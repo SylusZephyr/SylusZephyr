@@ -1,0 +1,135 @@
+import * as S from '../store.js';
+import * as UI from '../ui.js';
+import * as G from '../gamify.js';
+import * as P from '../plan.js';
+import * as C from '../charts.js';
+import * as Sh from './shared.js';
+import { CHECKINS } from '../data/content.js';
+
+let tab = 'overview';
+const TABS = [['overview', 'Overview'], ['food', 'Food'], ['sleep', 'Sleep'], ['body', 'Body'], ['checkins', 'Check-ins']];
+
+export function render() {
+  return `<div class="topbar"><div><div class="sub">Your progress</div><h1>Track</h1></div></div>
+  <div class="seg mb12">${TABS.map(([id, l]) => `<button class="${tab === id ? 'on' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
+  ${({ overview, food, sleep, body, checkins })[tab]()}`;
+}
+
+function lastNDays(n) { const out = []; for (let i = n - 1; i >= 0; i--) out.push(S.addDays(S.dayKey(), -i)); return out; }
+
+function overview() {
+  const st = S.get(); const days = lastNDays(35); const wk = P.programWeek();
+  const prog = P.PROGRAM[Math.min(3, wk - 1)];
+  const firstWd = (S.keyToDate(days[0]).getDay() + 6) % 7;
+  const avg7 = lastNDays(7).reduce((s, k) => s + G.essentialsDone(k), 0) / 7;
+  return `
+  <div class="grid3">
+    <div class="macro"><b>🔥 ${G.streak()}</b><span>streak</span></div>
+    <div class="macro"><b>${st.game.bestStreak}</b><span>best</span></div>
+    <div class="macro"><b>${avg7.toFixed(1)}</b><span>avg /7 this wk</span></div>
+  </div>
+  <div class="card mt12"><div class="kicker">Last 5 weeks · essentials per day</div>
+    <div class="heat mt8">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((x) => `<span class="tiny muted" style="text-align:center">${x}</span>`).join('')}
+    ${Array.from({ length: firstWd }, () => '<i style="background:transparent"></i>').join('')}
+    ${days.map((k) => { const n = G.essentialsDone(k); const fr = st.game.frozen?.[k]; return `<i class="${n >= 7 ? 'l4' : n >= 5 ? 'l3' : n >= 3 ? 'l2' : n >= 1 ? 'l1' : ''} ${k === S.dayKey() ? 'today' : ''}" style="${fr ? 'background:rgba(90,169,255,.35)' : ''}" title="${k}: ${n}/7"></i>`; }).join('')}</div>
+    <div class="legend"><span><i style="background:var(--surface2)"></i>0</span><span><i style="background:rgba(52,211,153,.45)"></i>3–4</span><span><i style="background:rgba(52,211,153,.7)"></i>5–6 (streak)</span><span><i style="background:var(--green)"></i>7</span><span><i style="background:rgba(90,169,255,.35)"></i>freeze</span></div>
+  </div>
+  <div class="card cool glow"><div class="kicker">4-week plan · week ${Math.min(wk, 4)}${wk > 4 ? ' (maintenance)' : ''}</div><h3>${UI.esc(prog.t)}</h3>
+    ${prog.goals.map((g) => `<div class="small" style="padding:4px 0">• ${UI.esc(g)}</div>`).join('')}</div>
+  <div class="card"><div class="kicker">Daily XP · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: st.days[k]?.xpToday || 0, label: S.prettyDate(k, { day: 'numeric' }), color: k === S.dayKey() ? '#ffb547' : '#5aa9ff' })), { h: 120 })}</div>`;
+}
+
+function food() {
+  const st = S.get(); const tg = P.nutritionTargets(); const days = lastNDays(7);
+  const kc = days.map((k) => ({ y: P.dayTotals(k).kcal, label: S.prettyDate(k, { weekday: 'narrow' }) }));
+  const pr = days.map((k) => ({ y: P.dayTotals(k).protein, label: S.prettyDate(k, { weekday: 'narrow' }), color: '#34d399' }));
+  const mealsPerDay = days.map((k) => new Set((st.days[k]?.meals || []).filter((m) => m.slot !== 'snack').map((m) => m.slot)).size);
+  const today = S.day();
+  return `
+  <div class="card"><div class="row between"><div class="kicker">Calories · 7 days</div><span class="small muted">target ${tg.kcal}</span></div>${C.barChart(kc, { goal: tg.kcal, color: '#ffb547' })}
+    <p class="tiny muted">Target = estimated needs (${tg.tdee}) + ~300 kcal for slow gain. Build up gradually — no need to force it.</p></div>
+  <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein })}</div>
+  <div class="card"><div class="kicker">Main meals per day</div><div class="row" style="justify-content:space-around">${days.map((k, i) => `<div style="text-align:center"><div style="font-size:20px">${['😶', '🙂', '😋', '🔥'][mealsPerDay[i]]}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
+  <div class="section-title">Today’s meals <button class="link" data-logmeal>+ Log</button></div>
+  <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${P.SLOT_EMOJI[m.slot] || '🍽️'}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty"><span class="e">🍽️</span>No meals logged yet</div>'}</div>`;
+}
+
+function sleep() {
+  const st = S.get(); const t = P.sleepTargets(); const days = lastNDays(14);
+  const nights = days.map((k) => ({ k, ...(st.days[k]?.sleep || {}) })).filter((n) => n.bed && n.wake).map((n) => ({ bed: S.minutesOf(n.bed), wake: S.minutesOf(n.wake), label: S.prettyDate(n.k, { day: 'numeric' }), dur: P.sleepDurationMin(n.bed, n.wake), w: S.minutesOf(n.wake) }));
+  const avgDur = nights.length ? nights.reduce((s, n) => s + n.dur, 0) / nights.length : 0;
+  const anchor = S.minutesOf(st.profile.wakeAnchor);
+  const devs = nights.map((n) => Math.abs(((n.w - anchor + 720 + 1440) % 1440) - 720));
+  const avgDev = devs.length ? devs.reduce((a, b) => a + b, 0) / devs.length : null;
+  const onAnchor = devs.filter((d) => d <= 30).length;
+  return `
+  <div class="card glow"><div class="kicker">Your plan</div>
+    <div class="grid3 mt8"><div class="macro"><b>${S.prettyTime(t.wake)}</b><span>wake anchor</span></div><div class="macro"><b>${S.prettyTime(t.bed)}</b><span>bed tonight</span></div><div class="macro"><b>${S.prettyTime(t.ideal)}</b><span>ideal bed</span></div></div>
+    <p class="small muted mt12">${t.reached ? 'You’ve reached your ideal bedtime — hold it steady.' : `Bedtime moves 15 min earlier every 3 days · ~${t.daysLeft} days to go.`} Wind-down starts ${S.prettyTime(t.windDown)}.</p>
+    <button class="btn sm mt12" data-sleepset>Adjust plan</button></div>
+  <div class="card"><div class="kicker">Last 14 nights</div>${C.sleepChart(nights.slice(-10), { target: { bed: S.minutesOf(t.bed), wake: S.minutesOf(t.wake) } })}
+    <div class="grid3 mt12"><div class="macro"><b>${nights.length ? `${Math.floor(avgDur / 60)}h${Math.round(avgDur % 60)}` : '—'}</b><span>avg sleep</span></div>
+    <div class="macro"><b>${avgDev != null ? `±${Math.round(avgDev)}m` : '—'}</b><span>wake drift</span></div>
+    <div class="macro"><b>${onAnchor}/${nights.length}</b><span>on anchor</span></div></div></div>
+  <button class="btn block" data-logsleep>🌙 Log last night</button>
+  <div class="notice mt12">Wake drift = how far your wake-up time is from your anchor, on average. Get it under ±30 min first — that’s what fixes a random schedule.</div>`;
+}
+
+function body() {
+  const st = S.get(); const ws = [...st.weights].sort((a, b) => a.date.localeCompare(b.date));
+  const pts = ws.map((w) => ({ y: w.kg, label: S.prettyDate(w.date, { day: 'numeric', month: 'short' }) }));
+  const first = ws[0]; const last = ws.at(-1);
+  const weeks = first && last ? Math.max(1, (S.keyToDate(last.date) - S.keyToDate(first.date)) / (7 * 86400000)) : 1;
+  const rate = first && last && ws.length > 1 ? (last.kg - first.kg) / weeks : null;
+  const toGoal = last ? Math.max(0, st.profile.goalKgMin - last.kg) : null;
+  const bmi = last ? last.kg / ((st.profile.heightCm / 100) ** 2) : null;
+  return `
+  <div class="grid3"><div class="macro"><b>${last ? last.kg.toFixed(1) : '—'}</b><span>kg now</span></div><div class="macro"><b>${bmi ? bmi.toFixed(1) : '—'}</b><span>BMI</span></div><div class="macro"><b>${toGoal != null ? toGoal.toFixed(1) : '—'}</b><span>kg to 66</span></div></div>
+  <div class="card mt12"><div class="kicker">Weight · goal zone 66–68 kg</div>${C.lineChart(pts, { band: [st.profile.goalKgMin, st.profile.goalKgMax], unit: '' })}
+    <p class="small mt8" style="color:${rate == null ? 'var(--muted)' : rate > 0.4 ? 'var(--amber)' : rate >= 0.05 ? 'var(--green)' : 'var(--muted)'}">${rate == null ? 'Weigh in weekly to see your trend.' : `${rate >= 0 ? '+' : ''}${rate.toFixed(2)} kg/week · ${rate > 0.4 ? 'faster than planned — fine, but no need to push' : rate >= 0.05 ? 'right on track (0.1–0.25 target)' : 'flat — add a daily shake'}`}</p></div>
+  <button class="btn primary block" data-weigh>⚖️ Weigh in</button>
+  <div class="card mt12"><div class="kicker">History</div>${ws.length ? [...ws].reverse().map((w) => `<div class="list-item"><div class="grow"><b>${w.kg.toFixed(1)} kg</b><div class="muted small">${S.prettyDate(w.date)}</div></div><button class="icon-btn" data-delw="${w.date}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty">No weigh-ins</div>'}</div>`;
+}
+
+function checkins() {
+  const st = S.get(); const weeks = Object.keys(st.checkins).sort();
+  const series = (type, f) => weeks.filter((w) => st.checkins[w][type]).map((w) => ({ y: f(st.checkins[w][type].score), label: S.prettyDate(w, { day: 'numeric', month: 'short' }) }));
+  const wk = S.weekKey(); const cur = st.checkins[wk] || {};
+  const block = (type, label, f, opts, desc) => `<div class="card"><div class="row between"><div><div class="kicker">${CHECKINS[type].e} ${label}</div><div class="tiny muted">${desc}</div></div><button class="btn sm ${cur[type] ? '' : 'primary'}" data-ci="${type}">${cur[type] ? 'Redo' : 'Do now'}</button></div>${C.lineChart(series(type, f), opts)}</div>`;
+  return `
+  <p class="muted small mb12">One set per week. Higher = better for erection & energy; lower = better for mood.</p>
+  ${block('erection', 'Erection & confidence', (s) => s.pct, { min: 0, max: 100, color: '#ff6b6b', unit: '%' }, 'Score out of 100')}
+  ${block('mood', 'Mood & worry (PHQ-4)', (s) => s.total, { min: 0, max: 12, color: '#a78bfa' }, '0–2 normal · 3–5 mild · 6–8 moderate · 9–12 severe')}
+  ${block('energy', 'Energy & cold', (s) => s.pct, { min: 0, max: 100, color: '#5aa9ff', unit: '%' }, 'Score out of 100')}
+  <a class="btn block" href="#me/summary">🖨️ Doctor summary</a>`;
+}
+
+function sleepSettings(rerender) {
+  const p = S.get().profile;
+  UI.openSheet(`<h2>Sleep plan</h2>
+    <div class="field"><label>Wake anchor (every day)</label><input type="time" id="ss-wake" value="${p.wakeAnchor}"></div>
+    <div class="field"><label>Current usual bedtime (starting point)</label><input type="time" id="ss-bed" value="${p.currentBedtime}"></div>
+    <div class="field"><label>Time in bed needed</label><select id="ss-need">${[450, 480, 510, 540].map((m) => `<option value="${m}" ${p.sleepNeedMin === m ? 'selected' : ''}>${m / 60} h</option>`).join('')}</select></div>
+    <div class="field"><label>Coffee cutoff</label><input type="time" id="ss-cut" value="${p.caffeineCutoff}"></div>
+    <label class="row mt12" style="gap:10px"><input type="checkbox" id="ss-restart" style="width:22px;height:22px"><span>Restart gradual shift from today</span></label>
+    <button class="btn primary block mt16" id="ss-save">Save</button>`, {
+    onMount: (sh, close) => sh.querySelector('#ss-save').onclick = () => {
+      p.wakeAnchor = sh.querySelector('#ss-wake').value || p.wakeAnchor; p.currentBedtime = sh.querySelector('#ss-bed').value || p.currentBedtime;
+      p.sleepNeedMin = +sh.querySelector('#ss-need').value; p.caffeineCutoff = sh.querySelector('#ss-cut').value || p.caffeineCutoff;
+      if (sh.querySelector('#ss-restart').checked) p.bedShiftStartedOn = S.dayKey();
+      S.save(); close(); UI.toast('Sleep plan updated — re-import reminders in Me', '🌙'); rerender();
+    },
+  });
+}
+
+export function bind(root, _, { rerender }) {
+  const st = S.get();
+  root.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { tab = b.dataset.tab; rerender(); });
+  root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
+  root.querySelectorAll('[data-delmeal]').forEach((b) => b.onclick = () => { const d = S.day(); d.meals = d.meals.filter((m) => m.id !== b.dataset.delmeal); S.save(); rerender(); });
+  root.querySelector('[data-sleepset]')?.addEventListener('click', () => sleepSettings(rerender));
+  root.querySelector('[data-logsleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
+  root.querySelector('[data-weigh]')?.addEventListener('click', () => Sh.weighSheet(rerender));
+  root.querySelectorAll('[data-delw]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete weigh-in?', '', 'Delete', true)) { st.weights = st.weights.filter((w) => w.date !== b.dataset.delw); S.save(); rerender(); } });
+  root.querySelectorAll('[data-ci]').forEach((b) => b.onclick = () => Sh.checkinSheet(b.dataset.ci, rerender));
+}
