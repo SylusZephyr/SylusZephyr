@@ -51,7 +51,7 @@ function closeDay(k) {
   if (d && !d.checks.caffeine && !d.coffee.some((c) => isAfterCutoff(c)) && G.essentialsDone(k) > 0) {
     d.checks.caffeine = true; G.award('ess_caffeine', 10, null, { k, silent: true });
   }
-  G.evaluateQuests(k, true); S.save();
+  G.evaluateQuests(k, true, true); S.save();
 }
 // Close any past days not yet closed (app wasn't open at rollover).
 function closePastDays() {

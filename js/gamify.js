@@ -31,8 +31,8 @@ export function award(key, amount, ev, { once = true, k = S.dayKey(), silent = f
   const st = S.get(); const d = S.day(k);
   d.xpLog = d.xpLog || {};
   if (once && d.xpLog[key]) return 0;
-  comboCount++; clearTimeout(comboTimer); comboTimer = setTimeout(() => { comboCount = 0; }, 90_000);
-  const mult = comboCount >= 5 ? 2 : comboCount >= 3 ? 1.5 : 1;
+  if (!silent && k === S.dayKey()) { comboCount++; clearTimeout(comboTimer); comboTimer = setTimeout(() => { comboCount = 0; }, 90_000); }
+  const mult = silent ? 1 : comboCount >= 5 ? 2 : comboCount >= 3 ? 1.5 : 1;
   const amt = Math.round(amount * mult);
   const before = levelInfo(st.game.xp).level;
   st.game.xp += amt; st.game.coins += Math.max(1, Math.round(amt / 10));
@@ -145,20 +145,20 @@ export function todaysQuests(k = S.dayKey()) {
   }
   return d.quests.map((q) => ({ ...QUEST_POOL.find((p) => p.id === q.id), done: q.done }));
 }
-export function evaluateQuests(k = S.dayKey(), endOfDay = false) {
+export function evaluateQuests(k = S.dayKey(), endOfDay = false, silent = false) {
   const d = S.day(k); todaysQuests(k);
   let any = false;
   d.quests.forEach((q) => {
     const def = QUEST_POOL.find((p) => p.id === q.id);
     if (!q.done && def && def.check(d, endOfDay || k !== S.dayKey())) {
       q.done = true; any = true;
-      award(`quest_${q.id}`, def.xp, null, { k });
-      UI.toast(`Quest complete: ${def.t}`, def.e);
+      award(`quest_${q.id}`, def.xp, null, { k, silent });
+      if (!silent) UI.toast(`Quest complete: ${def.t}`, def.e);
     }
   });
   if (any && d.quests.every((q) => q.done)) {
     award('all_quests', 60, null, { k, silent: true });
-    setTimeout(() => UI.celebrate({ big: '🏆', title: 'All quests cleared!', body: '+60 bonus XP and +30 coins', rarity: 'QUEST MASTER' }), 900);
+    if (!silent) setTimeout(() => UI.celebrate({ big: '🏆', title: 'All quests cleared!', body: '+60 bonus XP and +30 coins', rarity: 'QUEST MASTER' }), 900);
     S.get().game.coins += 30;
   }
   S.save();
