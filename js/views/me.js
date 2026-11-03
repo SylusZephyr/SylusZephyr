@@ -115,7 +115,7 @@ function summary() {
     <h2>Lab results entered</h2>${st.medical.labs.length ? `<table>${st.medical.labs.map((l) => `<tr><td>${l.date}</td><td>${UI.esc(l.name)}</td><td>${UI.esc(l.value)} ${UI.esc(l.unit)}</td></tr>`).join('')}</table>` : '<p>None</p>'}
     <h2>Questions</h2><ol>${(st.medical.questions || []).filter((q) => !q.done).map((q) => `<li>${UI.esc(q.q)}</li>`).join('')}</ol>`;
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Doctor summary</h1><div class="sub">Show on your phone or print / save as PDF</div></div></div>
-  <button class="btn primary block mb12" data-print>🖨️ Print / Save PDF</button>
+  <div class="grid2 mb12"><button class="btn primary" data-print>🖨️ Print / PDF</button><button class="btn" data-sharesum>📤 Share text</button></div>
   <div class="card summary-doc" style="background:#fff;color:#111;font-size:13px;line-height:1.45">${html.replace(/<h2>/g, '<h3 style="margin-top:14px;border-bottom:1px solid #ccc;font-size:14px">').replace(/<\/h2>/g, '</h3>').replace(/<table>/g, '<table style="width:100%;border-collapse:collapse;font-size:12px" border="1" cellpadding="4">')}</div>
   <template id="print-html">${html}</template>`;
 }
@@ -126,6 +126,7 @@ function reminders() {
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Reminders</h1><div class="sub">Free daily alerts via iPhone Calendar</div></div></div>
   <div class="card tight">${list.map((r) => `<div class="list-item"><div class="grow"><b>${UI.esc(r.title)}</b><div class="muted small">${S.prettyTime(r.time)} daily</div></div><button class="toggle ${r.on ? 'on' : ''}" data-rem="${r.id}" aria-label="toggle"></button></div>`).join('')}</div>
   <button class="btn primary block" data-ics>📅 Add to iPhone Calendar</button>
+  <button class="btn block mt8" data-icsshare>Didn’t open? Share the file instead</button>
   <div class="card mt12"><div class="kicker">How it works</div><div class="small" style="line-height:1.6">
     1. Tap the button above → Safari shows the calendar events → tap <b>Add All</b>.<br>
     2. Each one repeats daily with an alert. They come from your current sleep plan.<br>
@@ -242,6 +243,12 @@ export function bind(root, parts, { rerender }) {
       let pr = document.getElementById('print-root'); if (!pr) { pr = document.createElement('div'); pr.id = 'print-root'; document.body.appendChild(pr); }
       pr.innerHTML = root.querySelector('#print-html').innerHTML; window.print();
     };
+    root.querySelector('[data-sharesum]').onclick = async () => {
+      const tmp = document.createElement('div'); tmp.innerHTML = root.querySelector('#print-html').innerHTML;
+      tmp.querySelectorAll('h1,h2,p,li,tr').forEach((el) => el.append('\n')); tmp.querySelectorAll('td,th').forEach((el) => el.append('  '));
+      const text = tmp.textContent.replace(/\n\s*\n+/g, '\n').trim();
+      try { if (navigator.share) await navigator.share({ title: 'Revive summary', text }); else { await navigator.clipboard.writeText(text); UI.toast('Summary copied', '📋'); } } catch (e) {}
+    };
   }
   if (sub === 'reminders') {
     st.reminderPrefs = st.reminderPrefs || {};
@@ -249,6 +256,10 @@ export function bind(root, parts, { rerender }) {
     root.querySelector('[data-ics]').onclick = () => {
       const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
       ICS.downloadICS(list); G.award('reminders_setup', 30, null); UI.toast('Opening Calendar…', '📅');
+    };
+    root.querySelector('[data-icsshare]').onclick = async () => {
+      const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
+      try { if (!(await ICS.shareICS(list))) UI.toast('Sharing not supported — open Revive in Safari and try again', '⚠️'); else G.award('reminders_setup', 30, null); } catch (e) {}
     };
   }
   if (sub === 'settings') {
