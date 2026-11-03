@@ -36,7 +36,43 @@ function overview() {
   </div>
   <div class="card cool glow"><div class="kicker">4-week plan · week ${Math.min(wk, 4)}${wk > 4 ? ' (maintenance)' : ''}</div><h3>${UI.esc(prog.t)}</h3>
     ${prog.goals.map((g) => `<div class="small" style="padding:4px 0">• ${UI.esc(g)}</div>`).join('')}</div>
+  ${insightsCard()}
   <div class="card"><div class="kicker">Daily XP · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: st.days[k]?.xpToday || 0, label: S.prettyDate(k, { day: 'numeric' }), color: k === S.dayKey() ? '#ffb547' : '#5aa9ff' })), { h: 120 })}</div>`;
+}
+
+// Personal insights: compare average energy/mood on days with vs without a habit.
+export function insights() {
+  const st = S.get(); const out = [];
+  const days = Object.keys(st.days).filter((k) => st.days[k].energy != null && k < S.dayKey() || (k === S.dayKey() && st.days[k].energy != null));
+  if (days.length < 5) return { need: 5 - days.length, list: [] };
+  const avg = (arr, f) => arr.length ? arr.reduce((a, k) => a + f(st.days[k]), 0) / arr.length : null;
+  const tests = [
+    { t: 'slept 7h+', f: (d) => { const m = P.sleepDurationMin(d.sleep?.bed, d.sleep?.wake); return m != null && m >= 420; } },
+    { t: 'ate 3 main meals', f: (d) => new Set(d.meals.filter((m) => m.slot !== 'snack').map((m) => m.slot)).size >= 3 },
+    { t: 'drank 1.5 L+', f: (d) => d.waterMl >= 1500 },
+    { t: 'ate breakfast', f: (d) => d.checks.breakfast },
+    { t: 'had no coffee after cutoff', f: (d) => !d.coffee.some((c) => P.isAfterCutoff(c)) },
+    { t: 'did pelvic-floor training', f: (d) => (d.pf || 0) > 0 },
+    { t: 'went outdoors', f: (d) => d.checks.outdoors },
+  ];
+  for (const m of [{ key: 'energy', label: 'energy' }, { key: 'mood', label: 'mood' }]) {
+    for (const tt of tests) {
+      const yes = days.filter((k) => tt.f(st.days[k]) && st.days[k][m.key] != null); const no = days.filter((k) => !tt.f(st.days[k]) && st.days[k][m.key] != null);
+      if (yes.length < 2 || no.length < 2) continue;
+      const a = avg(yes, (d) => d[m.key] + 1), b = avg(no, (d) => d[m.key] + 1);
+      const diff = a - b;
+      if (Math.abs(diff) >= 0.5) out.push({ t: tt.t, metric: m.label, a, b, diff, n: yes.length + no.length });
+    }
+  }
+  out.sort((x, y) => Math.abs(y.diff) - Math.abs(x.diff));
+  return { need: 0, list: out.slice(0, 4) };
+}
+function insightsCard() {
+  const r = insights();
+  return `<div class="card cool glow"><div class="kicker">🔍 Your patterns</div>
+    ${r.need ? `<p class="muted small">Log energy & mood on ${r.need} more day${r.need === 1 ? '' : 's'} to unlock personal insights — what actually makes <i>you</i> feel better.</p>`
+      : r.list.length ? r.list.map((x) => `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span style="font-size:20px">${x.diff > 0 ? '📈' : '📉'}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
+      : '<p class="muted small">No clear patterns yet. Keep logging — they usually appear after 1–2 weeks.</p>'}</div>`;
 }
 
 function food() {
