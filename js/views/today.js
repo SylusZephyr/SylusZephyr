@@ -33,6 +33,12 @@ function todayStory() {
 }
 
 // Context-aware nudges (replace push notifications when the app is open).
+function installHint() {
+  const ua = navigator.userAgent || '';
+  const standalone = window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
+  return /iPhone|iPad|iPod/.test(ua) && !standalone;
+}
+
 export function nudges(now = new Date()) {
   const st = S.get(); const d = S.day(); const out = [];
   const m = now.getHours() * 60 + now.getMinutes();
@@ -82,6 +88,7 @@ export function render(_, { night }) {
     <div class="row between tiny muted mt8"><span>❄️ ${st.game.freezes} freeze${st.game.freezes === 1 ? '' : 's'}</span><span>Today +${d.xpToday || 0} XP</span><span>Best 🔥 ${st.game.bestStreak}</span></div>
   </button>
 
+  ${installHint() ? `<a class="nudge blue" href="#me/install"><span class="n-e">📲</span><div class="grow"><b>Install Revive on your Home Screen</b><span>Safari → Share → Add to Home Screen. Works offline and keeps your data in one place.</span></div></a>` : ''}
   ${night ? '' : nudges().map((n) => `<button class="nudge ${n.cls || ''}" data-nudge="${n.act}"><span class="n-e">${n.e}</span><div class="grow"><b>${n.t}</b><span>${n.s}</span></div><span class="pill amber">+XP</span></button>`).join('')}
 
   <div class="stories">${STORIES.map((s) => `<button class="story ${seen[s.id] === k ? 'seen' : ''}" data-story="${s.id}"><div class="ring"><div class="inner">${s.e}</div></div><span>${s.label}</span></button>`).join('')}</div>

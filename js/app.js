@@ -84,8 +84,22 @@ document.addEventListener('visibilitychange', () => {
 let hiddenAt = Date.now();
 setInterval(() => { if (document.visibilityState === 'visible' && S.dayKey() !== lastDay) onForeground(); }, 60_000);
 
+// Environment hints: WeChat's in-app browser can't install or keep data reliably.
+const UA = navigator.userAgent || '';
+const IN_WECHAT = /MicroMessenger/i.test(UA);
+const IS_STANDALONE = window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
+const IS_IOS = /iPhone|iPad|iPod/.test(UA);
+function wechatGate() {
+  UI.fullscreen(`<div class="lock" style="z-index:600;text-align:center">
+    <div class="logo">🧭</div><h2>Open in Safari</h2>
+    <p class="muted" style="max-width:320px">WeChat’s browser can’t install Revive or keep your data safely.<br><br>Tap <b>···</b> (top right) → <b>Open in Browser / 在浏览器打开</b>, then in Safari: Share → <b>Add to Home Screen</b>.</p>
+  </div>`);
+}
+export function installHintNeeded() { return IS_IOS && !IS_STANDALONE && !IN_WECHAT; }
+
 // Boot
 function boot() {
+  if (IN_WECHAT) { wechatGate(); return; }
   Lock.showLock(() => {
     if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
     render();
