@@ -51,6 +51,7 @@ export function render(parts) {
   if (sub === 'pantry') return pantryView();
   if (sub === 'delivery') return deliveryView();
   if (sub === 'shop') return shopView();
+  if (sub === 'plan') return planView();
   return main();
 }
 
@@ -83,6 +84,8 @@ function main() {
     ${filt.feel === 'tired' ? '<a class="btn block mt8" href="#cook/delivery">📦 Or order halal delivery</a>' : ''}
   </div>
 
+  ${planTeaser()}
+
   <div class="section-title">Cookbook <span class="muted small">${RECIPES.length} recipes</span></div>
   <div class="row mb12"><input id="rq" placeholder="Search recipes or ingredients" value="${UI.esc(filt.q)}"></div>
   <div class="chips scroll mb12">${[['all', '✨ All'], ['fav', '❤️ Favourites'], ['breakfast', '🍳 Breakfast'], ['lunch', '🌯 Lunch'], ['dinner', '🍛 Dinner'], ['snack', '🥤 Snacks'], ['nocook', '🥄 No-cook'], ['protein', '💪 High protein']].map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
@@ -110,6 +113,8 @@ function detail(r) {
   <div class="card">${r.ing.map((i) => { const g = ING[i.id]; const have = pantry.has(i.id); return `<button class="ing ${have ? 'have' : ''}" data-toggle="${i.id}" style="width:100%;text-align:left">
     <span class="e">${g.e}</span><div class="grow"><div class="name" style="font-weight:600">${UI.esc(g.name)} ${i.opt ? '<span class="muted small">(optional)</span>' : ''}</div><div class="zh">${UI.esc(g.zh)}</div></div><div class="muted small">${UI.esc(i.q)}</div></button>`; }).join('')}
     <p class="tiny faint mt8">Tap an ingredient to mark it as in/out of your pantry. Chinese names help when shopping on Hema/Taobao.</p></div>
+
+  ${r.vars ? `<div class="section-title">Switch it up</div><div class="card tight">${r.vars.map((v) => `<div class="small" style="padding:7px 0;border-bottom:1px solid var(--line)">${UI.esc(v)}</div>`).join('')}<p class="tiny faint mt8">Same easy method, different taste — so you never get bored.</p></div>` : ''}
 
   <div class="section-title">Steps</div>
   <div class="card">${r.steps.map((s, i) => `<div class="step"><div class="n">${i + 1}</div><div class="grow">${UI.esc(s.t)}${s.timer ? ` <span class="pill amber">⏱ ${fmtT(s.timer)}</span>` : ''}</div></div>`).join('')}</div>
@@ -236,6 +241,15 @@ export function bind(root, parts, { rerender }) {
     root.querySelectorAll('[data-copy]').forEach((b) => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); UI.toast('Copied — paste into Meituan', '📋'); } catch (e) { UI.toast(b.dataset.copy, '📋'); } });
     root.querySelectorAll('[data-ate-del]').forEach((b) => b.onclick = (ev) => { const d = DELIVERY.find((x) => x.id === b.dataset.ateDel); Sh.logMeal({ slot: P.currentSlot(), name: d.name, delivery: true, kcal: d.kcal, protein: d.protein }, ev); UI.toast(`Logged ${d.name}`, d.emoji); });
   }
+  if (sub === 'plan') {
+    root.querySelector('[data-genplan]')?.addEventListener('click', () => { generatePlan(); G.award('plan_' + S.weekKey(), 25, null); rerender(); });
+    root.querySelectorAll('[data-swap]').forEach((b) => b.onclick = () => { const [i, slot] = b.dataset.swap.split(':'); swapMeal(+i, slot); UI.haptic(8); rerender(); });
+    root.querySelector('[data-planshop]')?.addEventListener('click', () => {
+      st.shopping = st.shopping || []; const need = planIngredients().filter((id) => !st.pantry.includes(id));
+      need.forEach((id) => { if (!st.shopping.some((x) => x.id === id)) st.shopping.push({ id, done: false }); });
+      S.save(); UI.toast(`${need.length} items added to shopping list`, '🛒'); location.hash = 'cook/shop';
+    });
+  }
   if (sub === 'shop') {
     st.shopping = st.shopping || [];
     root.querySelectorAll('[data-shop]').forEach((b) => b.onclick = () => { const x = st.shopping.find((y) => y.id === b.dataset.shop); x.done = !x.done; S.save(); rerender(); });
@@ -246,4 +260,67 @@ export function bind(root, parts, { rerender }) {
       st.shopping = st.shopping.filter((x) => !x.done); S.save(); UI.toast(`${bought.length} items added to pantry`, '🧺'); G.award(`shop_${S.dayKey()}`, 15, null, { silent: true }); rerender();
     });
   }
+}
+
+// ---------- Weekly meal plan ----------
+const PLAN_SLOTS = ['breakfast', 'lunch', 'dinner', 'snack'];
+// Core rotation per slot = your stated preferences (desi savory breakfast, wraps, curry + roti, smoothies).
+const CORE = {
+  breakfast: ['egg_paratha', 'overnight_oats', 'naan_egg_cheese', 'egg_muffins', 'aloo_paratha_cheat'],
+  lunch: ['chicken_cheese_wrap', 'tikka_wrap', 'tuna_melt', 'hummus_wrap', 'kebab_naan'],
+  dinner: ['airfryer_chicken_curry', 'tandoori_thighs', 'tray_bake', 'shawarma_bowl', 'kofta_tray'],
+  snack: ['shaker_smoothie', 'protein_milk_dates', 'mango_lassi', 'yogurt_bowl'],
+};
+function pickFor(slot, used, rnd) {
+  const st = S.get();
+  const favs = st.favorites.filter((id) => RECIPE[id]?.meals.includes(slot));
+  const ids = [...new Set([...favs, ...CORE[slot]])];
+  const scored = suggest({ slot }).filter((x) => ids.includes(x.r.id)).slice(0, 4); // max 4 options per slot = familiar
+  const weights = scored.map((x, i) => (4 - i) * (favs.includes(x.r.id) ? 2 : 1) / (1 + (used[x.r.id] || 0) * 2));
+  let t = rnd() * weights.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < scored.length; i++) { t -= weights[i]; if (t <= 0) return scored[i].r.id; }
+  return scored[0]?.r.id;
+}
+export function generatePlan() {
+  const st = S.get(); const used = {}; const days = [];
+  for (let d = 0; d < 7; d++) { const day = {}; PLAN_SLOTS.forEach((sl) => { const id = pickFor(sl, used, Math.random); day[sl] = id; used[id] = (used[id] || 0) + 1; }); days.push(day); }
+  st.weekPlan = { week: S.weekKey(), days }; S.save();
+}
+function swapMeal(i, slot) {
+  const st = S.get(); const cur = st.weekPlan.days[i][slot];
+  const opts = suggest({ slot }).filter((x) => x.r.meals.includes(slot) && x.r.id !== cur).slice(0, 10);
+  st.weekPlan.days[i][slot] = opts[Math.floor(Math.random() * opts.length)].r.id; S.save();
+}
+function planIngredients() {
+  const st = S.get(); const ids = new Set();
+  (st.weekPlan?.days || []).forEach((d) => PLAN_SLOTS.forEach((sl) => RECIPE[d[sl]]?.ing.filter((i) => !i.opt).forEach((i) => ids.add(i.id))));
+  return [...ids];
+}
+export function planToday(slot) {
+  const st = S.get(); if (!st.weekPlan || st.weekPlan.week !== S.weekKey()) return null;
+  const idx = (S.keyToDate(S.dayKey()).getDay() + 6) % 7; return RECIPE[st.weekPlan.days[idx]?.[slot]] || null;
+}
+function planTeaser() {
+  const st = S.get(); const has = st.weekPlan && st.weekPlan.week === S.weekKey();
+  const today = has ? ['breakfast', 'lunch', 'dinner'].map((sl) => planToday(sl)).filter(Boolean) : [];
+  return `<a class="card cool glow mt16" href="#cook/plan" style="display:block">
+    <div class="kicker">📅 This week’s meal plan</div>
+    ${has ? `<h3>Today: ${today.map((r) => r.emoji).join(' ')}</h3><p class="muted small">${today.map((r) => UI.esc(r.name)).join(' · ')}</p>`
+      : '<h3>Plan the week in one tap</h3><p class="muted small">Familiar favourites, small variations, one shopping list. No thinking at mealtime.</p>'}</a>`;
+}
+function planView() {
+  const st = S.get(); const has = st.weekPlan && st.weekPlan.week === S.weekKey();
+  const todayIdx = (S.keyToDate(S.dayKey()).getDay() + 6) % 7;
+  const wk = S.weekKey();
+  let cost = 0, kcal = 0;
+  if (has) st.weekPlan.days.forEach((d) => PLAN_SLOTS.forEach((sl) => { const r = RECIPE[d[sl]]; if (r) { cost += r.cost; kcal += r.kcal; } }));
+  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Meal plan</h1><div class="sub">Week of ${S.prettyDate(wk, { day: 'numeric', month: 'short' })}</div></div></div>
+  ${has ? `<div class="grid3 mb12"><div class="macro"><b>¥${cost}</b><span>whole week</span></div><div class="macro"><b>${Math.round(kcal / 7)}</b><span>kcal/day</span></div><div class="macro"><b>${planIngredients().filter((id) => !st.pantry.includes(id)).length}</b><span>to buy</span></div></div>
+    ${st.weekPlan.days.map((d, i) => { const k = S.addDays(wk, i); return `<div class="card tight" style="${i === todayIdx ? 'border-color:rgba(255,181,71,.55)' : ''}">
+      <div class="row between mb8"><b>${S.prettyDate(k, { weekday: 'long' })}${i === todayIdx ? ' · today' : ''}</b><span class="muted small">${PLAN_SLOTS.reduce((s, sl) => s + (RECIPE[d[sl]]?.kcal || 0), 0)} kcal</span></div>
+      ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row" style="padding:5px 0"><span style="width:22px">${P.SLOT_EMOJI[sl]}</span><a href="#cook/r/${r.id}" class="grow ellipsis" style="color:inherit;text-decoration:none">${r.emoji} ${UI.esc(r.name)}</a><button class="btn sm ghost" data-swap="${i}:${sl}" aria-label="Swap">🔄</button></div>`; }).join('')}
+    </div>`; }).join('')}
+    <div class="grid2 mt8"><button class="btn" data-genplan>🎲 Regenerate</button><button class="btn primary" data-planshop>🛒 Shopping list</button></div>`
+    : `<div class="empty"><span class="e">📅</span>No plan for this week yet.</div><button class="btn primary block" data-genplan>✨ Generate my week</button>`}
+  <div class="notice mt12">Plans lean on your favourites and what’s in your pantry, with small variations so you don’t get bored. Tap 🔄 to swap any meal.</div>`;
 }

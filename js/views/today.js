@@ -5,7 +5,7 @@ import * as P from '../plan.js';
 import * as Sh from './shared.js';
 import { TIPS, STORIES } from '../data/content.js';
 import { RECIPES, RECIPE } from '../data/recipes.js';
-import { suggest } from './cook.js';
+import { suggest, planToday } from './cook.js';
 
 function greeting() {
   const h = new Date().getHours(); const n = S.get().profile.name;
@@ -57,7 +57,9 @@ export function render(_, { night }) {
   const lv = G.levelInfo(); const streak = G.streak(); const n = G.essentialsDone(k);
   const quests = G.todaysQuests(k); const loot = G.lootState(k);
   const tg = P.nutritionTargets(); const tot = P.dayTotals(k); const t = P.sleepTargets();
-  const slot = P.currentSlot(); const sug = suggest({ slot }).slice(0, 3);
+  const slot = P.currentSlot(); let sug = suggest({ slot }).slice(0, 3);
+  const planned = planToday(slot);
+  if (planned) sug = [suggest({ slot }).find((x) => x.r.id === planned.id), ...sug.filter((x) => x.r.id !== planned.id)].filter(Boolean).slice(0, 3);
   const cmp = G.weekCompare();
   const wk = S.weekKey(); const ci = st.checkins[wk] || {};
   const ciMissing = ['erection', 'mood', 'energy'].filter((x) => !ci[x]);
@@ -121,7 +123,7 @@ export function render(_, { night }) {
       <button class="btn sm primary" data-logmeal>+ Log</button></div>
     <div class="lvlbar mt8"><i style="width:${Math.min(100, Math.round(tot.kcal / tg.kcal * 100))}%;background:var(--grad-green)"></i></div>
     <div class="mt12">${sug.map(({ r, have, total }) => `<a class="rwide" href="#cook/r/${r.id}"><div class="thumb" style="${UI.grad(r.bg)}">${r.emoji}</div>
-      <div class="grow"><div style="font-weight:700" class="ellipsis">${UI.esc(r.name)}</div><div class="muted small">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div>
+      <div class="grow"><div style="font-weight:700" class="ellipsis">${planned && planned.id === r.id ? '📅 ' : ''}${UI.esc(r.name)}</div><div class="muted small">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div>
       <div class="match" style="color:${have === total ? 'var(--green)' : 'var(--amber)'}">${have === total ? 'You have everything ✓' : `Have ${have}/${total} ingredients`}</div></div></a>`).join('')}</div>
     <a class="btn block sm" href="#cook/delivery">😮‍💨 Too tired? Halal delivery ideas</a>
   </div>

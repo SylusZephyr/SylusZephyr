@@ -39,8 +39,9 @@ export function award(key, amount, ev, { once = true, k = S.dayKey(), silent = f
   d.xpLog[key] = amt; d.xpToday = (d.xpToday || 0) + amt;
   S.save();
   if (!silent) {
-    const x = ev?.clientX ?? (ev?.target?.getBoundingClientRect?.().left + 30);
-    const y = ev?.clientY ?? ev?.target?.getBoundingClientRect?.().top;
+    const rect = ev?.target?.getBoundingClientRect?.();
+    const x = ev?.clientX || (rect ? rect.left + 30 : undefined);
+    const y = ev?.clientY || (rect ? rect.top : undefined);
     UI.xpPop(amt, x, y); UI.ding('xp'); UI.haptic(15);
     if (mult > 1) UI.toast(`${mult}× COMBO! Keep going`, '🔥');
   }

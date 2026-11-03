@@ -72,7 +72,7 @@ function pumpToasts() {
 export function xpPop(amount, x, y) {
   const el = document.createElement('div'); el.className = 'xp-pop';
   el.textContent = `+${amount} XP`;
-  el.style.left = `${x ?? window.innerWidth / 2}px`; el.style.top = `${(y ?? window.innerHeight / 2) - 20}px`;
+  el.style.left = `${Number.isFinite(x) ? x : window.innerWidth / 2}px`; el.style.top = `${(Number.isFinite(y) ? y : window.innerHeight / 2) - 20}px`;
   document.body.appendChild(el); setTimeout(() => el.remove(), 1150);
 }
 

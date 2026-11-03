@@ -473,3 +473,18 @@ export const DELIVERY = [
 ];
 
 export const RECIPE = Object.fromEntries(RECIPES.map((r) => [r.id, r]));
+
+// Small variations on familiar meals ("same but different").
+const VARIATIONS = {
+  egg_paratha: ['🧀 Cheese melt: add a slice in the last minute', '🌶️ Green chili + coriander in the egg', '🍗 Add torn ready-chicken for +15 g protein', '🍅 Tomato-onion masala egg'],
+  overnight_oats: ['🥭 Mango + cardamom', '🍫 Cocoa + banana', '🌴 Chopped dates + nuts', '🍎 Apple + cinnamon + honey'],
+  chicken_cheese_wrap: ['🔥 Chili sauce + jalapeño', '🥒 Cucumber-yogurt (raita style)', '🧄 Garlic mayo', '🍟 Stuff a few fries inside'],
+  tikka_wrap: ['🧀 Add cheese and toast it closed', '🥗 Lettuce + lemon onions', '🫓 Use paratha instead of tortilla'],
+  airfryer_chicken_curry: ['🥔 Add potato cubes (aloo chicken)', '🥥 Splash of coconut milk for creamy korma style', '🫑 Peppers + onion (jalfrezi style)', '🥬 Frozen spinach (palak style)'],
+  tandoori_thighs: ['🍋 Extra lemon + chaat masala', '🔥 More chili (Lahori style)', '🧄 Garlic-heavy marinade'],
+  tray_bake: ['🍠 Swap potato for sweet potato', '🥦 Add broccoli for the last 5 min', '🌶️ Cumin-chili (Xinjiang style)'],
+  shaker_smoothie: ['🍫 Add cocoa powder', '🌴 Mash in 2 dates', '☕ Decaf coffee (before cutoff only if regular)', '💪 Scoop of protein powder'],
+  tuna_melt: ['🌽 Add sweet corn', '🧅 Red onion + chili', '🥒 Pickles on the side'],
+  kebab_naan: ['🧀 Melt cheese on the naan first', '🥗 Lettuce + tomato + lemon', '🌶️ Chili-yogurt sauce'],
+};
+for (const [id, v] of Object.entries(VARIATIONS)) if (RECIPE[id]) RECIPE[id].vars = v;
