@@ -149,6 +149,32 @@ export function checkinSheet(type, onDone) {
   });
 }
 
+// Private symptom log — factual, for the doctor. Never shown outside Track/summary.
+export const SX = {
+  type: ['Solo', 'With partner'],
+  firm: ['Not firm', 'Larger, not hard', 'Hard, not enough', 'Hard enough', 'Fully firm'],
+  kept: ['Lost it early', 'Lost it partway', 'Kept it'],
+  time: ['< 1 min', '1–2 min', '2–5 min', '> 5 min', 'Did not ejaculate'],
+  semen: ['Normal amount', 'Less than usual', 'None / dry'],
+};
+export function sxSheet(onDone) {
+  const v = {};
+  const row = (key, label) => `<div class="field"><label>${label}</label><div class="chips">${SX[key].map((a, i) => `<button class="chip" data-k="${key}" data-v="${i}">${a}</button>`).join('')}</div></div>`;
+  UI.openSheet(`<h2>🔒 Private log</h2><p class="muted small">Quick facts for your doctor. Stays on this phone. No judgement — data helps find causes.</p>
+    ${row('type', 'Type')}${row('firm', 'Firmness at best')}${row('kept', 'Kept the erection?')}${row('time', 'Time to ejaculation')}${row('semen', 'Semen')}
+    <label class="row mt12" style="gap:10px"><input type="checkbox" id="sx-anx" style="width:22px;height:22px"><span>I felt anxious / under pressure</span></label>
+    <button class="btn primary block mt16" id="sx-save">Save</button>`, {
+    onMount: (sh, close) => {
+      sh.querySelectorAll('[data-k]').forEach((b) => b.onclick = () => { v[b.dataset.k] = +b.dataset.v; sh.querySelectorAll(`[data-k="${b.dataset.k}"]`).forEach((x) => x.classList.toggle('on', x === b)); UI.haptic(6); });
+      sh.querySelector('#sx-save').onclick = (ev) => {
+        if (v.firm == null) { UI.toast('Pick firmness at least', '☝️'); return; }
+        const st = S.get(); st.sxLog = st.sxLog || []; st.sxLog.push({ date: S.dayKey(), ...v, anxious: sh.querySelector('#sx-anx').checked });
+        S.save(); G.award('sx_' + st.sxLog.length, 10, ev); close(); UI.toast('Logged privately', '🔒'); onDone && onDone();
+      };
+    },
+  });
+}
+
 export function weighSheet(onDone) {
   const st = S.get(); const last = [...st.weights].sort((a, b) => a.date.localeCompare(b.date)).at(-1);
   UI.openSheet(`<h2>⚖️ Weekly weigh-in</h2><p class="muted small">Same day each week, morning, after the toilet, before food.</p>
