@@ -49,3 +49,10 @@ export function downloadICS(items) {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
+
+// iOS Home Screen apps sometimes ignore blob downloads — share the file instead.
+export async function shareICS(items) {
+  const file = new File([buildICS(items)], 'revive-reminders.ics', { type: 'text/calendar' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Revive reminders' }); return true; }
+  return false;
+}
