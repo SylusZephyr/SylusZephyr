@@ -90,6 +90,12 @@ export function render(_, { night }) {
       <div class="kicker" style="color:#c4b5fd">Wind-down mode 🌙</div>
       <h3>Bedtime target ${S.prettyTime(t.bed)}</h3>
       <p class="muted small">The feed is asleep until morning. Do the 2-minute breathing, prep tomorrow’s breakfast, then put the phone down.</p>
+      <div class="grid3 mt12">
+        <div class="macro"><b>${n}/7</b><span>essentials</span></div>
+        <div class="macro"><b>${tot.kcal}</b><span>kcal</span></div>
+        <div class="macro"><b>${(d.waterMl / 1000).toFixed(1)}L</b><span>water</span></div></div>
+      <p class="small mt12">${n >= 5 ? '🔥 Streak secured. Great day — rest now.' : n >= 3 ? `So close: ${5 - n} more essential${5 - n === 1 ? '' : 's'} would have secured it. Tomorrow.` : 'Tough day? That’s OK. Tomorrow: just breakfast within 2 hours of waking.'}</p>
+      <p class="small muted">Tomorrow: wake ${S.prettyTime(t.wake)} · ${planToday('breakfast') ? `breakfast: ${planToday('breakfast').emoji} ${UI.esc(planToday('breakfast').name)}` : 'breakfast within 2 h'}</p>
       <div class="grid2 mt12"><button class="btn cool" data-breath>🌬️ Breathe 2 min</button><button class="btn" data-go="cook/r/overnight_oats">🥣 Prep oats</button></div>
     </div>` : ''}
 
