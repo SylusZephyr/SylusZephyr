@@ -393,3 +393,5 @@ details[open] summary .faint svg { transform: rotate(90deg); }
 .nudge span { font-size: 13px; color: var(--muted); }
 .nudge.blue { background: linear-gradient(135deg, rgba(90,169,255,.16), rgba(167,139,250,.10)); border-color: rgba(90,169,255,.35); }
 .nudge.red { background: rgba(255,107,107,.12); border-color: rgba(255,107,107,.4); }
+
+a.link { text-decoration: none; }
