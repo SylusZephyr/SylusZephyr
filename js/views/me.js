@@ -112,6 +112,15 @@ function summary() {
     <h2>Weekly self-check scores</h2>
     <table><tr><th>Week of</th><th>Erection/confidence (0–100)</th><th>PHQ-4 (0–12)</th><th>Energy/cold (0–100)</th></tr>
     ${weeks.map((w) => { const c = st.checkins[w]; return `<tr><td>${w}</td><td>${c.erection?.score?.pct ?? '—'}</td><td>${c.mood ? `${c.mood.score.total} (anx ${c.mood.score.anx}, dep ${c.mood.score.dep})` : '—'}</td><td>${c.energy?.score?.pct ?? '—'}${c.energy?.score?.redFlag ? ' ⚠ exertion symptoms' : ''}</td></tr>`; }).join('') || '<tr><td colspan="4">None yet</td></tr>'}</table>
+    <h2>Private symptom log (last 28 days)</h2>${(() => { const L = (st.sxLog || []).filter((x) => days.includes(x.date)); if (!L.length) return '<p>No entries</p>';
+      const c = (f) => L.filter(f).length; const solo = L.filter((x) => x.type === 0), partner = L.filter((x) => x.type === 1);
+      const firm = (a) => a.length ? Math.round(a.filter((x) => x.firm >= 3).length / a.length * 100) + '%' : '—';
+      return `<table><tr><th>Entries</th><td>${L.length} (solo ${solo.length}, partner ${partner.length})</td></tr>
+      <tr><th>Firm enough</th><td>solo ${firm(solo)} · partner ${firm(partner)}</td></tr>
+      <tr><th>Lost erection early/partway</th><td>${c((x) => x.kept != null && x.kept < 2)} of ${L.length}</td></tr>
+      <tr><th>Ejaculation &lt; 1 min / 1–2 min</th><td>${c((x) => x.time === 0)} / ${c((x) => x.time === 1)}</td></tr>
+      <tr><th>Semen: less / none</th><td>${c((x) => x.semen === 1)} / ${c((x) => x.semen === 2)}</td></tr>
+      <tr><th>Felt anxious/pressure</th><td>${c((x) => x.anxious)}</td></tr></table>`; })()}
     <h2>Lab results entered</h2>${st.medical.labs.length ? `<table>${st.medical.labs.map((l) => `<tr><td>${l.date}</td><td>${UI.esc(l.name)}</td><td>${UI.esc(l.value)} ${UI.esc(l.unit)}</td></tr>`).join('')}</table>` : '<p>None</p>'}
     <h2>Questions</h2><ol>${(st.medical.questions || []).filter((q) => !q.done).map((q) => `<li>${UI.esc(q.q)}</li>`).join('')}</ol>`;
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Doctor summary</h1><div class="sub">Show on your phone or print / save as PDF</div></div></div>

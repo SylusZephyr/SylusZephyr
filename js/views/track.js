@@ -91,6 +91,14 @@ function body() {
   <div class="card mt12"><div class="kicker">History</div>${ws.length ? [...ws].reverse().map((w) => `<div class="list-item"><div class="grow"><b>${w.kg.toFixed(1)} kg</b><div class="muted small">${S.prettyDate(w.date)}</div></div><button class="icon-btn" data-delw="${w.date}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty">No weigh-ins</div>'}</div>`;
 }
 
+function sxCard() {
+  const log = (S.get().sxLog || []).filter((x) => x.date >= S.addDays(S.dayKey(), -28));
+  const n = log.length; const pct = (f) => n ? Math.round(log.filter(f).length / n * 100) : 0;
+  return `<div class="card"><div class="row between"><div><div class="kicker">🔒 Private log · 28 days</div><div class="tiny muted">${n} entries</div></div><button class="btn sm primary" data-sx>+ Log</button></div>
+    ${n ? `<div class="grid3 mt12"><div class="macro"><b>${pct((x) => x.firm >= 3)}%</b><span>firm enough</span></div><div class="macro"><b>${pct((x) => x.kept === 2)}%</b><span>kept it</span></div><div class="macro"><b>${pct((x) => x.semen === 2)}%</b><span>dry</span></div></div>
+    <div class="grid2 mt8"><div class="macro"><b>${pct((x) => x.time <= 1)}%</b><span>under 2 min</span></div><div class="macro"><b>${pct((x) => x.anxious)}%</b><span>felt pressure</span></div></div>` : '<p class="muted small mt8">Optional. Log after any sexual activity — it shows your doctor patterns (e.g. solo vs partner, dry orgasms) that questionnaires miss.</p>'}</div>`;
+}
+
 function checkins() {
   const st = S.get(); const weeks = Object.keys(st.checkins).sort();
   const series = (type, f) => weeks.filter((w) => st.checkins[w][type]).map((w) => ({ y: f(st.checkins[w][type].score), label: S.prettyDate(w, { day: 'numeric', month: 'short' }) }));
@@ -101,6 +109,7 @@ function checkins() {
   ${block('erection', 'Erection & confidence', (s) => s.pct, { min: 0, max: 100, color: '#ff6b6b', unit: '%' }, 'Score out of 100')}
   ${block('mood', 'Mood & worry (PHQ-4)', (s) => s.total, { min: 0, max: 12, color: '#a78bfa' }, '0–2 normal · 3–5 mild · 6–8 moderate · 9–12 severe')}
   ${block('energy', 'Energy & cold', (s) => s.pct, { min: 0, max: 100, color: '#5aa9ff', unit: '%' }, 'Score out of 100')}
+  ${sxCard()}
   <a class="btn block" href="#me/summary">🖨️ Doctor summary</a>`;
 }
 
@@ -132,4 +141,5 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-weigh]')?.addEventListener('click', () => Sh.weighSheet(rerender));
   root.querySelectorAll('[data-delw]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete weigh-in?', '', 'Delete', true)) { st.weights = st.weights.filter((w) => w.date !== b.dataset.delw); S.save(); rerender(); } });
   root.querySelectorAll('[data-ci]').forEach((b) => b.onclick = () => Sh.checkinSheet(b.dataset.ci, rerender));
+  root.querySelector('[data-sx]')?.addEventListener('click', () => Sh.sxSheet(rerender));
 }
