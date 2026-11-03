@@ -1,5 +1,5 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-v1.0.0';
+const VERSION = 'revive-v1.1.0';
 const ASSETS = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/store.js', 'js/ui.js', 'js/gamify.js', 'js/plan.js', 'js/lock.js', 'js/ics.js', 'js/charts.js',

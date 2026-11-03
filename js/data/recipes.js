@@ -383,6 +383,81 @@ export const RECIPES = [
       { t: 'Wrap with sauces.' },
     ],
   }),
+  // ───────────── v1.1 additions ─────────────
+  R({
+    id: 'shawarma_bowl', name: 'Chicken Shawarma Rice Bowl', emoji: '🥙', bg: ['#ca8a04', '#713f12'],
+    method: 'airfryer', meals: ['lunch', 'dinner'], mins: 18, cost: 15, kcal: 760, protein: 46,
+    tags: ['high-protein', 'creamy', 'savory'], feel: ['ok', 'energetic'],
+    desc: 'Cumin-garlic chicken over rice with cucumber, tomato and a garlicky yogurt sauce.',
+    ing: [{ id: 'chicken_thigh', q: '200 g' }, { id: 'cumin_chili', q: '1 tsp' }, { id: 'garlic_ginger', q: '1 tsp' }, { id: 'instant_rice', q: '1 bowl' }, { id: 'yogurt', q: '3 tbsp' }, { id: 'cucumber', q: '½' }, { id: 'tomato', q: '½' }],
+    steps: [
+      { t: 'Toss chicken strips with cumin, chili, garlic-ginger, salt and a little oil.' },
+      { t: 'Air fry 200°C, shake halfway.', timer: 720 },
+      { t: 'Heat the rice. Mix yogurt with a pinch of salt (and garlic if you like).' },
+      { t: 'Bowl: rice, chicken, chopped cucumber & tomato, yogurt sauce on top.' },
+    ],
+  }),
+  R({
+    id: 'aloo_tikki', name: 'Crispy Aloo Tikki + Yogurt', emoji: '🥔', bg: ['#a16207', '#422006'],
+    method: 'airfryer', meals: ['snack', 'lunch'], mins: 25, cost: 4, kcal: 420, protein: 12,
+    tags: ['crispy', 'desi', 'comfort'], feel: ['ok'],
+    desc: 'Golden potato patties — crunchy outside, soft inside. Classic chaat flavours.',
+    ing: [{ id: 'potato', q: '2 small' }, { id: 'cumin_chili', q: '½ tsp' }, { id: 'onion', q: '¼', opt: true }, { id: 'yogurt', q: '3 tbsp' }, { id: 'ketchup', q: 'dip', opt: true }],
+    steps: [
+      { t: 'Air fry thin potato slices 200°C until soft.', timer: 600 },
+      { t: 'Mash with salt, cumin, chili and chopped onion. Shape into 4 flat patties.' },
+      { t: 'Spray oil, air fry 200°C, flip halfway.', timer: 600 },
+      { t: 'Top with yogurt and ketchup/chili sauce.' },
+    ],
+  }),
+  R({
+    id: 'mango_lassi', name: 'Mango Lassi Shake', emoji: '🥭', bg: ['#f59e0b', '#c2410c'],
+    method: 'nocook', meals: ['snack', 'breakfast'], mins: 3, cost: 7, kcal: 420, protein: 16,
+    tags: ['creamy', 'sweet', 'drinkable', 'desi'], feel: ['tired', 'lowappetite'],
+    desc: 'Mash ripe mango into yogurt and milk, shake hard. Tastes like home.',
+    ing: [{ id: 'mango', q: '1 cup, very ripe' }, { id: 'yogurt', q: '150 g' }, { id: 'milk', q: '150 ml' }, { id: 'honey', q: '1 tsp', opt: true }],
+    steps: [
+      { t: 'Mash mango with a fork until very smooth (frozen: thaw 10 min first).' },
+      { t: 'Bottle: mango, yogurt, milk, honey, pinch of cardamom if you have it.' },
+      { t: 'Shake 30 seconds.', timer: 30 },
+    ],
+  }),
+  R({
+    id: 'hummus_wrap', name: 'No-Cook Hummus Chicken Wrap', emoji: '🫔', bg: ['#65a30d', '#1a2e05'],
+    method: 'nocook', meals: ['lunch', 'snack'], mins: 6, cost: 12, kcal: 640, protein: 38,
+    tags: ['creamy', 'high-protein', 'grab-and-go'], feel: ['tired', 'ok'],
+    desc: 'Smash chickpeas with lemon & yogurt into a quick hummus, add ready chicken. No heat at all.',
+    ing: [{ id: 'chickpeas', q: '½ can' }, { id: 'lemon', q: '½' }, { id: 'yogurt', q: '1 tbsp' }, { id: 'cooked_chicken', q: '1 pack' }, { id: 'tortilla', q: '1' }, { id: 'cucumber', q: '¼', opt: true }],
+    steps: [
+      { t: 'In a bowl, mash chickpeas with lemon, yogurt, salt and cumin until spreadable.' },
+      { t: 'Spread on the tortilla, add chicken and cucumber. Roll up tight.' },
+      { t: 'Keep the other half of the hummus in the fridge for tomorrow.' },
+    ],
+  }),
+  R({
+    id: 'kofta_tray', name: 'Beef Kofta & Veg Tray', emoji: '🍢', bg: ['#b45309', '#3f1d03'],
+    method: 'airfryer', meals: ['dinner'], mins: 20, cost: 17, kcal: 700, protein: 40,
+    tags: ['desi', 'smoky', 'iron-rich'], feel: ['energetic', 'ok'],
+    desc: 'Spiced mince fingers with peppers and onion — iron and zinc rich. Eat with naan.',
+    ing: [{ id: 'beef_mince', q: '200 g' }, { id: 'onion', q: '1' }, { id: 'pepper', q: '1' }, { id: 'cumin_chili', q: '1 tsp' }, { id: 'garlic_ginger', q: '1 tsp' }, { id: 'naan', q: '½' }],
+    steps: [
+      { t: 'Mix mince, grated/finely chopped ½ onion, garlic-ginger, cumin, chili, salt. Shape 6 fingers.' },
+      { t: 'Basket: kofta + chunks of pepper and the rest of the onion. Spray oil.' },
+      { t: 'Air fry 200°C, turn halfway.', timer: 720 },
+      { t: 'Warm naan 1 min. Serve with yogurt.', timer: 60 },
+    ],
+  }),
+  R({
+    id: 'pb_banana_toast', name: 'PB Banana Honey Toast', emoji: '🍌', bg: ['#ca8a04', '#422006'],
+    method: 'airfryer', meals: ['breakfast', 'snack'], mins: 5, cost: 3, kcal: 430, protein: 14,
+    tags: ['sweet', 'crunchy'], feel: ['tired', 'lowappetite', 'ok'],
+    desc: 'Toast in the air fryer, peanut butter, banana, honey. Five minutes, 430 kcal.',
+    ing: [{ id: 'bread', q: '2 slices' }, { id: 'peanut_butter', q: '2 tbsp' }, { id: 'banana', q: '1' }, { id: 'honey', q: 'drizzle', opt: true }],
+    steps: [
+      { t: 'Toast bread in the air fryer 200°C.', timer: 180 },
+      { t: 'Spread peanut butter, top with banana slices and honey.' },
+    ],
+  }),
 ];
 
 // Halal delivery ideas for Meituan 美团 / Ele.me 饿了么. Tip: search with 清真 and filter by rating.

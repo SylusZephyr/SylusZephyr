@@ -21,7 +21,7 @@ export function lineChart(points, { h = 140, color = '#ffb547', min, max, band, 
     <path d="${area}" fill="url(#${id})"/>
     <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     ${points.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.y)}" r="${i === n - 1 ? 4.5 : 2.5}" fill="${i === n - 1 ? color : '#0b0f1a'}" stroke="${color}" stroke-width="2"/>`).join('')}
-    ${labels ? points.map((p, i) => (n <= 8 || i % Math.ceil(n / 6) === 0 || i === n - 1) ? `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${p.label ?? ''}</text>` : '').join('') : ''}
+    ${labels ? points.map((p, i) => (n <= 8 || i % Math.ceil(n / 6) === 0 || i === n - 1) ? `<text x="${X(i)}" y="${H - 6}" text-anchor="${n > 1 && i === n - 1 ? 'end' : n > 1 && i === 0 ? 'start' : 'middle'}">${p.label ?? ''}</text>` : '').join('') : ''}
   </svg>`;
 }
 const fmt = (v) => (Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 10) / 10);

@@ -220,13 +220,14 @@ export const BADGES = [
   { id: 'level10', e: '🏅', n: 'Level 10', d: 'Reach level 10', c: (st) => levelFromXp(st.game.xp) >= 10 },
 ];
 export function checkBadges() {
-  const st = S.get();
+  const st = S.get(); const fresh = [];
   for (const b of BADGES) {
-    if (!st.game.badges[b.id] && safe(() => b.c(st))) {
-      st.game.badges[b.id] = Date.now(); S.save();
-      setTimeout(() => UI.toast(`Badge unlocked: ${b.n}`, b.e), 500);
-    }
+    if (!st.game.badges[b.id] && safe(() => b.c(st))) { st.game.badges[b.id] = Date.now(); fresh.push(b); }
   }
+  if (!fresh.length) return;
+  S.save();
+  if (fresh.length <= 2) fresh.forEach((b) => setTimeout(() => UI.toast(`Badge unlocked: ${b.n}`, b.e), 500));
+  else setTimeout(() => UI.toast(`${fresh.length} badges unlocked! ${fresh.map((b) => b.e).join('')}`, '🏅'), 500);
 }
 function safe(fn) { try { return fn(); } catch (e) { return false; } }
 
@@ -238,4 +239,44 @@ export function weekCompare() {
   const thisW = sum(today, wd + 1);
   const lastW = sum(S.addDays(today, -7), wd + 1); // same point last week
   return { thisW, lastW };
+}
+
+// ---------- Daily open bonus (variable reward) ----------
+export function dailyOpen() {
+  const k = S.dayKey(); const d = S.day(k); d.xpLog = d.xpLog || {};
+  if (d.xpLog.daily_open) return;
+  const roll = Math.random(); const amt = roll < 0.05 ? 50 : roll < 0.25 ? 20 : 10;
+  award('daily_open', amt, null, { k, silent: true });
+  setTimeout(() => UI.toast(amt >= 50 ? `JACKPOT check-in bonus +${amt} XP!` : `Daily check-in +${amt} XP`, amt >= 50 ? '🎰' : '👋'), 600);
+  if (amt >= 50) setTimeout(() => UI.confetti(80), 700);
+}
+
+// ---------- Weekly review (first open of a new week) ----------
+export function weeklyReviewData(wk) {
+  const st = S.get(); const days = Array.from({ length: 7 }, (_, i) => S.addDays(wk, i));
+  const logged = days.filter((k) => st.days[k]);
+  const ess = days.reduce((s, k) => s + essentialsDone(k), 0);
+  const secured = days.filter((k) => essentialsDone(k) >= STREAK_THRESHOLD).length;
+  const meals = days.reduce((s, k) => s + new Set((st.days[k]?.meals || []).filter((m) => m.slot !== 'snack').map((m) => m.slot)).size, 0);
+  const pf = st.pf.sessions.filter((x) => days.includes(x.date)).length;
+  const xp = days.reduce((s, k) => s + (st.days[k]?.xpToday || 0), 0);
+  const water = days.filter((k) => (st.days[k]?.waterMl || 0) >= 1500).length;
+  const pct = ess / 49;
+  const grade = pct >= 0.85 ? 'S' : pct >= 0.7 ? 'A' : pct >= 0.5 ? 'B' : pct >= 0.3 ? 'C' : 'D';
+  return { logged: logged.length, ess, secured, meals, pf, xp, water, grade };
+}
+export async function maybeWeeklyReview() {
+  const st = S.get(); const thisWk = S.weekKey(); const lastWk = S.addDays(thisWk, -7);
+  if (st.game.reviewed === thisWk) return;
+  st.game.reviewed = thisWk; S.save();
+  const r = weeklyReviewData(lastWk);
+  if (r.logged < 2) return;
+  const bonus = { S: 150, A: 100, B: 60, C: 30, D: 15 }[r.grade];
+  st.game.coins += bonus; S.save();
+  await UI.celebrate({
+    big: { S: '🏆', A: '🥇', B: '🥈', C: '🥉', D: '🌱' }[r.grade], rarity: `WEEKLY GRADE ${r.grade}`,
+    title: `Last week: ${r.secured}/7 streak days`,
+    body: `🍽️ ${r.meals} main meals · 💪 ${r.pf} pelvic-floor sessions<br>💧 ${r.water} days with 1.5 L+ · ⚡ ${r.xp} XP<br><br>+${bonus} coins. ${r.grade === 'S' || r.grade === 'A' ? 'Elite week. Do it again.' : 'New week, clean slate. Beat last-week you.'}`,
+    btn: 'Start this week',
+  });
 }
