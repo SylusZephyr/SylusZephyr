@@ -64,7 +64,7 @@ export function render(_, { night }) {
   const wk = S.weekKey(); const ci = st.checkins[wk] || {};
   const ciMissing = ['erection', 'mood', 'energy'].filter((x) => !ci[x]);
   const weighDone = st.weights.some((w) => S.weekKey(w.date) === wk);
-  const lateCoffee = S.minutesOf(S.hm()) >= S.minutesOf(st.profile.caffeineCutoff) && new Date().getHours() >= 4;
+  const lateCoffee = P.isAfterCutoff(S.hm());
   const glasses = Math.round(d.waterMl / 250); const goalGl = Math.round(st.profile.waterGoalMl / 250);
   const seen = st.storiesSeen || {};
 
@@ -216,7 +216,7 @@ export function bind(root, _, { rerender }) {
     const v = +b.dataset.coffee;
     if (v > 0) {
       d.coffee.push(S.hm());
-      if (S.minutesOf(S.hm()) >= S.minutesOf(st.profile.caffeineCutoff)) {
+      if (P.isAfterCutoff(S.hm())) {
         if (d.checks.caffeine) G.setEssential('caffeine', false);
         UI.toast('Logged. After cutoff — try decaf or water next time', '☕');
       }
