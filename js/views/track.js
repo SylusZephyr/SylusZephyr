@@ -71,6 +71,7 @@ function sleep() {
     <div class="grid3 mt12"><div class="macro"><b>${nights.length ? `${Math.floor(avgDur / 60)}h${Math.round(avgDur % 60)}` : '—'}</b><span>avg sleep</span></div>
     <div class="macro"><b>${avgDev != null ? `±${Math.round(avgDev)}m` : '—'}</b><span>wake drift</span></div>
     <div class="macro"><b>${onAnchor}/${nights.length}</b><span>on anchor</span></div></div></div>
+  ${t.reached && onAnchor >= 5 && S.minutesOf(st.profile.wakeAnchor) > 7 * 60 ? `<div class="card cool glow"><div class="kicker">Level up your sleep 🌅</div><h3>Ready for the next step?</h3><p class="muted small">You hit your bedtime and woke on-anchor ${onAnchor} times recently. Move everything 30 min earlier — wake ${S.prettyTime(S.fmtMin(S.minutesOf(st.profile.wakeAnchor) - 30))}.</p><button class="btn cool block mt12" data-earlier>Shift 30 min earlier</button></div>` : ''}
   <button class="btn block" data-logsleep>🌙 Log last night</button>
   <div class="notice mt12">Wake drift = how far your wake-up time is from your anchor, on average. Get it under ±30 min first — that’s what fixes a random schedule.</div>`;
 }
@@ -137,6 +138,11 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
   root.querySelectorAll('[data-delmeal]').forEach((b) => b.onclick = () => { const d = S.day(); d.meals = d.meals.filter((m) => m.id !== b.dataset.delmeal); S.save(); rerender(); });
   root.querySelector('[data-sleepset]')?.addEventListener('click', () => sleepSettings(rerender));
+  root.querySelector('[data-earlier]')?.addEventListener('click', (ev) => {
+    const p = st.profile; const t = P.sleepTargets();
+    p.wakeAnchor = S.fmtMin(S.minutesOf(p.wakeAnchor) - 30); p.currentBedtime = t.bed; p.bedShiftStartedOn = S.dayKey();
+    S.save(); G.award('sleep_level_' + p.wakeAnchor, 60, ev); UI.toast('New anchor set — update your Calendar reminders', '🌅'); rerender();
+  });
   root.querySelector('[data-logsleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
   root.querySelector('[data-weigh]')?.addEventListener('click', () => Sh.weighSheet(rerender));
   root.querySelectorAll('[data-delw]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete weigh-in?', '', 'Delete', true)) { st.weights = st.weights.filter((w) => w.date !== b.dataset.delw); S.save(); rerender(); } });

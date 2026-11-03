@@ -124,7 +124,7 @@ export const QUEST_POOL = [
   { id: 'q_shake', e: '🥤', t: 'Have a shake or extra snack', xp: 30, check: (d) => d.meals.some((m) => m.slot === 'snack') },
   { id: 'q_brekkie', e: '⏱️', t: 'Breakfast within 2 h of waking', xp: 35, check: (d) => { if (!d.sleep.wake) return false; const b = d.meals.find((m) => m.slot === 'breakfast'); if (!b) return false; const diff = (S.minutesOf(b.time) - S.minutesOf(d.sleep.wake) + 1440) % 1440; return diff <= 120; } },
   { id: 'q_coffee1', e: '☕', t: 'Max 1 coffee today', xp: 30, check: (d, endOfDay) => endOfDay && d.coffee.length <= 1 },
-  { id: 'q_nocoffee_pm', e: '🌗', t: 'Zero coffee after 2 pm', xp: 30, check: (d, endOfDay) => endOfDay && !d.coffee.some((c) => S.minutesOf(c) >= 14 * 60) },
+  { id: 'q_nocoffee_pm', e: '🌗', t: 'Zero coffee after 2 pm', xp: 30, check: (d, endOfDay) => endOfDay && !d.coffee.some((c) => { const m = S.minutesOf(c); return m < 240 || m >= 14 * 60; }) },
   { id: 'q_walk', e: '🚶', t: 'Take a gentle 10-min walk', xp: 35, check: (d) => (d.walkMin || 0) >= 10 },
   { id: 'q_breath', e: '🌬️', t: 'Do a 2-min breathing session', xp: 25, check: (d) => (d.breath || 0) >= 1 },
   { id: 'q_mood', e: '🙂', t: 'Log energy & mood', xp: 20, check: (d) => d.energy != null && d.mood != null },

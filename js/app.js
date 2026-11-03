@@ -2,7 +2,7 @@ import * as S from './store.js';
 import * as UI from './ui.js';
 import * as G from './gamify.js';
 import * as Lock from './lock.js';
-import { inWindDown } from './plan.js';
+import { inWindDown, isAfterCutoff } from './plan.js';
 import * as Today from './views/today.js';
 import * as Cook from './views/cook.js';
 import * as Train from './views/train.js';
@@ -45,10 +45,26 @@ export function render({ keepScroll = false } = {}) {
 window.addEventListener('scroll', () => { lastScroll[location.hash] = window.scrollY; }, { passive: true });
 window.addEventListener('hashchange', () => { UI.closeAllSheets(); render(); });
 
+// End-of-day bookkeeping: auto-credit 'no coffee after cutoff' if true, finish quests.
+function closeDay(k) {
+  const d = S.get().days[k];
+  if (d && !d.checks.caffeine && !d.coffee.some((c) => isAfterCutoff(c)) && G.essentialsDone(k) > 0) {
+    d.checks.caffeine = true; G.award('ess_caffeine', 10, null, { k, silent: true });
+  }
+  G.evaluateQuests(k, true); S.save();
+}
+// Close any past days not yet closed (app wasn't open at rollover).
+function closePastDays() {
+  const st = S.get(); st.closedDays = st.closedDays || {};
+  for (let i = 1; i <= 7; i++) { const k = S.addDays(S.dayKey(), -i); if (st.days[k] && !st.closedDays[k]) { closeDay(k); st.closedDays[k] = true; } }
+  S.save();
+}
+
 // Re-render when the day rolls over or the app comes back to foreground.
 let lastDay = S.dayKey();
 function onForeground() {
-  if (S.dayKey() !== lastDay) { G.evaluateQuests(lastDay, true); lastDay = S.dayKey(); }
+  if (S.dayKey() !== lastDay) { closeDay(lastDay); lastDay = S.dayKey(); }
+  closePastDays();
   const frozen = G.applyFreezeIfNeeded();
   if (frozen) UI.toast('Streak freeze used for yesterday ❄️ — streak saved!', '🧊');
   G.updateBestStreak();
@@ -71,7 +87,7 @@ setInterval(() => { if (document.visibilityState === 'visible' && S.dayKey() !==
 // Boot
 function boot() {
   Lock.showLock(() => {
-    if (S.get().onboarded) { G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
+    if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
     render();
     if (S.get().onboarded) setTimeout(() => G.maybeWeeklyReview(), 900);
   });

@@ -86,3 +86,11 @@ export const PROGRAM = [
   { w: 3, t: 'Build strength & stamina safely', goals: ['If cleared: gentle cycling/walking', 'Pelvic-floor sessions 2–3× daily', 'Add a daily shake'] },
   { w: 4, t: 'Review & refine', goals: ['Compare check-in scores', 'Review any test results', 'Keep what worked, simplify what you missed'] },
 ];
+
+// Coffee after the cutoff — times between midnight and 4 AM belong to the
+// previous day and are always "late".
+export function isAfterCutoff(hhmm) {
+  const m = S.minutesOf(hhmm); if (m == null) return false;
+  if (m < S.DAY_ROLLOVER_HOUR * 60) return true;
+  return m >= S.minutesOf(S.get().profile.caffeineCutoff);
+}
