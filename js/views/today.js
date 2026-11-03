@@ -32,6 +32,26 @@ function todayStory() {
   ].filter(Boolean);
 }
 
+// Context-aware nudges (replace push notifications when the app is open).
+export function nudges(now = new Date()) {
+  const st = S.get(); const d = S.day(); const out = [];
+  const m = now.getHours() * 60 + now.getMinutes();
+  const wake = S.minutesOf(st.profile.wakeAnchor);
+  const since = (m - wake + 1440) % 1440;
+  const mt = P.mealTimes();
+  if (!d.sleep.wake && since < 300) out.push({ e: '🌙', t: 'Log last night’s sleep', s: 'Takes 5 seconds. Builds your sleep chart.', act: 'sleep', cls: 'blue' });
+  for (const slot of ['dinner', 'lunch', 'breakfast']) {
+    const due = (S.minutesOf(mt[slot]) - wake + 1440) % 1440;
+    if (since >= due && !d.checks[slot]) { out.push({ e: P.SLOT_EMOJI[slot], t: `${P.SLOT_LABEL[slot]} time — eaten yet?`, s: since - due > 90 ? 'Hungry-but-not-eating is the pattern we’re breaking. Even a shake counts.' : 'Tap to log it, or open Cook for a 10-min idea.', act: 'meal' }); break; }
+  }
+  const awake = 960; const expected = Math.min(1, since / awake) * st.profile.waterGoalMl;
+  if (since > 120 && since < awake && d.waterMl < expected - 500) out.push({ e: '💧', t: 'Water check', s: `You’re at ${(d.waterMl / 1000).toFixed(1)} L — aim for ${(expected / 1000).toFixed(1)} L by now.`, act: 'water', cls: 'blue' });
+  const cut = S.minutesOf(st.profile.caffeineCutoff);
+  if (m >= cut - 45 && m < cut) out.push({ e: '☕', t: 'Last call for coffee', s: `Cutoff at ${S.prettyTime(st.profile.caffeineCutoff)}. After that, water or decaf.`, act: 'none' });
+  if (!(d.pf > 0) && since > 360 && since < awake) out.push({ e: '💪', t: 'Pelvic-floor session', s: 'About 2 minutes. Lie down, tap Start.', act: 'train' });
+  return out.slice(0, 2);
+}
+
 export function render(_, { night }) {
   const st = S.get(); const k = S.dayKey(); const d = S.day(k);
   const lv = G.levelInfo(); const streak = G.streak(); const n = G.essentialsDone(k);
@@ -59,6 +79,8 @@ export function render(_, { night }) {
     <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
     <div class="row between tiny muted mt8"><span>❄️ ${st.game.freezes} freeze${st.game.freezes === 1 ? '' : 's'}</span><span>Today +${d.xpToday || 0} XP</span><span>Best 🔥 ${st.game.bestStreak}</span></div>
   </button>
+
+  ${night ? '' : nudges().map((n) => `<button class="nudge ${n.cls || ''}" data-nudge="${n.act}"><span class="n-e">${n.e}</span><div class="grow"><b>${n.t}</b><span>${n.s}</span></div><span class="pill amber">+XP</span></button>`).join('')}
 
   <div class="stories">${STORIES.map((s) => `<button class="story ${seen[s.id] === k ? 'seen' : ''}" data-story="${s.id}"><div class="ring"><div class="inner">${s.e}</div></div><span>${s.label}</span></button>`).join('')}</div>
 
@@ -200,6 +222,14 @@ export function bind(root, _, { rerender }) {
     S.save(); rerender();
   }));
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
+  root.querySelectorAll('[data-nudge]').forEach((b) => b.addEventListener('click', (ev) => {
+    const a = b.dataset.nudge;
+    if (a === 'sleep') Sh.sleepSheet(rerender);
+    else if (a === 'meal') Sh.mealSheet(rerender);
+    else if (a === 'train') location.hash = 'train';
+    else if (a === 'water') { d.waterMl += 250; S.save(); G.award(`water_${d.waterMl}`, 3, ev); if (d.waterMl >= 1500) G.setEssential('fluids', true, ev); G.evaluateQuests(); rerender(); }
+    else b.remove();
+  }));
   root.querySelector('[data-sleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
   root.querySelector('[data-energy]')?.addEventListener('click', () => Sh.energySheet(rerender));
   root.querySelector('[data-breath]')?.addEventListener('click', () => Sh.breathing({ onDone: rerender }));

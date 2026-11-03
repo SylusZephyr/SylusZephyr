@@ -34,7 +34,7 @@ export const ICON = {
 
 // ---------- feedback ----------
 export function haptic(ms = 12) {
-  try { if (S.get().settings.haptics && navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+  try { if (S.get().settings.haptics && navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms); } catch (e) {}
 }
 let audioCtx = null;
 export function ding(kind = 'tick') {
@@ -54,13 +54,21 @@ export function ding(kind = 'tick') {
   } catch (e) {}
 }
 
+const toastQueue = [];
+let toastActive = 0;
 export function toast(msg, icon = '✨') {
-  const root = $('#toast-root'); if (!root) return;
-  const el = document.createElement('div'); el.className = 'toast';
-  el.innerHTML = `<span style="font-size:18px">${icon}</span><span>${esc(msg)}</span>`;
-  root.appendChild(el); setTimeout(() => el.remove(), 2700);
+  toastQueue.push([msg, icon]); pumpToasts();
 }
-
+function pumpToasts() {
+  const root = $('#toast-root'); if (!root) return;
+  while (toastActive < 2 && toastQueue.length) {
+    const [msg, icon] = toastQueue.shift(); toastActive++;
+    const el = document.createElement('div'); el.className = 'toast';
+    el.innerHTML = `<span style="font-size:18px">${icon}</span><span>${esc(msg)}</span>`;
+    root.appendChild(el);
+    setTimeout(() => { el.remove(); toastActive--; pumpToasts(); }, 2700);
+  }
+}
 export function xpPop(amount, x, y) {
   const el = document.createElement('div'); el.className = 'xp-pop';
   el.textContent = `+${amount} XP`;

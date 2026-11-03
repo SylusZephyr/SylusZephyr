@@ -53,7 +53,9 @@ function onForeground() {
   if (frozen) UI.toast('Streak freeze used for yesterday ❄️ — streak saved!', '🧊');
   G.updateBestStreak();
   G.evaluateQuests();
+  G.dailyOpen();
   render({ keepScroll: true });
+  G.maybeWeeklyReview();
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') { S.saveNow(); hiddenAt = Date.now(); }
@@ -69,8 +71,9 @@ setInterval(() => { if (document.visibilityState === 'visible' && S.dayKey() !==
 // Boot
 function boot() {
   Lock.showLock(() => {
-    if (S.get().onboarded) { G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); }
+    if (S.get().onboarded) { G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
     render();
+    if (S.get().onboarded) setTimeout(() => G.maybeWeeklyReview(), 900);
   });
   S.requestPersist();
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {

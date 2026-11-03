@@ -51,6 +51,7 @@ export const INGREDIENTS = [
   { id: 'avocado', name: 'Avocado', zh: '牛油果', e: '🥑', cat: 'Fruit & veg', price: 6, unit: 'piece' },
   { id: 'lemon', name: 'Lemon', zh: '柠檬', e: '🍋', cat: 'Fruit & veg', price: 3, unit: 'piece' },
   { id: 'corn', name: 'Sweet corn', zh: '玉米 / 玉米粒', e: '🌽', cat: 'Fruit & veg', price: 5, unit: 'can/cob' },
+  { id: 'mango', name: 'Mango (fresh or frozen)', zh: '芒果 / 冷冻芒果块', e: '🥭', cat: 'Fruit & veg', price: 15, unit: '500 g' },
   { id: 'mushroom', name: 'Mushrooms', zh: '蘑菇', e: '🍄', cat: 'Fruit & veg', price: 6, unit: '250 g' },
 
   // Pantry & flavour
