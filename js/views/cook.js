@@ -74,10 +74,7 @@ function main() {
     <h3>Based on your ${st.pantry.length} items, mood, time & budget</h3>
     <div class="field"><label>Meal</label><div class="chips scroll">${Object.keys(P.SLOT_LABEL).map((s) => `<button class="chip ${slot === s ? 'on' : ''}" data-slot="${s}">${P.SLOT_EMOJI[s]} ${P.SLOT_LABEL[s]}</button>`).join('')}</div></div>
     <div class="field"><label>I feel…</label><div class="chips scroll">${FEELS.map((f) => `<button class="chip ${filt.feel === f.id ? 'on' : ''}" data-feel="${f.id}">${f.e} ${f.l}</button>`).join('')}</div></div>
-    <div class="grid2">
-      <div class="field"><label>Time</label><div class="chips">${TIMES.map((t) => `<button class="chip ${filt.mins === t.v ? 'on' : ''}" data-mins="${t.v}">${t.l}</button>`).join('')}</div></div>
-      <div class="field"><label>Budget</label><div class="chips">${BUDGETS.map((t) => `<button class="chip ${filt.budget === t.v ? 'on' : ''}" data-budget="${t.v}">${t.l}</button>`).join('')}</div></div>
-    </div>
+    <div class="field"><label>Time & budget</label><div class="chips scroll">${TIMES.map((t) => `<button class="chip ${filt.mins === t.v ? 'on' : ''}" data-mins="${t.v}">⏱ ${t.l}</button>`).join('')}${BUDGETS.map((t) => `<button class="chip ${filt.budget === t.v ? 'on' : ''}" data-budget="${t.v}">💴 ${t.l}</button>`).join('')}</div></div>
     <div class="mt16">${sug.map(({ r, have, total, missing }, i) => `<a class="rwide" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none">
       <div class="thumb" style="${UI.grad(r.bg)}">${r.emoji}</div>
       <div class="grow"><div class="row between"><b class="ellipsis">${i === 0 ? '⭐ ' : ''}${UI.esc(r.name)}</b></div>
