@@ -472,6 +472,9 @@ export const DELIVERY = [
   { id: 'd_shawarma', name: 'Shawarma / Turkish', zh: '土耳其烤肉卷 / 沙威玛', emoji: '🌯', cost: 35, kcal: 700, protein: 35, tip: 'Basically your favourite wrap — order 2 and keep one.' },
 ];
 
+import { MORE_RECIPES } from './recipes-more.js';
+RECIPES.push(...MORE_RECIPES);
+
 export const RECIPE = Object.fromEntries(RECIPES.map((r) => [r.id, r]));
 
 // Small variations on familiar meals ("same but different").

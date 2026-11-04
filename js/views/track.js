@@ -181,7 +181,11 @@ export function bind(root, _, { rerender }) {
   const st = S.get();
   root.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { tab = b.dataset.tab; rerender(); });
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
-  root.querySelectorAll('[data-delmeal]').forEach((b) => b.onclick = () => { const d = S.day(); d.meals = d.meals.filter((m) => m.id !== b.dataset.delmeal); S.save(); rerender(); });
+  root.querySelectorAll('[data-delmeal]').forEach((b) => b.onclick = () => {
+    const d = S.day(); const idx = d.meals.findIndex((m) => m.id === b.dataset.delmeal); if (idx < 0) return;
+    const [removed] = d.meals.splice(idx, 1); S.save(); rerender();
+    UI.undoToast(`Removed ${removed.name}`, () => { d.meals.splice(idx, 0, removed); S.save(); rerender(); });
+  });
   root.querySelector('[data-sleepset]')?.addEventListener('click', () => sleepSettings(rerender));
   root.querySelector('[data-earlier]')?.addEventListener('click', (ev) => {
     const p = st.profile; const t = P.sleepTargets();
@@ -190,7 +194,11 @@ export function bind(root, _, { rerender }) {
   });
   root.querySelector('[data-logsleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
   root.querySelector('[data-weigh]')?.addEventListener('click', () => Sh.weighSheet(rerender));
-  root.querySelectorAll('[data-delw]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete weigh-in?', '', 'Delete', true)) { st.weights = st.weights.filter((w) => w.date !== b.dataset.delw); S.save(); rerender(); } });
+  root.querySelectorAll('[data-delw]').forEach((b) => b.onclick = () => {
+    const removed = st.weights.find((w) => w.date === b.dataset.delw); if (!removed) return;
+    st.weights = st.weights.filter((w) => w !== removed); S.save(); rerender();
+    UI.undoToast(`Removed ${removed.kg.toFixed(1)} kg`, () => { st.weights.push(removed); st.weights.sort((a, b) => a.date.localeCompare(b.date)); S.save(); rerender(); });
+  });
   root.querySelectorAll('[data-ci]').forEach((b) => b.onclick = () => Sh.checkinSheet(b.dataset.ci, rerender));
   root.querySelector('[data-journal]')?.addEventListener('click', () => Sh.energySheet(rerender));
   root.querySelector('[data-sx]')?.addEventListener('click', () => Sh.sxSheet(rerender));

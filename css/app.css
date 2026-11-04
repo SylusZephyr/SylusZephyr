@@ -6,8 +6,8 @@
   --surface3: #252f47;
   --line: rgba(255,255,255,0.07);
   --text: #eef1f8;
-  --muted: #8b93a8;
-  --faint: #727b94;
+  --muted: #a1a9bd;
+  --faint: #8b94aa;
   --amber: #ffb547;
   --coral: #ff6b6b;
   --green: #34d399;
@@ -514,3 +514,29 @@ a.link { text-decoration: none; }
 .screen.onboard > * { animation: slideIn .4s cubic-bezier(.2,.9,.3,1) both; }
 @keyframes slideIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ob-badge.big, .screen.onboard > * { animation: none; } }
+
+/* Contrast and focus */
+.pill { color: #c9cfdd; }
+.tipcard .pill { background: rgba(0,0,0,.35); color: #f1f3f9; }
+.check .xp { color: #ffc56b; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 10px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.feed-loader { display: flex; justify-content: center; gap: 6px; padding: 24px 0 40px; }
+.feed-loader span { width: 8px; height: 8px; border-radius: 4px; background: var(--muted); animation: dots 1s infinite ease-in-out; }
+.feed-loader span:nth-child(2) { animation-delay: .15s; } .feed-loader span:nth-child(3) { animation-delay: .3s; }
+@keyframes dots { 0%, 80%, 100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: none; } }
+.feed-in { animation: rise .4s cubic-bezier(.2,.9,.3,1) both; }
+.toast.undo { pointer-events: auto; animation: toastIn .35s cubic-bezier(.2,.9,.3,1.3); }
+.undo-btn { margin-left: 8px; padding: 6px 12px; border-radius: 10px; background: rgba(255,181,71,.18); color: var(--amber); font-weight: 800; }
+.star { font-size: 26px; color: var(--surface3); padding: 2px 4px; transition: transform .15s; }
+.star.on { color: var(--amber); }
+.star:active { transform: scale(1.25); }
+/* Lazy photo elements fill their container like a cover background */
+.has-photo { position: relative; overflow: hidden; }
+.has-photo > img.ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0; transition: opacity .35s ease; }
+.has-photo > img.ph.loaded, .has-photo > img.ph[data-done] { opacity: 1; }
+.rcard .hero.has-photo::after, .hero-lg.has-photo::before { z-index: 1; }
+.hero-lg.has-photo > .icon-btn { z-index: 2; }
+.rcard .hero.has-photo > img.ph, .rwide .thumb.has-photo > img.ph { position: absolute; inset: 0; z-index: 0; }
+.dthumb { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 14px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 34px; }

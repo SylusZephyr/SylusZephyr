@@ -47,7 +47,7 @@ export function render() {
 
   <div class="card">
     <div class="kicker">Program roadmap</div>
-    ${PF_PHASES.map((p) => { const active = p.weeks.includes(wk); const done = Math.max(...p.weeks) < wk; return `<div class="row" style="padding:8px 0;opacity:${active || done ? 1 : 0.5}">
+    ${PF_PHASES.map((p) => { const active = p.weeks.includes(wk); const done = Math.max(...p.weeks) < wk; return `<div class="row" style="padding:8px 0;opacity:${active || done ? 1 : 0.8}">
       <div class="q-ico" style="width:36px;height:36px;border-radius:10px;background:${active ? 'var(--grad-warm)' : done ? 'var(--grad-green)' : 'var(--surface3)'};display:flex;align-items:center;justify-content:center">${done ? '✓' : active ? '▶' : '🔒'}</div>
       <div class="grow"><b>${p.name}</b> <span class="muted small">weeks ${p.weeks[0]}–${p.weeks.at(-1)}</span><div class="muted small">${p.reps}×${p.hold}s hold · ${p.flicks} flicks · ${p.pos}</div></div></div>`; }).join('')}
     <div class="row between mt8"><span class="small muted">Adjust week</span><div class="row"><button class="btn sm" data-wk="-1">−</button><b>${wk}</b><button class="btn sm" data-wk="1">+</button></div></div>

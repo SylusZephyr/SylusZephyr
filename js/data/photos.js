@@ -221,5 +221,143 @@ export const PHOTOS = {
   "credit": "Foodista · CC BY 2.0",
   "page": "https://commons.wikimedia.org/wiki/File:K%C3%B6fte_kebabs.jpg",
   "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "aloo_paratha_cheat": {
+  "src": "img/food/aloo_paratha_cheat.webp",
+  "credit": "No machine-readable author provided. Onef9day assumed (based on copyright claims). · CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Aloo_Paratha_North_Indian.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ "chicken_65": {
+  "src": "img/food/chicken_65.webp",
+  "credit": "Amiyashrivastava · CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_65_(Dish).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ "fish_tikka": {
+  "src": "img/food/fish_tikka.webp",
+  "credit": "P1898 · CC BY 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Fish_malai_tikka.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0"
+ },
+ "omelette_roll": {
+  "src": "img/food/omelette_roll.webp",
+  "credit": "Krishnendu84 · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Egg_pork_roll_-_self_innovative_-_self_made_-_Kolkata-_west_bengal_-DSC0104.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "palak_paratha": {
+  "src": "img/food/palak_paratha.webp",
+  "credit": "Ravi Talwar · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Palak_parantha.JPG",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "gobi_roast": {
+  "src": "img/food/gobi_roast.webp",
+  "credit": "Wheeler Cowperthwaite · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Plated_roasted_cauliflower_10.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "malai_tikka": {
+  "src": "img/food/malai_tikka.webp",
+  "credit": "Renupradhul · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_Malai_Tikka.JPG",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "keema_naan": {
+  "src": "img/food/keema_naan.webp",
+  "credit": "Sruthi.dongari · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Food_pic_004.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "peri_chicken": {
+  "src": "img/food/peri_chicken.webp",
+  "credit": "Banej · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Flame-grilled_PERi-PERi_chicken.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "shawarma_pita": {
+  "src": "img/food/shawarma_pita.webp",
+  "credit": "Romainbehar · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Lyon_7e_-_Grande_Rue_de_la_Guilloti%C3%A8re_-_Malting-Pot,_poulet_shawarma_dans_sa_pita.jpg",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "egg_bhurji_toast": {
+  "src": "img/food/egg_bhurji_toast.webp",
+  "credit": "Praveen from Bangalore, India · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Spicy_egg_bhurji_@_the_eggfactory.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "caesar_wrap": {
+  "src": "img/food/caesar_wrap.webp",
+  "credit": "Famartin · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:2023-08-02_13_28_10_A_Wawa_Chicken_Caesar_Wrap_in_Westampton_Township,_Burlington_County,_New_Jersey.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "tuna_kachumber": {
+  "src": "img/food/tuna_kachumber.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Kachumber_Salad.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "stuffed_peppers": {
+  "src": "img/food/stuffed_peppers.webp",
+  "credit": "Mark Bonica · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Quinoa_stuffed_peppers.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "mushroom_toastie": {
+  "src": "img/food/mushroom_toastie.webp",
+  "credit": "Andy Li · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Emmental_%26_Mushroom_Toastie_-_the_M%26S_Caf%C3%A9.jpg",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "tandoori_thighs": {
+  "src": "img/food/tandoori_thighs.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Tandoori_Chicken_1.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "chicken_seekh": {
+  "src": "img/food/chicken_seekh.webp",
+  "credit": "Asif Saleh · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_Seekh_Kabab.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "bombay_potatoes": {
+  "src": "img/food/bombay_potatoes.webp",
+  "credit": "Divya Kudua · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Anjum%27s_Indian_Vegetarian_Feast_-_Bombay_Potatoes.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "fish_tacos": {
+  "src": "img/food/fish_tacos.webp",
+  "credit": "Douglas Muth · CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Fish_tacos_in_Pittsburg.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
+ },
+ "chicken_satay": {
+  "src": "img/food/chicken_satay.webp",
+  "credit": "Elly Suhailee · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:CHICKEN_SATAY.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "falafel_bites": {
+  "src": "img/food/falafel_bites.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Falafel_1.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "sweet_potato_fries": {
+  "src": "img/food/sweet_potato_fries.webp",
+  "credit": "Thriving Vegetarian · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Baked_Sweet_Potato_Fries_With_Rosemary_and_Parmesan_-_8420845814.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "green_chutney_chicken": {
+  "src": "img/food/green_chutney_chicken.webp",
+  "credit": "Joegoaukfishcurry2 · CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_Hariyali_Kabab_(7843205634).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
  }
 };

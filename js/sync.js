@@ -54,6 +54,7 @@ export function merge(local, remote) {
   out.storiesSeen = { ...remote.storiesSeen, ...local.storiesSeen };
   out.weekPlan = newer.weekPlan || local.weekPlan;
   out.reminderPrefs = { ...remote.reminderPrefs, ...local.reminderPrefs };
+  out.recipeNotes = { ...remote.recipeNotes, ...local.recipeNotes };
 
   out.pf = {
     ...newer.pf,

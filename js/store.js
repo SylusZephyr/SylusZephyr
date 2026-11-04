@@ -27,14 +27,18 @@ export function prettyTime(hhmm) {
   return `${h}:${pad(m)}${ap}`;
 }
 export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'numeric' }) {
-  return keyToDate(k).toLocaleDateString('en-GB', opts);
+  const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'en';
+  return keyToDate(k).toLocaleDateString(lang === 'en' ? 'en-GB' : lang, opts);
 }
+
+export const SCHEMA_VERSION = 2;
+export const loadIssues = [];   // surfaced to the UI after boot (e.g. recovered from corrupt data)
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 
 function defaults() {
   return {
-    version: 1,
+    version: SCHEMA_VERSION,
     createdAt: Date.now(),
     onboarded: false,
     profile: {
@@ -81,12 +85,54 @@ let state = null;
 const listeners = new Set();
 
 export function load() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) state = deepMerge(defaults(), JSON.parse(raw));
-  } catch (e) { console.warn('load failed', e); }
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { loadIssues.push('storage-unavailable'); }
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if ((parsed.version || 1) < SCHEMA_VERSION) {
+        try { localStorage.setItem(KEY + '.backup', raw); } catch (e) {}
+      }
+      state = deepMerge(defaults(), migrate(parsed));
+    } catch (e) {
+      // Never throw away unreadable data: park it so it can be recovered later.
+      try { localStorage.setItem(`${KEY}.corrupt.${Date.now()}`, raw); } catch (err) {}
+      loadIssues.push('recovered-corrupt');
+    }
+  }
   if (!state) state = defaults();
+  state.version = SCHEMA_VERSION;
   return state;
+}
+
+// Step-by-step upgrades of saved data. Each step takes the previous shape and returns the next.
+const MIGRATIONS = {
+  // 1 → 2: guarantee list fields exist, drop malformed day entries, clean non-finite numbers.
+  1: (s) => {
+    for (const k of ['shopping', 'sxLog', 'walks', 'weights', 'favorites', 'pantry', 'savedTips', 'likedTips']) if (!Array.isArray(s[k])) s[k] = [];
+    s.pf = s.pf || {}; if (!Array.isArray(s.pf.sessions)) s.pf.sessions = []; if (!Array.isArray(s.pf.control)) s.pf.control = [];
+    const days = {};
+    for (const [k, d] of Object.entries(s.days || {})) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !d || typeof d !== 'object') continue;
+      d.meals = Array.isArray(d.meals) ? d.meals.filter((m) => m && typeof m === 'object') : [];
+      d.meals.forEach((m) => { m.kcal = Number.isFinite(+m.kcal) ? +m.kcal : 0; m.protein = Number.isFinite(+m.protein) ? +m.protein : 0; });
+      d.coffee = Array.isArray(d.coffee) ? d.coffee : [];
+      d.waterMl = Number.isFinite(+d.waterMl) ? Math.max(0, +d.waterMl) : 0;
+      d.checks = d.checks && typeof d.checks === 'object' ? d.checks : {};
+      d.sleep = d.sleep && typeof d.sleep === 'object' ? d.sleep : { bed: null, wake: null };
+      days[k] = d;
+    }
+    s.days = days;
+    s.weights = s.weights.filter((w) => w && Number.isFinite(+w.kg) && /^\d{4}-\d{2}-\d{2}$/.test(w.date)).map((w) => ({ date: w.date, kg: +w.kg }));
+    if (s.game) for (const k of ['xp', 'coins', 'freezes', 'bestStreak']) s.game[k] = Number.isFinite(+s.game[k]) ? Math.max(0, +s.game[k]) : 0;
+    s.version = 2;
+    return s;
+  },
+};
+export function migrate(s) {
+  let v = s.version || 1;
+  while (v < SCHEMA_VERSION && MIGRATIONS[v]) { s = MIGRATIONS[v](s); v = s.version; }
+  return s;
 }
 
 function deepMerge(base, over) {
@@ -103,10 +149,27 @@ function deepMerge(base, over) {
 let saveTimer = null;
 let persistHook = null;
 export function setPersistHook(fn) { persistHook = fn; }
+let quotaWarned = false;
 function write() {
-  const json = JSON.stringify(state);
-  try { localStorage.setItem(KEY, json); } catch (e) { console.warn('save failed', e); }
+  let json = JSON.stringify(state);
+  try { localStorage.setItem(KEY, json); }
+  catch (e) {
+    // Storage full: trim bulky per-day details older than a year, then retry once.
+    compact(365);
+    json = JSON.stringify(state);
+    try { localStorage.setItem(KEY, json); }
+    catch (err) { if (!quotaWarned) { quotaWarned = true; window.dispatchEvent(new CustomEvent('revive:storage-full')); } }
+  }
   if (persistHook) persistHook(json);
+}
+
+// Removes rebuildable detail (read-tip lists, XP logs, quest lists) from days older than `keepDays`.
+export function compact(keepDays) {
+  const cutoff = addDays(dayKey(), -keepDays);
+  for (const [k, d] of Object.entries(state.days)) {
+    if (k >= cutoff) continue;
+    delete d.readTips; delete d.xpLog; delete d.quests;
+  }
 }
 export function save() { if (state) state.editedAt = Date.now(); clearTimeout(saveTimer); saveTimer = setTimeout(write, 60); }
 export function saveNow() { if (state) state.editedAt = Date.now(); clearTimeout(saveTimer); write(); }

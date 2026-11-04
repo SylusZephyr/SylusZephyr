@@ -6,6 +6,8 @@ import * as Sh from './shared.js';
 import { TIPS, STORIES } from '../data/content.js';
 import { RECIPES, RECIPE } from '../data/recipes.js';
 import { suggest, planToday, art } from './cook.js';
+import * as Search from './search.js';
+import { t } from '../i18n.js';
 
 function dayPhase() {
   const h = new Date().getHours();
@@ -14,7 +16,7 @@ function dayPhase() {
 
 function greeting() {
   const h = new Date().getHours(); const n = S.get().profile.name;
-  const g = h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Late night';
+  const g = t(h < 5 ? 'greet.night' : h < 12 ? 'greet.morning' : h < 17 ? 'greet.afternoon' : h < 22 ? 'greet.evening' : 'greet.late');
   return n ? `${g}, ${UI.esc(n)}` : g;
 }
 
@@ -86,6 +88,7 @@ export function render(_, { night }) {
     <div class="row between" style="position:relative">
       <div><div class="sub">${S.prettyDate(k, { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>${greeting()}</h1></div>
       <div class="hud">
+        <button class="stat" data-search aria-label="Search"><span class="ico">🔍</span></button>
         <div class="stat" title="Streak"><span class="ico ${streak ? 'flame' : ''}">🔥</span><span data-count="${streak}">${streak}</span></div>
         <div class="stat" title="Coins"><span class="ico">🪙</span><span data-count="${st.game.coins}">${st.game.coins}</span></div>
       </div>
@@ -200,29 +203,38 @@ export function render(_, { night }) {
   `;
 }
 
-function feedHtml(k) {
+const FEED_PAGE = 6;
+let feedShown = FEED_PAGE;
+function feedItems(k) {
   const st = S.get(); const tips = shuffledTips(k);
-  const recs = [...RECIPES].sort(() => 0.5 - ((k.charCodeAt(9) * 7) % 10) / 10).slice(0, 4);
+  const recs = [...RECIPES].sort((a, b) => ((a.id.charCodeAt(0) * 31 + k.charCodeAt(9)) % 17) - ((b.id.charCodeAt(0) * 31 + k.charCodeAt(9)) % 17)).slice(0, 8);
   const items = [];
   tips.forEach((t, i) => {
+    const liked = st.likedTips.includes(t.id), saved = st.savedTips.includes(t.id);
     items.push(`<div class="tipcard" style="${UI.grad(t.bg)}" data-tip="${t.id}">
       <div class="row between"><span class="pill">${t.cat}</span></div>
       <div class="big mt8">${t.e}</div><h3>${UI.esc(t.title)}</h3><p>${UI.esc(t.body)}</p>
-      <div class="actions"><button data-like="${t.id}" class="${st.likedTips.includes(t.id) ? 'liked' : ''}">${st.likedTips.includes(t.id) ? UI.ICON.heartFill : UI.ICON.heart}</button>
-      <button data-save="${t.id}" class="${st.savedTips.includes(t.id) ? 'saved' : ''}">${st.savedTips.includes(t.id) ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div></div>`);
+      <div class="actions"><button data-like="${t.id}" class="${liked ? 'liked' : ''}" aria-pressed="${liked}">${liked ? UI.ICON.heartFill : UI.ICON.heart}</button>
+      <button data-save="${t.id}" class="${saved ? 'saved' : ''}" aria-pressed="${saved}">${saved ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div></div>`);
     if (i % 4 === 2 && recs.length) {
-      const r = recs.shift();
+      const r = recs.shift(); const a = art(r);
       items.push(`<a class="card" href="#cook/r/${r.id}" style="display:block;padding:0;color:inherit;text-decoration:none">
-        <div style="${UI.grad(r.bg)};height:150px;display:flex;align-items:center;justify-content:center;font-size:80px">${r.emoji}</div>
+        <div class="${a.cls}" style="${a.style};height:170px;display:flex;align-items:center;justify-content:center;font-size:80px;border-radius:var(--radius) var(--radius) 0 0">${a.emoji}</div>
         <div style="padding:14px"><div class="kicker">Recipe for you</div><h3>${UI.esc(r.name)}</h3><p class="muted small">${r.mins} min · ${r.kcal} kcal · ${r.protein} g protein · ¥${r.cost}</p></div></a>`);
     }
   });
-  return items.join('') + `<div class="empty"><span class="e">🎉</span>You’re all caught up. New cards tomorrow.</div>`;
+  return items;
+}
+function feedHtml(k) {
+  const items = feedItems(k);
+  return `<div id="feed">${items.slice(0, feedShown).join('')}</div>` +
+    (items.length > feedShown ? '<div id="feed-more" class="feed-loader" aria-hidden="true"><span></span><span></span><span></span></div>' : `<div class="empty"><span class="e">🎉</span>${t('feed.caughtUp')}</div>`);
 }
 
 export function bind(root, _, { rerender }) {
   const st = S.get(); const k = S.dayKey(); const d = S.day(k);
   root.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => { location.hash = b.dataset.go; }));
+  root.querySelector('[data-search]')?.addEventListener('click', () => Search.open());
   root.querySelectorAll('[data-ess]').forEach((b) => b.addEventListener('click', (ev) => {
     const id = b.dataset.ess; const on = !d.checks[id]; G.setEssential(id, on, ev); G.updateBestStreak(); G.evaluateQuests();
     b.classList.toggle('done', on); setTimeout(rerender, 350);
@@ -265,16 +277,19 @@ export function bind(root, _, { rerender }) {
     const slides = s.slides === 'dynamic' ? todayStory() : s.slides.map((x, i) => ({ ...x, bg: [['#1e1b4b', '#000'], ['#4c0519', '#000'], ['#14532d', '#000'], ['#0c4a6e', '#000'], ['#713f12', '#000']][i % 5] }));
     Sh.storyViewer(s, slides, () => { st.storiesSeen[s.id] = k; G.award(`story_${s.id}`, 5, null, { silent: true }); S.save(); rerender(); });
   }));
-  root.querySelectorAll('[data-like]').forEach((b) => b.addEventListener('click', () => {
-    const id = b.dataset.like; const i = st.likedTips.indexOf(id);
-    if (i >= 0) st.likedTips.splice(i, 1); else { st.likedTips.push(id); UI.haptic(10); }
-    S.save(); b.classList.toggle('liked'); b.innerHTML = (i >= 0 ? UI.ICON.heart : UI.ICON.heartFill);
-  }));
-  root.querySelectorAll('[data-save]').forEach((b) => b.addEventListener('click', () => {
-    const id = b.dataset.save; const i = st.savedTips.indexOf(id);
-    if (i >= 0) st.savedTips.splice(i, 1); else { st.savedTips.push(id); UI.toast('Saved to Me → Saved', '🔖'); }
-    S.save(); b.classList.toggle('saved'); b.innerHTML = (i >= 0 ? UI.ICON.bookmark : UI.ICON.bookmarkFill);
-  }));
+  // Feed: delegated like/save so cards added later work too
+  root.querySelector('#feed')?.addEventListener('click', (e) => {
+    const like = e.target.closest('[data-like]'); const save = e.target.closest('[data-save]');
+    if (like) {
+      const id = like.dataset.like; const i = st.likedTips.indexOf(id);
+      if (i >= 0) st.likedTips.splice(i, 1); else { st.likedTips.push(id); UI.haptic(10); }
+      S.save(); like.classList.toggle('liked', i < 0); like.setAttribute('aria-pressed', String(i < 0)); like.innerHTML = i >= 0 ? UI.ICON.heart : UI.ICON.heartFill;
+    } else if (save) {
+      const id = save.dataset.save; const i = st.savedTips.indexOf(id);
+      if (i >= 0) st.savedTips.splice(i, 1); else { st.savedTips.push(id); UI.toast('Saved to Me → Saved', '🔖'); }
+      S.save(); save.classList.toggle('saved', i < 0); save.setAttribute('aria-pressed', String(i < 0)); save.innerHTML = i >= 0 ? UI.ICON.bookmark : UI.ICON.bookmarkFill;
+    }
+  });
   // Count tips read as they scroll into view (feed engagement → quest).
   const io = new IntersectionObserver((entries) => entries.forEach((e) => {
     if (e.isIntersecting) {
@@ -283,4 +298,17 @@ export function bind(root, _, { rerender }) {
     }
   }), { threshold: 0.7 });
   root.querySelectorAll('[data-tip]').forEach((el) => io.observe(el));
+  // Infinite feed: append the next page when the loader nears the viewport.
+  const more = root.querySelector('#feed-more');
+  if (more) {
+    const loader = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      const items = feedItems(k); const feed = root.querySelector('#feed');
+      const next = items.slice(feedShown, feedShown + FEED_PAGE); feedShown += next.length;
+      const tmp = document.createElement('div'); tmp.innerHTML = next.join('');
+      [...tmp.children].forEach((c) => { c.classList.add('feed-in'); feed.appendChild(c); if (c.dataset.tip) io.observe(c); });
+      if (feedShown >= items.length) { loader.disconnect(); more.outerHTML = `<div class="empty"><span class="e">🎉</span>${t('feed.caughtUp')}</div>`; }
+    }, { rootMargin: '600px 0px' });
+    loader.observe(more);
+  }
 }

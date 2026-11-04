@@ -5,6 +5,7 @@ export const INGREDIENTS = [
   { id: 'eggs', name: 'Eggs', zh: '鸡蛋', e: '🥚', cat: 'Protein', price: 15, unit: '10 pcs' },
   { id: 'chicken_thigh', name: 'Chicken thighs (boneless)', zh: '清真去骨鸡腿肉', e: '🍗', cat: 'Protein', price: 25, unit: '500 g' },
   { id: 'chicken_breast', name: 'Chicken breast', zh: '清真鸡胸肉', e: '🐔', cat: 'Protein', price: 18, unit: '500 g' },
+  { id: 'chicken_mince', name: 'Chicken mince', zh: '清真鸡肉馅', e: '🍗', cat: 'Protein', price: 20, unit: '500 g' },
   { id: 'chicken_wings', name: 'Chicken wings', zh: '清真鸡翅中', e: '🍗', cat: 'Protein', price: 30, unit: '500 g' },
   { id: 'cooked_chicken', name: 'Ready-cooked chicken', zh: '即食鸡胸肉', e: '🥡', cat: 'Protein', price: 8, unit: '100 g pack' },
   { id: 'beef_mince', name: 'Beef mince', zh: '清真牛肉馅', e: '🥩', cat: 'Protein', price: 35, unit: '500 g' },
@@ -29,6 +30,7 @@ export const INGREDIENTS = [
   { id: 'tortilla', name: 'Tortilla wraps', zh: '墨西哥卷饼皮', e: '🌯', cat: 'Bread & staples', price: 15, unit: '8 pcs' },
   { id: 'naan', name: 'Uyghur naan (馕)', zh: '新疆馕', e: '🥯', cat: 'Bread & staples', price: 5, unit: 'piece' },
   { id: 'bread', name: 'Sandwich bread', zh: '吐司面包', e: '🍞', cat: 'Bread & staples', price: 10, unit: 'loaf' },
+  { id: 'pita', name: 'Pita / flatbread', zh: '皮塔饼 / 口袋饼', e: '🫓', cat: 'Bread & staples', price: 12, unit: '6 pcs' },
   { id: 'instant_rice', name: 'Self-heating / instant rice', zh: '自热米饭 / 即食米饭', e: '🍚', cat: 'Bread & staples', price: 6, unit: 'bowl' },
   { id: 'oats', name: 'Instant oats', zh: '即食燕麦片', e: '🌾', cat: 'Bread & staples', price: 15, unit: '1 kg' },
   { id: 'potato', name: 'Potatoes', zh: '土豆', e: '🥔', cat: 'Bread & staples', price: 4, unit: '1 kg' },
@@ -52,6 +54,10 @@ export const INGREDIENTS = [
   { id: 'lemon', name: 'Lemon', zh: '柠檬', e: '🍋', cat: 'Fruit & veg', price: 3, unit: 'piece' },
   { id: 'corn', name: 'Sweet corn', zh: '玉米 / 玉米粒', e: '🌽', cat: 'Fruit & veg', price: 5, unit: 'can/cob' },
   { id: 'mango', name: 'Mango (fresh or frozen)', zh: '芒果 / 冷冻芒果块', e: '🥭', cat: 'Fruit & veg', price: 15, unit: '500 g' },
+  { id: 'spinach', name: 'Spinach (fresh/frozen)', zh: '菠菜', e: '🥬', cat: 'Fruit & veg', price: 5, unit: '300 g' },
+  { id: 'cauliflower', name: 'Cauliflower', zh: '花菜 / 菜花', e: '🥦', cat: 'Fruit & veg', price: 6, unit: 'head' },
+  { id: 'herbs', name: 'Coriander & mint', zh: '香菜 / 薄荷', e: '🌿', cat: 'Fruit & veg', price: 3, unit: 'bunch' },
+  { id: 'cabbage', name: 'Cabbage / slaw mix', zh: '卷心菜', e: '🥬', cat: 'Fruit & veg', price: 4, unit: 'head' },
   { id: 'mushroom', name: 'Mushrooms', zh: '蘑菇', e: '🍄', cat: 'Fruit & veg', price: 6, unit: '250 g' },
 
   // Pantry & flavour

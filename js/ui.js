@@ -72,6 +72,18 @@ function pumpToasts() {
     setTimeout(() => { el.remove(); toastActive--; pumpToasts(); }, 2700);
   }
 }
+// A toast with an Undo button. Calls onUndo if tapped within `ms`.
+export function undoToast(msg, onUndo, ms = 5000) {
+  const root = $('#toast-root'); if (!root) return;
+  const el = document.createElement('div'); el.className = 'toast undo';
+  el.innerHTML = `<span>${esc(msg)}</span><button class="undo-btn" type="button">Undo</button>`;
+  root.appendChild(el);
+  let done = false;
+  const finish = () => { if (!done) { done = true; el.remove(); } };
+  el.querySelector('.undo-btn').addEventListener('click', () => { if (done) return; onUndo(); finish(); });
+  setTimeout(finish, ms);
+}
+
 export function xpPop(amount, x, y) {
   const el = document.createElement('div'); el.className = 'xp-pop';
   el.textContent = `+${amount} XP`;

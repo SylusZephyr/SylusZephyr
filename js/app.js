@@ -12,9 +12,12 @@ import * as Onboard from './views/onboard.js';
 import * as Native from './native.js';
 import { reminderList } from './ics.js';
 import * as Cloud from './cloud.js';
+import * as A11y from './a11y.js';
+import { t, locale, dir } from './i18n.js';
 import { applyRemoteContent } from './content.js';
 
 await Native.restoreStorage();
+document.documentElement.lang = locale; document.documentElement.dir = dir;
 S.load();
 S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
@@ -23,11 +26,11 @@ window.addEventListener('revive:content', () => { if (applyRemoteContent()) rend
 window.addEventListener('revive:remote-update', () => { if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
 
 const TABS = [
-  { id: 'today', label: 'Today', icon: UI.ICON.home, view: Today },
-  { id: 'cook', label: 'Cook', icon: UI.ICON.cook, view: Cook },
-  { id: 'train', label: 'Train', icon: UI.ICON.train, view: Train },
-  { id: 'track', label: 'Track', icon: UI.ICON.track, view: Track },
-  { id: 'me', label: 'Me', icon: UI.ICON.me, view: Me },
+  { id: 'today', label: t('tab.today'), icon: UI.ICON.home, view: Today },
+  { id: 'cook', label: t('tab.cook'), icon: UI.ICON.cook, view: Cook },
+  { id: 'train', label: t('tab.train'), icon: UI.ICON.train, view: Train },
+  { id: 'track', label: t('tab.track'), icon: UI.ICON.track, view: Track },
+  { id: 'me', label: t('tab.me'), icon: UI.ICON.me, view: Me },
 ];
 
 export function route() {
@@ -46,11 +49,18 @@ export function render({ keepScroll = false } = {}) {
   const y = window.scrollY;
   const nightMode = inWindDown();
   document.body.classList.toggle('night', nightMode);
-  app.innerHTML = `<main class="screen" id="screen">${tab.view.render(r.parts, { night: nightMode })}</main>
+  let body;
+  try { body = tab.view.render(r.parts, { night: nightMode }); }
+  catch (e) { logError(e, 'render:' + r.tab); body = crashCard(); }
+  app.innerHTML = `<main class="screen" id="screen">${body}</main>
     <nav class="tabbar"><div class="brand"><span>🔥</span>Revive</div>${TABS.map((t, i) => `<a class="tab ${t.id === r.tab ? 'active' : ''}" href="#${t.id}" aria-label="${t.label}">${t.icon}<span>${t.label}</span>${IS_DESKTOP ? `<kbd>${i + 1}</kbd>` : ''}</a>`).join('')}${IS_DESKTOP ? '<div class="side-foot">Private · stored only on this PC<br>Keys: 1–5 tabs · Esc closes</div>' : ''}</nav>`;
-  tab.view.bind && tab.view.bind(UI.$('#screen'), r.parts, { rerender: () => render({ keepScroll: true }) });
+  try { tab.view.bind && tab.view.bind(UI.$('#screen'), r.parts, { rerender: () => render({ keepScroll: true }) }); }
+  catch (e) { logError(e, 'bind:' + r.tab); }
+  UI.$('#screen [data-crash-home]')?.addEventListener('click', () => { location.hash = 'today'; render(); });
+  UI.$('#screen [data-crash-reload]')?.addEventListener('click', () => location.reload());
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
   countUp();
+  document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
 }
 
 // Numbers that changed since the last render roll up to their new value.
@@ -83,6 +93,30 @@ function closePastDays() {
   for (let i = 1; i <= 7; i++) { const k = S.addDays(S.dayKey(), -i); if (st.days[k] && !st.closedDays[k]) { closeDay(k); st.closedDays[k] = true; } }
   S.save();
 }
+
+// ---------- Error safety net ----------
+// Errors are kept in a small local ring buffer (never uploaded) and the UI degrades to a
+// recoverable card instead of a blank screen.
+const ERR_KEY = 'revive.errors';
+function logError(err, where = 'global') {
+  try {
+    const list = JSON.parse(localStorage.getItem(ERR_KEY) || '[]');
+    list.push({ at: new Date().toISOString(), where, msg: String(err?.message || err).slice(0, 300), stack: String(err?.stack || '').slice(0, 800) });
+    localStorage.setItem(ERR_KEY, JSON.stringify(list.slice(-20)));
+  } catch (e) {}
+  console.error(where, err);
+}
+function crashCard() {
+  return `<div class="card danger" style="margin-top:40px;text-align:center"><div style="font-size:42px">🛠️</div><h3 class="mt8">${t('error.screen')}</h3>
+    <p class="muted small mt8">${t('error.safe')}</p>
+    <div class="grid2 mt16"><button class="btn" data-crash-home>Back to Today</button><button class="btn primary" data-crash-reload>Reload</button></div></div>`;
+}
+let errorToastShown = false;
+window.addEventListener('error', (e) => { logError(e.error || e.message, 'window'); if (!errorToastShown) { errorToastShown = true; UI.toast('Something went wrong — your data is safe', '🛠️'); } });
+window.addEventListener('unhandledrejection', (e) => logError(e.reason, 'promise'));
+window.addEventListener('revive:storage-full', () => UI.toast('Phone storage is almost full — older details were trimmed', '💾'));
+if (S.loadIssues.includes('recovered-corrupt')) setTimeout(() => UI.toast('Saved data could not be read. A copy was kept and the app started fresh.', '⚠️'), 800);
+if (S.loadIssues.includes('storage-unavailable')) setTimeout(() => UI.toast('Private browsing blocks storage — progress will not be saved', '⚠️'), 800);
 
 // Re-render when the day rolls over or the app comes back to foreground.
 let lastDay = S.dayKey();
@@ -126,6 +160,7 @@ setInterval(() => { if (document.visibilityState === 'visible' && S.dayKey() !==
 const IS_DESKTOP = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
 document.addEventListener('keydown', (e) => {
   const tag = (e.target.tagName || '').toLowerCase();
+  if (e.key === 'k' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); import('./views/search.js').then((m) => m.open()); return; }
   if (['input', 'textarea', 'select'].includes(tag) || e.ctrlKey || e.metaKey || e.altKey) return;
   const lock = document.querySelector('.lock .keypad');
   if (lock) {
@@ -135,6 +170,7 @@ document.addEventListener('keydown', (e) => {
   }
   const pinSheet = document.querySelector('.sheet .keypad');
   if (pinSheet) { if (/^[0-9]$/.test(e.key)) pinSheet.querySelector(`[data-k="${e.key}"]`)?.click(); if (e.key === 'Backspace') pinSheet.querySelector('[data-del]')?.click(); }
+  if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !document.querySelector('.sheet'))) { e.preventDefault(); import('./views/search.js').then((m) => m.open()); return; }
   if (e.key === 'Escape') {
     const fs = document.querySelector('.celebrate [data-close], .story-viewer [data-x], .cookmode [data-x], .trainer [data-x]');
     if (fs) fs.click(); else UI.closeAllSheets();
@@ -142,6 +178,25 @@ document.addEventListener('keydown', (e) => {
   }
   if (!document.querySelector('#overlay-root > *') && /^[1-5]$/.test(e.key)) location.hash = TABS[+e.key - 1].id;
 });
+
+// Photos fade in once decoded (capture phase catches load events from any image).
+document.addEventListener('load', (e) => { if (e.target.classList?.contains('ph')) e.target.classList.add('loaded'); }, true);
+
+// Phones: swipe left/right on the page to move between tabs.
+let swipe = null;
+document.addEventListener('touchstart', (e) => {
+  const t = e.touches[0]; const el = e.target;
+  if (e.touches.length > 1 || document.querySelector('#overlay-root > *') || el.closest('input, textarea, select, .stories, .chips.scroll, .seg, .scale, .heat, .tabbar, .keypad')) { swipe = null; return; }
+  swipe = { x: t.clientX, y: t.clientY, t: Date.now() };
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (!swipe) return; const t = e.changedTouches[0];
+  const dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, dt = Date.now() - swipe.t; swipe = null;
+  if (dt > 600 || Math.abs(dx) < 90 || Math.abs(dy) > 50) return;
+  const r = route(); if (r.parts.length) return; // only between top-level tabs
+  const i = TABS.findIndex((x) => x.id === r.tab); const next = TABS[i + (dx < 0 ? 1 : -1)];
+  if (next) { UI.haptic(6); location.hash = next.id; }
+}, { passive: true });
 
 // PC/Android install prompt (Edge/Chrome): keep the event so "Install" can trigger it.
 let deferredInstall = null;
@@ -177,6 +232,7 @@ function boot() {
   });
   S.requestPersist();
   Cloud.init();
+  A11y.start();
   if (Native.isNative) {
     Native.onNotificationTap((route) => { location.hash = route; });
     syncReminders();
