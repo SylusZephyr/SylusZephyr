@@ -5,7 +5,12 @@ import * as P from '../plan.js';
 import * as Sh from './shared.js';
 import { TIPS, STORIES } from '../data/content.js';
 import { RECIPES, RECIPE } from '../data/recipes.js';
-import { suggest, planToday } from './cook.js';
+import { suggest, planToday, art } from './cook.js';
+
+function dayPhase() {
+  const h = new Date().getHours();
+  return h < 5 ? 'night' : h < 11 ? 'morning' : h < 17 ? 'day' : h < 21 ? 'evening' : 'night';
+}
 
 function greeting() {
   const h = new Date().getHours(); const n = S.get().profile.name;
@@ -76,18 +81,21 @@ export function render(_, { night }) {
   const seen = st.storiesSeen || {};
 
   return `
-  <div class="topbar">
-    <div class="grow"><div class="sub">${S.prettyDate(k, { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1 style="font-size:26px">${greeting()}</h1></div>
-    <div class="hud">
-      <div class="stat" title="Streak"><span class="ico ${streak ? 'flame' : ''}">🔥</span>${streak}</div>
-      <div class="stat" title="Coins"><span class="ico">🪙</span>${st.game.coins}</div>
+  <section class="hero-today ${dayPhase()}">
+    <div class="hero-sky"></div>
+    <div class="row between" style="position:relative">
+      <div><div class="sub">${S.prettyDate(k, { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>${greeting()}</h1></div>
+      <div class="hud">
+        <div class="stat" title="Streak"><span class="ico ${streak ? 'flame' : ''}">🔥</span><span data-count="${streak}">${streak}</span></div>
+        <div class="stat" title="Coins"><span class="ico">🪙</span><span data-count="${st.game.coins}">${st.game.coins}</span></div>
+      </div>
     </div>
-  </div>
-  <button class="card tight" data-go="me" style="width:100%;text-align:left">
-    <div class="row between small"><b>Lv ${lv.level} · ${lv.title}</b><span class="muted">${lv.into}/${lv.need} XP</span></div>
-    <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
-    <div class="row between tiny muted mt8"><span>❄️ ${st.game.freezes} freeze${st.game.freezes === 1 ? '' : 's'}</span><span>Today +${d.xpToday || 0} XP</span><span>Best 🔥 ${st.game.bestStreak}</span></div>
-  </button>
+    <button class="hero-level" data-go="me">
+      <div class="row between small"><b>Level ${lv.level} · ${lv.title}</b><span>${lv.into}/${lv.need} XP</span></div>
+      <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
+      <div class="row between tiny mt8" style="opacity:.8"><span>❄️ ${st.game.freezes} freeze${st.game.freezes === 1 ? '' : 's'}</span><span>Today +${d.xpToday || 0} XP</span><span>Best 🔥 ${st.game.bestStreak}</span></div>
+    </button>
+  </section>
 
   ${window.__canInstall ? `<a class="nudge blue" href="#me/install"><span class="n-e">🖥️</span><div class="grow"><b>Install Revive on this PC</b><span>Own window, Start menu icon, works offline.</span></div></a>` : ''}
   ${installHint() ? `<a class="nudge blue" href="#me/install"><span class="n-e">📲</span><div class="grow"><b>Install Revive on your Home Screen</b><span>Safari → Share → Add to Home Screen. Works offline and keeps your data in one place.</span></div></a>` : ''}
@@ -137,7 +145,7 @@ export function render(_, { night }) {
       <div class="small muted">${tot.kcal} / ${tg.kcal} kcal · ${tot.protein} / ${tg.protein} g protein</div></div>
       <button class="btn sm primary" data-logmeal>+ Log</button></div>
     <div class="lvlbar mt8"><i style="width:${Math.min(100, Math.round(tot.kcal / tg.kcal * 100))}%;background:var(--grad-green)"></i></div>
-    <div class="mt12">${sug.map(({ r, have, total }) => `<a class="rwide" href="#cook/r/${r.id}"><div class="thumb" style="${UI.grad(r.bg)}">${r.emoji}</div>
+    <div class="mt12">${sug.map(({ r, have, total }) => `<a class="rwide" href="#cook/r/${r.id}"><div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div>
       <div class="grow"><div style="font-weight:700" class="ellipsis">${planned && planned.id === r.id ? '📅 ' : ''}${UI.esc(r.name)}</div><div class="muted small">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div>
       <div class="match" style="color:${have === total ? 'var(--green)' : 'var(--amber)'}">${have === total ? 'You have everything ✓' : `Have ${have}/${total} ingredients`}</div></div></a>`).join('')}</div>
     <a class="btn block sm" href="#cook/delivery">😮‍💨 Too tired? Halal delivery ideas</a>

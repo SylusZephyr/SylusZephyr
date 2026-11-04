@@ -6,6 +6,7 @@ import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
 import { CHECKINS, scoreCheckin, CRISIS } from '../data/content.js';
 import { currentSlot, SLOT_LABEL, SLOT_EMOJI } from '../plan.js';
 import { searchLocal, searchOnline, forPortion } from '../nutrition.js';
+import { art } from './cook.js';
 
 const QUICK = [
   { name: 'Light snack', kcal: 200, protein: 5, e: '🍪' },
@@ -36,7 +37,7 @@ export function mealSheet(onDone, preset = {}) {
     <div class="kicker mt16">Quick size</div>
     <div class="grid2">${QUICK.map((q, i) => `<button class="btn" data-quick="${i}" style="justify-content:flex-start">${q.e} ${q.name}<span class="muted small" style="margin-left:auto">${q.kcal}</span></button>`).join('')}</div>
     <div class="kicker mt16">Your go-tos</div>
-    ${picks.map((r) => `<button class="rwide" data-rec="${r.id}"><div class="thumb" style="${UI.grad(r.bg)}">${r.emoji}</div><div class="grow"><div style="font-weight:700">${UI.esc(r.name)}</div><div class="muted small">${r.kcal} kcal · ${r.protein} g protein</div></div><span class="pill amber">+XP</span></button>`).join('')}
+    ${picks.map((r) => `<button class="rwide" data-rec="${r.id}"><div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div><div class="grow"><div style="font-weight:700">${UI.esc(r.name)}</div><div class="muted small">${r.kcal} kcal · ${r.protein} g protein</div></div><span class="pill amber">+XP</span></button>`).join('')}
     <div class="kicker mt16">Delivery (Meituan 清真)</div>
     <div class="chips">${DELIVERY.map((d) => `<button class="chip" data-del="${d.id}">${d.emoji} ${UI.esc(d.name)}</button>`).join('')}</div>
     <div class="kicker mt16">Something else</div>

@@ -6,6 +6,8 @@ import * as Lock from '../lock.js';
 import * as ICS from '../ics.js';
 import * as Native from '../native.js';
 import * as Cloud from '../cloud.js';
+import { PHOTOS } from '../data/photos.js';
+import { RECIPE, DELIVERY } from '../data/recipes.js';
 import { TIPS, RED_FLAGS, CRISIS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
 import { pfWeek } from './train.js';
 
@@ -29,6 +31,7 @@ export function render(parts) {
   if (sub === 'settings') return settings();
   if (sub === 'install') return install();
   if (sub === 'account') return account();
+  if (sub === 'credits') return credits();
   return main();
 }
 
@@ -67,6 +70,13 @@ function account() {
     ${st.error ? `<div class="notice" style="color:var(--coral)">${UI.esc(st.error)}</div>` : ''}
     <div class="notice">Changes sync automatically within a few seconds. Your app lock and PIN stay on each device and are never uploaded.</div>
     <button class="btn ghost danger block mt16 small" data-delacct>Delete my account and cloud data</button>`;
+}
+
+function credits() {
+  const rows = Object.entries(PHOTOS).map(([id, p]) => ({ name: RECIPE[id]?.name || DELIVERY.find((d) => d.id === id)?.name || id, ...p }));
+  return `<div class="topbar">${back('me/settings')}<div class="grow"><h1 style="font-size:24px">Photo credits</h1><div class="sub">Free-licence photos from Wikimedia Commons</div></div></div>
+  <div class="card tight">${rows.length ? rows.map((r) => `<div class="list-item"><div class="li-ico" style="background:url('${r.src}') center/cover"></div><div class="grow" style="min-width:0"><b>${UI.esc(r.name)}</b><div class="muted small">${UI.esc(r.credit)}</div><a class="tiny" href="${UI.esc(r.page)}" target="_blank" rel="noopener">Source</a>${r.licence_url ? ` · <a class="tiny" href="${UI.esc(r.licence_url)}" target="_blank" rel="noopener">Licence</a>` : ''}</div></div>`).join('') : '<div class="empty small">No photos bundled.</div>'}</div>
+  <p class="tiny faint">Photos were resized and cropped to fit. Illustrated cards are original artwork.</p>`;
 }
 
 const back = (to = 'me') => `<a class="icon-btn" href="#${to}">${UI.ICON.back}</a>`;
@@ -222,7 +232,9 @@ function settings() {
   <div class="notice">All data is stored only in this browser on this iPhone. Nothing is uploaded. If you delete Safari website data or the Home Screen app, your data is gone. You chose no backups; a manual export is here just in case.</div>
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
-  <p class="tiny faint mt16" style="text-align:center">Revive v1 · made for you · not medical advice</p>`;
+  <a class="list-item mt12" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
+  <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
+  <p class="tiny faint mt16" style="text-align:center">Revive 1.0 · not medical advice</p>`;
 }
 
 function install() {

@@ -10,6 +10,8 @@ on:
         default: false
   push:
     tags: ['v*']
+  pull_request:
+    branches: [main]
 
 env:
   NODE_VERSION: '22'
@@ -73,6 +75,14 @@ jobs:
           fi
           npm run prepare-web
           npx electron-builder --win $TARGETS --x64 --publish never $EXTRA
+      - name: Verify installer on Windows
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem desktop/dist/Revive-Setup-*.exe | Select-Object -First 1
+          Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs\Revive\Revive.exe'
+          if (-not (Test-Path $exe)) { Write-Error "Revive.exe not installed"; exit 1 }
+          Write-Output "Installed: $exe"
       - uses: actions/upload-artifact@v4
         with:
           name: revive-windows

@@ -2,7 +2,7 @@
   "name": "revive-desktop",
   "productName": "Revive",
   "version": "1.0.0",
-  "description": "Revive — private recovery companion",
+  "description": "Revive \u2014 private recovery companion",
   "author": "Wajid Kanwar Abdul",
   "license": "UNLICENSED",
   "private": true,
@@ -17,7 +17,7 @@
   "build": {
     "appId": "com.syluszephyr.revive",
     "productName": "Revive",
-    "copyright": "© Wajid Kanwar Abdul",
+    "copyright": "\u00a9 Wajid Kanwar Abdul",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -64,7 +64,8 @@
       "languages": [
         "en-US"
       ]
-    }
+    },
+    "publish": null
   },
   "devDependencies": {
     "electron": "^45.2.2",

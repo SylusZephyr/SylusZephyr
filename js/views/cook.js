@@ -5,6 +5,7 @@ import * as P from '../plan.js';
 import * as Sh from './shared.js';
 import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
 import { INGREDIENTS, ING, ING_CATS } from '../data/ingredients.js';
+import { PHOTOS } from '../data/photos.js';
 
 const filt = { feel: null, mins: null, budget: null, slot: null, q: '', cat: 'all' };
 
@@ -39,9 +40,15 @@ export function suggest({ slot, feel, mins, budget } = {}) {
 
 const methodPill = (m) => m === 'airfryer' ? '<span class="pill amber method">♨️ Air fryer</span>' : '<span class="pill green method">🥄 No-cook</span>';
 
+// Photo if we have one, otherwise the illustrated gradient + emoji.
+export function art(r) {
+  const p = PHOTOS[r.id];
+  return p ? { cls: 'has-photo', style: `background:#1c2438 url('${p.src}') center/cover no-repeat`, emoji: '' } : { cls: '', style: UI.grad(r.bg), emoji: r.emoji };
+}
+
 function recipeCard(r) {
-  const fav = S.get().favorites.includes(r.id);
-  return `<a class="rcard" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero" style="${UI.grad(r.bg)}">${r.emoji}${fav ? '<span class="fav">❤️</span>' : ''}${methodPill(r.method)}</div>
+  const fav = S.get().favorites.includes(r.id); const a = art(r);
+  return `<a class="rcard" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? '<span class="fav">❤️</span>' : ''}${methodPill(r.method)}</div>
     <div class="body"><div class="name">${UI.esc(r.name)}</div><div class="meta">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div></div></a>`;
 }
 
@@ -77,7 +84,7 @@ function main() {
     <div class="field"><label>I feel…</label><div class="chips scroll">${FEELS.map((f) => `<button class="chip ${filt.feel === f.id ? 'on' : ''}" data-feel="${f.id}">${f.e} ${f.l}</button>`).join('')}</div></div>
     <div class="field"><label>Time & budget</label><div class="chips scroll">${TIMES.map((t) => `<button class="chip ${filt.mins === t.v ? 'on' : ''}" data-mins="${t.v}">⏱ ${t.l}</button>`).join('')}${BUDGETS.map((t) => `<button class="chip ${filt.budget === t.v ? 'on' : ''}" data-budget="${t.v}">💴 ${t.l}</button>`).join('')}</div></div>
     <div class="mt16">${sug.map(({ r, have, total, missing }, i) => `<a class="rwide" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none">
-      <div class="thumb" style="${UI.grad(r.bg)}">${r.emoji}</div>
+      <div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div>
       <div class="grow"><div class="row between"><b class="ellipsis">${i === 0 ? '⭐ ' : ''}${UI.esc(r.name)}</b></div>
       <div class="muted small">${r.mins} min · ${r.kcal} kcal · ${r.protein} g P · ¥${r.cost}</div>
       <div class="match" style="color:${have === total ? 'var(--green)' : 'var(--amber)'}">${have === total ? 'Ready to make ✓' : `Missing: ${missing.map((m) => ING[m.id]?.name.split(' (')[0]).slice(0, 2).join(', ')}${missing.length > 2 ? '…' : ''}`}</div></div></a>`).join('')}</div>
@@ -99,7 +106,8 @@ function detail(r) {
   const missing = r.ing.filter((i) => !i.opt && !pantry.has(i.id));
   const cookedN = st.cooked[r.id] || 0;
   return `
-  <div class="hero-lg" style="${UI.grad(r.bg)}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav>${fav ? '❤️' : '🤍'}</button>${r.emoji}</div>
+  <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav>${fav ? '❤️' : '🤍'}</button>${art(r).emoji}</div>
+  ${PHOTOS[r.id] ? `<div class="photo-credit">Photo: ${UI.esc(PHOTOS[r.id].credit)}</div>` : ''}
   <div class="row wrap mb8" style="gap:6px">${methodPill(r.method)}${r.tags.map((t) => `<span class="pill">${t}</span>`).join('')}${cookedN ? `<span class="pill green">Cooked ${cookedN}×</span>` : ''}</div>
   <h1 style="font-size:28px">${UI.esc(r.name)}</h1>
   <p class="muted mt8">${UI.esc(r.desc)}</p>
@@ -132,7 +140,7 @@ function pantryView() {
 function deliveryView() {
   return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Halal delivery</h1><div class="sub">Meituan 美团 · Ele.me 饿了么</div></div></div>
   <div class="notice mb12">Search <b>清真</b> in the app and sort by rating. Ask for <b>少盐</b> (less salt) and <b>加蛋 / 加肉</b> (extra egg / meat) for protein. Ordering still counts — eating something is the win.</div>
-  ${DELIVERY.map((d) => `<div class="card tight"><div class="row"><div class="rwide" style="border:0;padding:0;margin:0;background:none"><div class="thumb" style="background:var(--surface2)">${d.emoji}</div></div>
+  ${DELIVERY.map((d) => `<div class="card tight"><div class="row"><div class="rwide" style="border:0;padding:0;margin:0;background:none"><div class="thumb ${PHOTOS[d.id] ? 'has-photo' : ''}" style="${PHOTOS[d.id] ? `background:url('${PHOTOS[d.id].src}') center/cover` : 'background:var(--surface2)'}">${PHOTOS[d.id] ? '' : d.emoji}</div></div>
     <div class="grow"><b>${UI.esc(d.name)}</b><div class="small" style="color:var(--amber)">${UI.esc(d.zh)}</div><div class="muted small">~¥${d.cost} · ${d.kcal} kcal · ${d.protein} g protein</div></div></div>
     <p class="small muted mt8">💡 ${UI.esc(d.tip)}</p>
     <div class="grid2 mt8"><button class="btn sm" data-copy="${UI.esc(d.zh)}">📋 Copy search</button><button class="btn sm primary" data-ate-del="${d.id}">✅ I ate this</button></div></div>`).join('')}`;

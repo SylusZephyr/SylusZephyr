@@ -50,6 +50,20 @@ export function render({ keepScroll = false } = {}) {
     <nav class="tabbar"><div class="brand"><span>🔥</span>Revive</div>${TABS.map((t, i) => `<a class="tab ${t.id === r.tab ? 'active' : ''}" href="#${t.id}" aria-label="${t.label}">${t.icon}<span>${t.label}</span>${IS_DESKTOP ? `<kbd>${i + 1}</kbd>` : ''}</a>`).join('')}${IS_DESKTOP ? '<div class="side-foot">Private · stored only on this PC<br>Keys: 1–5 tabs · Esc closes</div>' : ''}</nav>`;
   tab.view.bind && tab.view.bind(UI.$('#screen'), r.parts, { rerender: () => render({ keepScroll: true }) });
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
+  countUp();
+}
+
+// Numbers that changed since the last render roll up to their new value.
+const lastCounts = {};
+function countUp() {
+  document.querySelectorAll('[data-count]').forEach((el, i) => {
+    const key = (el.closest('[title]')?.title || '') + i; const to = +el.dataset.count; const from = lastCounts[key];
+    lastCounts[key] = to;
+    if (from == null || from === to || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const t0 = performance.now(), dur = 600;
+    const step = (t) => { const p = Math.min(1, (t - t0) / dur); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
 }
 
 window.addEventListener('scroll', () => { lastScroll[location.hash] = window.scrollY; }, { passive: true });
