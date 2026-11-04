@@ -177,7 +177,7 @@ function boot() {
       else Native.exitApp();
     });
   }
-  if (!Native.isNative && 'serviceWorker' in navigator && location.protocol !== 'file:') {
+  if (!Native.isNative && !window.reviveDesktop && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register('sw.js').then((reg) => {
       reg.addEventListener('updatefound', () => {
         const nw = reg.installing; if (!nw) return;

@@ -1,0 +1,73 @@
+{
+  "name": "revive-desktop",
+  "productName": "Revive",
+  "version": "1.0.0",
+  "description": "Revive — private recovery companion",
+  "author": "Wajid Kanwar Abdul",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "prepare-web": "node ../scripts/build-web.mjs && node -e \"require('fs').cpSync('../www','www',{recursive:true})\"",
+    "start": "npm run prepare-web && electron .",
+    "dist:win": "npm run prepare-web && electron-builder --win nsis --x64",
+    "dist:store": "npm run prepare-web && electron-builder --win appx --x64",
+    "dist:all": "npm run prepare-web && electron-builder --win nsis appx --x64"
+  },
+  "build": {
+    "appId": "com.syluszephyr.revive",
+    "productName": "Revive",
+    "copyright": "© Wajid Kanwar Abdul",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "www/**/*",
+      "build/icon.png"
+    ],
+    "protocols": [
+      {
+        "name": "Revive",
+        "schemes": [
+          "revive"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Revive-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Revive",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "appx": {
+      "displayName": "Revive",
+      "publisherDisplayName": "Wajid Kanwar Abdul",
+      "identityName": "REPLACE_WITH_PARTNER_CENTER_IDENTITY_NAME",
+      "publisher": "CN=REPLACE_WITH_PARTNER_CENTER_PUBLISHER_ID",
+      "applicationId": "Revive",
+      "backgroundColor": "#0b0f1a",
+      "languages": [
+        "en-US"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.2.2",
+    "electron-builder": "^26.18.0"
+  }
+}

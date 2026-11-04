@@ -438,3 +438,11 @@ a.link { text-decoration: none; }
   .recipe-grid { grid-template-columns: repeat(5, 1fr); }
 }
 @media (min-width: 900px) { .screen.onboard { margin-left: auto; margin-right: auto; max-width: 560px; } }
+/* Desktop scrollbars */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 10px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+  html { scrollbar-color: rgba(255,255,255,0.12) transparent; scrollbar-width: thin; }
+}

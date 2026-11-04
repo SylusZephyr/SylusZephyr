@@ -5,6 +5,7 @@ import * as G from '../gamify.js';
 import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
 import { CHECKINS, scoreCheckin, CRISIS } from '../data/content.js';
 import { currentSlot, SLOT_LABEL, SLOT_EMOJI } from '../plan.js';
+import { searchLocal, searchOnline, forPortion } from '../nutrition.js';
 
 const QUICK = [
   { name: 'Light snack', kcal: 200, protein: 5, e: '🍪' },
@@ -29,6 +30,9 @@ export function mealSheet(onDone, preset = {}) {
   const picks = [...new Set([...favs, ...recent, 'egg_paratha', 'chicken_cheese_wrap', 'airfryer_chicken_curry', 'shaker_smoothie'])].slice(0, 10).map((id) => RECIPE[id]).filter(Boolean);
   const html = () => `<h2>Log a meal</h2>
     <div class="seg mt8" id="slotseg">${Object.keys(SLOT_LABEL).map((s) => `<button data-slot="${s}" class="${s === slot ? 'on' : ''}">${SLOT_EMOJI[s]} ${SLOT_LABEL[s].split(' ')[0]}</button>`).join('')}</div>
+    <div class="field"><input id="food-q" type="search" placeholder="🔍 Search any food — naan, 鸡蛋, Snickers…" autocomplete="off"></div>
+    <div id="food-res"></div>
+    <div id="meal-rest">
     <div class="kicker mt16">Quick size</div>
     <div class="grid2">${QUICK.map((q, i) => `<button class="btn" data-quick="${i}" style="justify-content:flex-start">${q.e} ${q.name}<span class="muted small" style="margin-left:auto">${q.kcal}</span></button>`).join('')}</div>
     <div class="kicker mt16">Your go-tos</div>
@@ -37,7 +41,7 @@ export function mealSheet(onDone, preset = {}) {
     <div class="chips">${DELIVERY.map((d) => `<button class="chip" data-del="${d.id}">${d.emoji} ${UI.esc(d.name)}</button>`).join('')}</div>
     <div class="kicker mt16">Something else</div>
     <div class="row"><input id="cust-name" placeholder="e.g. Lamb samsa ×2" class="grow"><input id="cust-kcal" type="number" inputmode="numeric" placeholder="kcal" style="width:90px"></div>
-    <button class="btn block mt8" id="cust-add">Add custom</button>`;
+    <button class="btn block mt8" id="cust-add">Add custom</button></div>`;
   UI.openSheet(html(), {
     onMount: (sh, close) => {
       const wire = () => {
@@ -46,6 +50,38 @@ export function mealSheet(onDone, preset = {}) {
         sh.querySelectorAll('[data-quick]').forEach((b) => b.onclick = (ev) => { const q = QUICK[b.dataset.quick]; finish({ name: q.name, kcal: q.kcal, protein: q.protein }, ev); });
         sh.querySelectorAll('[data-rec]').forEach((b) => b.onclick = (ev) => { const r = RECIPE[b.dataset.rec]; finish({ name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein }, ev); });
         sh.querySelectorAll('[data-del]').forEach((b) => b.onclick = (ev) => { const r = DELIVERY.find((x) => x.id === b.dataset.del); finish({ name: r.name, delivery: true, kcal: r.kcal, protein: r.protein }, ev); });
+        // Food search
+        const q = sh.querySelector('#food-q'), res = sh.querySelector('#food-res'), rest = sh.querySelector('#meal-rest');
+        let found = [], timer = null, seq = 0;
+        const row = (f, i) => `<button class="rwide" data-food="${i}"><div class="thumb" style="background:var(--surface2);width:48px;height:48px;font-size:24px">${f.image ? `<img src="${UI.esc(f.image)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px" loading="lazy" referrerpolicy="no-referrer">` : f.e}</div>
+          <div class="grow" style="min-width:0"><div class="ellipsis" style="font-weight:700">${UI.esc(f.name)}</div><div class="muted small ellipsis">${f.brand ? UI.esc(f.brand) + ' · ' : ''}${forPortion(f, f.portionG).kcal} kcal · ${UI.esc(f.portionLabel)}</div></div>
+          <span class="pill ${f.source === 'Revive' ? 'amber' : 'blue'}">${f.source === 'Revive' ? 'Built-in' : 'Online'}</span></button>`;
+        const paint = (loading) => {
+          res.innerHTML = found.length ? found.map(row).join('') + (loading ? '<p class="tiny muted mt8">Searching online…</p>' : '') : (q.value.trim() ? (loading ? '<p class="small muted">Searching…</p>' : '<p class="small muted">No match — use a quick size or custom below.</p>') : '');
+          rest.style.display = q.value.trim() ? 'none' : '';
+          res.querySelectorAll('[data-food]').forEach((b) => b.onclick = () => portion(found[+b.dataset.food]));
+        };
+        q.addEventListener('input', () => {
+          clearTimeout(timer); const term = q.value; const my = ++seq;
+          found = searchLocal(term); paint(term.trim().length >= 2);
+          if (term.trim().length < 2) return;
+          timer = setTimeout(async () => { const online = await searchOnline(term); if (my !== seq) return; found = [...found, ...online.filter((o) => !found.some((f) => f.name.toLowerCase() === o.name.toLowerCase()))].slice(0, 25); paint(false); }, 550);
+        });
+        const portion = (f) => {
+          let grams = f.portionG;
+          const draw = () => { const n = forPortion(f, grams); return `<div class="card tight"><div class="row"><span style="font-size:28px">${f.e}</span><div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g</div></div></div>
+            <div class="chips mt12">${[0.5, 1, 1.5, 2].map((m) => `<button class="chip ${Math.abs(grams - f.portionG * m) < 0.5 ? 'on' : ''}" data-mult="${m}">${m === 1 ? '' : m + ' × '}${UI.esc(f.portionLabel)}</button>`).join('')}</div>
+            <div class="row mt12"><input id="food-g" type="number" inputmode="decimal" value="${Math.round(grams)}" style="width:110px"><span class="muted">grams</span><div class="grow" style="text-align:right"><b style="font-size:20px">${n.kcal}</b> kcal · <b>${n.protein}</b> g</div></div>
+            <div class="grid2 mt12"><button class="btn" data-back>Back</button><button class="btn primary" data-logfood>Log it</button></div></div>`; };
+          const mount = () => {
+            res.innerHTML = draw();
+            res.querySelectorAll('[data-mult]').forEach((b) => b.onclick = () => { grams = f.portionG * +b.dataset.mult; mount(); });
+            res.querySelector('#food-g').onchange = (e) => { grams = Math.max(1, +e.target.value || f.portionG); mount(); };
+            res.querySelector('[data-back]').onclick = () => paint(false);
+            res.querySelector('[data-logfood]').onclick = (ev) => { const n = forPortion(f, grams); finish({ name: f.name, kcal: n.kcal, protein: n.protein, grams: Math.round(grams), food: f.source }, ev); };
+          };
+          mount();
+        };
         sh.querySelector('#cust-add').onclick = (ev) => {
           const name = sh.querySelector('#cust-name').value.trim() || 'Meal'; const kcal = parseInt(sh.querySelector('#cust-kcal').value, 10) || 500;
           finish({ name, kcal, protein: Math.round(kcal * 0.04) }, ev);
