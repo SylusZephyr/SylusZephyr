@@ -496,3 +496,7 @@ a.link { text-decoration: none; }
 .rcard .hero.has-photo > .fav { position: absolute; top: 8px; right: 8px; }
 .has-photo .pill { background: rgba(10,12,20,.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .has-photo .pill.amber { color: #ffc56b; } .has-photo .pill.green { color: #5ee0a8; }
+@media (min-width: 1500px) {
+  .screen { max-width: 1100px; margin-left: calc(var(--side-w) + max(32px, (100vw - var(--side-w) - 1100px) / 2)); }
+  .topbar h1 { font-size: 38px; }
+}
