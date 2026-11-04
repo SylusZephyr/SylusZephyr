@@ -14,6 +14,23 @@ Runs on **Android**, **Windows**, **iPhone** and the **web**, works offline, and
 - **Publishing to stores:** [docs/STORES.md](docs/STORES.md)
 - **Privacy policy:** [privacy.html](privacy.html)
 
+## What's new in 2.0
+- 62 air-fryer / no-cook halal recipes (24 new), ~50 real photos with credits, lazy-loaded
+- Search everything (recipes, foods, tips, screens) — Ctrl/Cmd+K on desktop
+- Infinite tips feed, recipe ratings and notes, undo for deletions, swipe between tabs
+- Accessibility: zero WCAG 2 A/AA issues (axe-core), screen-reader names and states, focus handling, zoom allowed
+- Reliability: versioned data migrations with backups, corrupt-data recovery, storage-full handling,
+  per-screen error recovery, generated offline cache
+- Translation-ready (`js/i18n.js`, see `docs/TRANSLATING.md`)
+
+## Development
+```bash
+npm ci
+npm test                    # data integrity, migrations, sleep maths, sync merge
+npm run build:web           # regenerates the offline cache list and www/
+python3 -m http.server 8765 # open http://localhost:8765
+```
+
 ## Install on iPhone
 1. Open **https://syluszephyr.github.io/SylusZephyr/** in **Safari** (not WeChat's browser).
 2. Tap **Share → Add to Home Screen → Add**.
