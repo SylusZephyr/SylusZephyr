@@ -3,7 +3,7 @@ import { cpSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 const out = 'www';
 if (existsSync(out)) rmSync(out, { recursive: true });
 mkdirSync(out);
-for (const f of ['index.html', 'manifest.webmanifest', 'privacy.html', 'css', 'js', 'icons']) {
+for (const f of ['index.html', 'manifest.webmanifest', 'privacy.html', 'css', 'js', 'icons', 'img']) {
   if (existsSync(f)) cpSync(f, `${out}/${f}`, { recursive: true });
 }
 console.log('www/ built');

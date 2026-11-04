@@ -492,3 +492,7 @@ a.link { text-decoration: none; }
 .rcard .hero .method { z-index: 2; }
 .hero-lg.has-photo::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, rgba(0,0,0,.35), transparent 30%, transparent 60%, rgba(11,15,26,.55)); }
 .photo-credit { font-size: 10px; color: var(--faint); margin-top: 6px; }
+.rcard .hero.has-photo > .method { position: absolute; left: 8px; bottom: 8px; }
+.rcard .hero.has-photo > .fav { position: absolute; top: 8px; right: 8px; }
+.has-photo .pill { background: rgba(10,12,20,.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.has-photo .pill.amber { color: #ffc56b; } .has-photo .pill.green { color: #5ee0a8; }
