@@ -1,5 +1,5 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-53c65212edad';
+const VERSION = 'revive-38bb64afd09f';
 const ASSETS = [
   './',
   'css/app.css',
@@ -10,10 +10,13 @@ const ASSETS = [
   'img/food/aloo_paratha_cheat.webp',
   'img/food/aloo_tikki.webp',
   'img/food/avocado_egg_toast.webp',
+  'img/food/bombay_potatoes.webp',
   'img/food/caesar_wrap.webp',
   'img/food/chapli_patties.webp',
   'img/food/chicken_65.webp',
   'img/food/chicken_cheese_wrap.webp',
+  'img/food/chicken_satay.webp',
+  'img/food/chicken_seekh.webp',
   'img/food/chickpea_chaat.webp',
   'img/food/d_dapanji.webp',
   'img/food/d_indian.webp',
@@ -24,6 +27,8 @@ const ASSETS = [
   'img/food/egg_bhurji_toast.webp',
   'img/food/egg_mayo_sandwich.webp',
   'img/food/egg_paratha.webp',
+  'img/food/falafel_bites.webp',
+  'img/food/fish_tacos.webp',
   'img/food/fish_tikka.webp',
   'img/food/french_toast.webp',
   'img/food/gobi_roast.webp',
@@ -52,6 +57,7 @@ const ASSETS = [
   'img/food/shawarma_pita.webp',
   'img/food/stuffed_peppers.webp',
   'img/food/sweet_potato_loaded.webp',
+  'img/food/tandoori_thighs.webp',
   'img/food/tikka_wrap.webp',
   'img/food/tray_bake.webp',
   'img/food/tuna_kachumber.webp',

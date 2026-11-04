@@ -311,5 +311,41 @@ export const PHOTOS = {
   "credit": "Andy Li · CC0",
   "page": "https://commons.wikimedia.org/wiki/File:Emmental_%26_Mushroom_Toastie_-_the_M%26S_Caf%C3%A9.jpg",
   "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "tandoori_thighs": {
+  "src": "img/food/tandoori_thighs.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Tandoori_Chicken_1.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "chicken_seekh": {
+  "src": "img/food/chicken_seekh.webp",
+  "credit": "Asif Saleh · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_Seekh_Kabab.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "bombay_potatoes": {
+  "src": "img/food/bombay_potatoes.webp",
+  "credit": "Divya Kudua · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Anjum%27s_Indian_Vegetarian_Feast_-_Bombay_Potatoes.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "fish_tacos": {
+  "src": "img/food/fish_tacos.webp",
+  "credit": "Douglas Muth · CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Fish_tacos_in_Pittsburg.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
+ },
+ "chicken_satay": {
+  "src": "img/food/chicken_satay.webp",
+  "credit": "Elly Suhailee · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:CHICKEN_SATAY.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "falafel_bites": {
+  "src": "img/food/falafel_bites.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Falafel_1.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
  }
 };
