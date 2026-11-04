@@ -1,8 +1,18 @@
 # Revive 🔥
 
-A private, offline recovery companion for iPhone — installed free from Safari as a Home Screen app.
+A private recovery companion: easy meals, steady sleep, guided pelvic-floor training and health tracking.
+Runs on **Android**, **Windows**, **iPhone** and the **web**, works offline, and optionally syncs between devices.
 
-**Everything you enter stays on your phone.** This repository contains only generic app code — no personal data.
+| Platform | How |
+| --- | --- |
+| Android | `app-release.apk` (direct install) · `app-release.aab` (Google Play) |
+| Windows | `Revive-Setup-x.y.z.exe` installer · `.appx` for the Microsoft Store |
+| iPhone | Native app via Capacitor (`ios/`), TestFlight through CI · or Safari → Add to Home Screen |
+| Web | https://syluszephyr.github.io/SylusZephyr/ (installable PWA) |
+
+- **Setup & cloud sync:** [docs/SETUP.md](docs/SETUP.md)
+- **Publishing to stores:** [docs/STORES.md](docs/STORES.md)
+- **Privacy policy:** [privacy.html](privacy.html)
 
 ## Install on iPhone
 1. Open **https://syluszephyr.github.io/SylusZephyr/** in **Safari** (not WeChat's browser).
@@ -26,7 +36,17 @@ Each device keeps its own private data. Move progress with Me → Settings → E
 - **Track** — essentials heatmap, 4-week plan, calories/protein, sleep timeline & wake drift, weekly weigh-ins with 66–68 kg goal band, weekly check-ins (erection & confidence, PHQ-4 mood, energy & cold) and a private symptom log that feeds the doctor summary.
 - **Me** — badges, coins & streak freezes, medical follow-up questions, visits, lab results, printable **doctor summary**, calendar reminders (.ics), Face ID + PIN lock, settings.
 
-## Tech
-Plain HTML/CSS/ES modules, no build step, service worker for offline. Data in `localStorage`.
+## Project layout
+```
+index.html, css/, js/        the app (plain ES modules, no bundler)
+js/native.js                 iOS/Android bridge (Face ID, notifications, haptics, share, storage)
+js/cloud.js, js/sync.js      optional Supabase sign-in, realtime sync and remote content
+js/nutrition.js              food search (built-in list + Open Food Facts)
+ios/, android/               Capacitor native projects
+desktop/                     Windows/macOS/Linux shell (Electron)
+supabase/                    database schema and content examples
+scripts/                     web build, icon/splash rendering, photo tooling
+.github/workflows/build.yml  builds every platform in the cloud
+```
 
 Revive supports a plan; it does not diagnose or replace a doctor. Emergency in China: **120**.
