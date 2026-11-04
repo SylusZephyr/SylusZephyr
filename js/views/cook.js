@@ -274,10 +274,10 @@ export function bind(root, parts, { rerender }) {
 const PLAN_SLOTS = ['breakfast', 'lunch', 'dinner', 'snack'];
 // Core rotation per slot = your stated preferences (desi savory breakfast, wraps, curry + roti, smoothies).
 const CORE = {
-  breakfast: ['egg_paratha', 'overnight_oats', 'naan_egg_cheese', 'egg_muffins', 'aloo_paratha_cheat'],
-  lunch: ['chicken_cheese_wrap', 'tikka_wrap', 'tuna_melt', 'hummus_wrap', 'kebab_naan'],
-  dinner: ['airfryer_chicken_curry', 'tandoori_thighs', 'tray_bake', 'shawarma_bowl', 'kofta_tray'],
-  snack: ['shaker_smoothie', 'protein_milk_dates', 'mango_lassi', 'yogurt_bowl'],
+  breakfast: ['egg_paratha', 'overnight_oats', 'naan_egg_cheese', 'egg_muffins', 'aloo_paratha_cheat', 'omelette_roll', 'palak_paratha', 'egg_bhurji_toast'],
+  lunch: ['chicken_cheese_wrap', 'tikka_wrap', 'tuna_melt', 'hummus_wrap', 'kebab_naan', 'shawarma_pita', 'caesar_wrap'],
+  dinner: ['airfryer_chicken_curry', 'tandoori_thighs', 'tray_bake', 'shawarma_bowl', 'kofta_tray', 'chicken_seekh', 'malai_tikka', 'green_chutney_chicken'],
+  snack: ['shaker_smoothie', 'protein_milk_dates', 'mango_lassi', 'yogurt_bowl', 'date_shake', 'date_balls'],
 };
 function pickFor(slot, used, rnd) {
   const st = S.get();

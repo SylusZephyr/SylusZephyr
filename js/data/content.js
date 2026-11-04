@@ -38,6 +38,18 @@ export const TIPS = [
   { id: 't34', e: '🫖', bg: ['#365314', '#020617'], cat: 'Sleep', title: 'Swap the afternoon coffee', body: 'After your cutoff, try caffeine-free options: warm milk, rooibos or chamomile, or decaf. Bubble tea and many green teas still contain caffeine.' },
   { id: 't35', e: '💭', bg: ['#1e293b', '#020617'], cat: 'Mind', title: 'Worry window', body: 'Set 10 minutes in the afternoon to write down worries and one next step for each. When worries come at night, remind yourself: “that goes in tomorrow’s window.”' },
   { id: 't36', e: '📉', bg: ['#7c2d12', '#0b0f1a'], cat: 'Health', title: 'Porn and real-life arousal', body: 'Some men find heavy porn use makes partnered arousal harder or ejaculation faster. Evidence is mixed, but many find a break helps them reconnect with real sensations. Worth noticing in your private log.' },
+  { id: 't37', e: '🔁', bg: ['#1e3a8a', '#020617'], cat: 'Habits', title: 'Never miss twice', body: 'Missing one day is normal. Missing two starts a new habit — of not doing it. If yesterday slipped, today just do the smallest version: one meal, one glass, one session.' },
+  { id: 't38', e: '🧂', bg: ['#3f3f46', '#09090b'], cat: 'Food', title: 'Salt and water work together', body: 'If you feel dizzy when standing up, low fluids can be part of it. Drink steadily through the day — and mention dizziness to your doctor.' },
+  { id: 't39', e: '🛏️', bg: ['#1e1b4b', '#000'], cat: 'Sleep', title: 'Bed is for sleep', body: 'Scrolling, eating and working in bed teaches your brain that bed means awake. Keep the phone outside arm’s reach at night.' },
+  { id: 't40', e: '🍗', bg: ['#7c2d12', '#0b0f1a'], cat: 'Food', title: 'Marinate once, eat twice', body: 'Marinate double the chicken in a bag. Cook half tonight; tomorrow’s dinner is already ready to go in the air fryer.' },
+  { id: 't41', e: '🌬️', bg: ['#0c4a6e', '#020617'], cat: 'Mind', title: 'Physiological sigh', body: 'Two short breaths in through the nose, one long breath out through the mouth. Repeat three times. One of the fastest ways to calm a racing body.' },
+  { id: 't42', e: '🚶', bg: ['#14532d', '#020617'], cat: 'Training', title: 'Walk after meals', body: 'A 10-minute easy walk after eating helps digestion and blood-sugar control — and it counts as time outdoors.' },
+  { id: 't43', e: '🥛', bg: ['#334155', '#020617'], cat: 'Food', title: 'Milk is a recovery drink', body: 'Milk has protein, carbs, fluid and electrolytes in one glass. Two glasses a day is an easy 300+ kcal and 16 g protein.' },
+  { id: 't44', e: '📵', bg: ['#1e293b', '#020617'], cat: 'Sleep', title: 'Phone sleeps first', body: 'Put your phone on charge outside the bedroom at wind-down time. People who do this fall asleep faster and wake less.' },
+  { id: 't45', e: '🧠', bg: ['#4a044e', '#0b0f1a'], cat: 'Mind', title: 'Name it to tame it', body: 'When worry spikes, say what you feel in a few words: “anxious about tomorrow”. Naming an emotion lowers its intensity.' },
+  { id: 't46', e: '🍳', bg: ['#78350f', '#0b0f1a'], cat: 'Food', title: 'Breakfast sets the day', body: 'Eating within two hours of waking helps your body clock and makes it easier to eat enough later. Even a shake counts.' },
+  { id: 't47', e: '💪', bg: ['#14532d', '#020617'], cat: 'Training', title: 'Quality over quantity', body: 'Ten correct pelvic-floor squeezes beat thirty sloppy ones. Full lift, full release, breathe throughout.' },
+  { id: 't48', e: '🩺', bg: ['#7f1d1d', '#0b0f1a'], cat: 'Health', title: 'Bring your data', body: 'Doctors decide faster with facts. Your Doctor summary shows four weeks of sleep, meals, weight and check-ins on one page.' },
 ];
 
 // Stories: tap-through educational slides (Instagram-style).
@@ -72,6 +84,21 @@ export const STORIES = [
       { e: '🧠', title: 'Not a test', body: 'Intimacy is not an exam. Pressure to "perform" is one of the strongest erection killers.' },
       { e: '🌊', title: 'Ride the wave', body: 'Arousal is like a wave. Learning to notice where you are on the 1–10 scale is the core skill behind ejaculation control.' },
       { e: '💬', title: 'Talk about it', body: 'Sexual health is health. Doctors and urologists discuss this every day — it is normal to bring it up.' },
+    ],
+  },
+  {
+    id: 's_habits', e: '🔁', label: 'Habits', slides: [
+      { e: '🔁', title: 'Never miss twice', body: 'One missed day is noise. Two is a pattern. Streak freezes exist for exactly this.' },
+      { e: '🧲', title: 'Make it obvious', body: 'Shake ingredients on the counter. Water bottle by the bed. Paratha at the front of the freezer.' },
+      { e: '⚡', title: 'Make it easy', body: 'Pick the 5-minute recipe on hard days. A small win keeps the streak — and the momentum.' },
+      { e: '🎁', title: 'Make it rewarding', body: 'Tick, collect, open the chest. Your brain learns that taking care of yourself pays off today.' },
+    ],
+  },
+  {
+    id: 's_calm', e: '🌬️', label: 'Calm', slides: [
+      { e: '🌬️', title: '60-second reset', body: 'Two short inhales through the nose, one long exhale through the mouth. Three rounds.' },
+      { e: '🖐️', title: '5-4-3-2-1', body: 'Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste. It pulls you out of spiralling thoughts.' },
+      { e: '📝', title: 'Worry window', body: 'Write worries down in the afternoon with one next step each. At night, remind yourself: it is already on paper.' },
     ],
   },
   {
