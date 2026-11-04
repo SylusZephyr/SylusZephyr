@@ -287,5 +287,29 @@ export const PHOTOS = {
   "credit": "Praveen from Bangalore, India · CC BY 2.0",
   "page": "https://commons.wikimedia.org/wiki/File:Spicy_egg_bhurji_@_the_eggfactory.jpg",
   "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "caesar_wrap": {
+  "src": "img/food/caesar_wrap.webp",
+  "credit": "Famartin · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:2023-08-02_13_28_10_A_Wawa_Chicken_Caesar_Wrap_in_Westampton_Township,_Burlington_County,_New_Jersey.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "tuna_kachumber": {
+  "src": "img/food/tuna_kachumber.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Kachumber_Salad.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "stuffed_peppers": {
+  "src": "img/food/stuffed_peppers.webp",
+  "credit": "Mark Bonica · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Quinoa_stuffed_peppers.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "mushroom_toastie": {
+  "src": "img/food/mushroom_toastie.webp",
+  "credit": "Andy Li · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Emmental_%26_Mushroom_Toastie_-_the_M%26S_Caf%C3%A9.jpg",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
  }
 };

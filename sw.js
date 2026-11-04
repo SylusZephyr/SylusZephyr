@@ -1,5 +1,5 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-2fc60255820e';
+const VERSION = 'revive-53c65212edad';
 const ASSETS = [
   './',
   'css/app.css',
@@ -10,6 +10,7 @@ const ASSETS = [
   'img/food/aloo_paratha_cheat.webp',
   'img/food/aloo_tikki.webp',
   'img/food/avocado_egg_toast.webp',
+  'img/food/caesar_wrap.webp',
   'img/food/chapli_patties.webp',
   'img/food/chicken_65.webp',
   'img/food/chicken_cheese_wrap.webp',
@@ -35,6 +36,7 @@ const ASSETS = [
   'img/food/malai_tikka.webp',
   'img/food/mango_lassi.webp',
   'img/food/masala_fish.webp',
+  'img/food/mushroom_toastie.webp',
   'img/food/naan_egg_cheese.webp',
   'img/food/nugget_wrap.webp',
   'img/food/omelette_roll.webp',
@@ -48,9 +50,11 @@ const ASSETS = [
   'img/food/shaker_smoothie.webp',
   'img/food/shawarma_bowl.webp',
   'img/food/shawarma_pita.webp',
+  'img/food/stuffed_peppers.webp',
   'img/food/sweet_potato_loaded.webp',
   'img/food/tikka_wrap.webp',
   'img/food/tray_bake.webp',
+  'img/food/tuna_kachumber.webp',
   'img/food/tuna_melt.webp',
   'img/food/wings.webp',
   'img/food/yogurt_bowl.webp',
