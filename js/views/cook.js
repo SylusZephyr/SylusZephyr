@@ -34,6 +34,7 @@ export function suggest({ slot, feel, mins, budget } = {}) {
     if (budget && r.cost > budget) score -= 30;
     if (st.favorites.includes(r.id)) score += 6;
     score += Math.min(6, (st.cooked[r.id] || 0) * 2); // familiar meals with small variations
+    const rating = st.recipeNotes?.[r.id]?.rating; if (rating) score += (rating - 3) * 6; // your own ratings steer suggestions
     return { r, have, total, score, missing: req.filter((i) => !pantry.has(i.id)) };
   }).sort((a, b) => b.score - a.score);
 }
@@ -75,7 +76,7 @@ function main() {
   const shopN = (st.shopping || []).filter((x) => !x.done).length;
   return `
   <div class="topbar"><div><div class="sub">Air fryer · no-cook · halal</div><h1>Cook</h1></div>
-    <div class="row"><a class="icon-btn" href="#cook/shop" aria-label="Shopping list" style="position:relative">🛒${shopN ? `<span class="pill coral" style="position:absolute;top:-6px;right:-8px">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">🧺</a></div></div>
+    <div class="row"><button class="icon-btn" data-search aria-label="Search">🔍</button><a class="icon-btn" href="#cook/shop" aria-label="Shopping list" style="position:relative">🛒${shopN ? `<span class="pill coral" style="position:absolute;top:-6px;right:-8px">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">🧺</a></div></div>
 
   <div class="card glow">
     <div class="kicker">What can I make right now?</div>
@@ -121,6 +122,10 @@ function detail(r) {
   <div class="card">${r.ing.map((i) => { const g = ING[i.id]; const have = pantry.has(i.id); return `<button class="ing ${have ? 'have' : ''}" data-toggle="${i.id}" style="width:100%;text-align:left">
     <span class="e">${g.e}</span><div class="grow"><div class="name" style="font-weight:600">${UI.esc(g.name)} ${i.opt ? '<span class="muted small">(optional)</span>' : ''}</div><div class="zh">${UI.esc(g.zh)}</div></div><div class="muted small">${UI.esc(i.q)}</div></button>`; }).join('')}
     <p class="tiny faint mt8">Tap an ingredient to mark it as in/out of your pantry. Chinese names help when shopping on Hema/Taobao.</p></div>
+
+  ${(() => { const n = (st.recipeNotes || {})[r.id] || {}; return `<div class="section-title">Your verdict</div><div class="card tight">
+    <div class="row" role="group" aria-label="Your rating">${[1, 2, 3, 4, 5].map((i) => `<button class="star ${i <= (n.rating || 0) ? 'on' : ''}" data-rate="${i}" aria-label="${i} star${i > 1 ? 's' : ''}" aria-pressed="${i === n.rating}">★</button>`).join('')}<span class="muted small" style="margin-left:auto">${n.rating ? ['', 'Not for me', 'Meh', 'Good', 'Great', 'Favourite'][n.rating] : 'Rate it after cooking'}</span></div>
+    <textarea id="r-note" rows="2" class="mt8" maxlength="300" placeholder="Your notes — less chili, extra 2 minutes, add cheese…">${UI.esc(n.note || '')}</textarea></div>`; })()}
 
   ${r.vars ? `<div class="section-title">Switch it up</div><div class="card tight">${r.vars.map((v) => `<div class="small" style="padding:7px 0;border-bottom:1px solid var(--line)">${UI.esc(v)}</div>`).join('')}<p class="tiny faint mt8">Same easy method, different taste — so you never get bored.</p></div>` : ''}
 
@@ -217,6 +222,7 @@ export function bind(root, parts, { rerender }) {
   const st = S.get();
   const sub = parts[0];
   if (!sub) {
+    root.querySelector('[data-search]')?.addEventListener('click', () => import('./search.js').then((m) => m.open()));
     root.querySelectorAll('[data-slot]').forEach((b) => b.onclick = () => { filt.slot = b.dataset.slot; rerender(); });
     root.querySelectorAll('[data-feel]').forEach((b) => b.onclick = () => { filt.feel = filt.feel === b.dataset.feel ? null : b.dataset.feel; rerender(); });
     root.querySelectorAll('[data-mins]').forEach((b) => b.onclick = () => { const v = +b.dataset.mins; filt.mins = filt.mins === v ? null : v; rerender(); });
@@ -233,6 +239,14 @@ export function bind(root, parts, { rerender }) {
     const r = RECIPE[parts[1]]; if (!r) return;
     root.querySelector('[data-fav]').onclick = () => { const i = st.favorites.indexOf(r.id); if (i >= 0) st.favorites.splice(i, 1); else { st.favorites.push(r.id); UI.toast('Added to favourites', '❤️'); UI.haptic(10); } S.save(); rerender(); };
     root.querySelector('[data-cook]').onclick = () => cookMode(r, rerender);
+    st.recipeNotes = st.recipeNotes || {};
+    root.querySelectorAll('[data-rate]').forEach((b) => b.onclick = () => {
+      const n = st.recipeNotes[r.id] = st.recipeNotes[r.id] || {}; const v = +b.dataset.rate;
+      n.rating = n.rating === v ? 0 : v; S.save(); UI.haptic(8);
+      if (v >= 4 && !st.favorites.includes(r.id)) { st.favorites.push(r.id); S.save(); UI.toast('Rated highly — added to favourites', '❤️'); }
+      rerender();
+    });
+    root.querySelector('#r-note')?.addEventListener('change', (e) => { const n = st.recipeNotes[r.id] = st.recipeNotes[r.id] || {}; n.note = e.target.value.trim(); S.save(); UI.toast('Note saved', '📝'); });
     root.querySelector('[data-ate]').onclick = (ev) => { Sh.logMeal({ slot: P.currentSlot(), name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein }, ev); UI.toast(`${P.SLOT_LABEL[P.currentSlot()]} logged: ${r.name}`, r.emoji); };
     root.querySelectorAll('[data-toggle]').forEach((b) => b.onclick = () => { const id = b.dataset.toggle; const i = st.pantry.indexOf(id); if (i >= 0) st.pantry.splice(i, 1); else st.pantry.push(id); S.save(); rerender(); });
     root.querySelector('[data-addmissing]')?.addEventListener('click', () => {

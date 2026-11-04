@@ -157,6 +157,7 @@ setInterval(() => { if (document.visibilityState === 'visible' && S.dayKey() !==
 const IS_DESKTOP = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
 document.addEventListener('keydown', (e) => {
   const tag = (e.target.tagName || '').toLowerCase();
+  if (e.key === 'k' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); import('./views/search.js').then((m) => m.open()); return; }
   if (['input', 'textarea', 'select'].includes(tag) || e.ctrlKey || e.metaKey || e.altKey) return;
   const lock = document.querySelector('.lock .keypad');
   if (lock) {
@@ -166,6 +167,7 @@ document.addEventListener('keydown', (e) => {
   }
   const pinSheet = document.querySelector('.sheet .keypad');
   if (pinSheet) { if (/^[0-9]$/.test(e.key)) pinSheet.querySelector(`[data-k="${e.key}"]`)?.click(); if (e.key === 'Backspace') pinSheet.querySelector('[data-del]')?.click(); }
+  if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !document.querySelector('.sheet'))) { e.preventDefault(); import('./views/search.js').then((m) => m.open()); return; }
   if (e.key === 'Escape') {
     const fs = document.querySelector('.celebrate [data-close], .story-viewer [data-x], .cookmode [data-x], .trainer [data-x]');
     if (fs) fs.click(); else UI.closeAllSheets();
@@ -173,6 +175,22 @@ document.addEventListener('keydown', (e) => {
   }
   if (!document.querySelector('#overlay-root > *') && /^[1-5]$/.test(e.key)) location.hash = TABS[+e.key - 1].id;
 });
+
+// Phones: swipe left/right on the page to move between tabs.
+let swipe = null;
+document.addEventListener('touchstart', (e) => {
+  const t = e.touches[0]; const el = e.target;
+  if (e.touches.length > 1 || document.querySelector('#overlay-root > *') || el.closest('input, textarea, select, .stories, .chips.scroll, .seg, .scale, .heat, .tabbar, .keypad')) { swipe = null; return; }
+  swipe = { x: t.clientX, y: t.clientY, t: Date.now() };
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (!swipe) return; const t = e.changedTouches[0];
+  const dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, dt = Date.now() - swipe.t; swipe = null;
+  if (dt > 600 || Math.abs(dx) < 90 || Math.abs(dy) > 50) return;
+  const r = route(); if (r.parts.length) return; // only between top-level tabs
+  const i = TABS.findIndex((x) => x.id === r.tab); const next = TABS[i + (dx < 0 ? 1 : -1)];
+  if (next) { UI.haptic(6); location.hash = next.id; }
+}, { passive: true });
 
 // PC/Android install prompt (Edge/Chrome): keep the event so "Install" can trigger it.
 let deferredInstall = null;
