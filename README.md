@@ -11,6 +11,14 @@ A private, offline recovery companion for iPhone — installed free from Safari 
 
 In China, github.io can be slow — load it once (VPN if needed). After that it works fully offline.
 
+## Install on Windows PC
+1. Open the same link in **Microsoft Edge** or **Google Chrome**.
+2. Click **Install** in the address bar (or menu ⋯ → Apps → Install Revive).
+3. Revive gets its own window and Start-menu icon; right-click → Pin to taskbar. Works offline.
+Keyboard: `1`–`5` switch tabs, `Esc` closes, type your PIN on the lock screen. Lock supports Windows Hello.
+
+Each device keeps its own private data. Move progress with Me → Settings → Export / Import.
+
 ## What's inside
 - **Today** — stories, 7 daily essentials (5/7 secures the streak), XP & levels, combos, daily mystery chest, 3 daily quests, water & coffee counters with caffeine cutoff, sleep & energy logging, "you vs. last week", an infinite-style tips feed that **sleeps during wind-down** to protect bedtime.
 - **Cook** — "What can I make right now?" suggester (pantry + mood + time + budget + meal), 38 air-fryer / no-cook halal recipes with Chinese shopping names, interactive cook mode with step timers, "switch it up" variations, a one-tap weekly meal plan, pantry, shopping list (¥), and halal Meituan/Ele.me delivery picks.

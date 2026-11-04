@@ -12,7 +12,7 @@ const STEPS = [
       <div style="font-size:84px">🔥</div>
       <h1 style="font-size:38px">Revive</h1>
       <p class="muted" style="font-size:17px">Your private recovery companion.<br>Food that is easy. Sleep that settles. Training that works. Progress you can see.</p>
-      <div class="notice mt12" style="text-align:left">🔒 <b>100% private.</b> Everything you enter stays on this iPhone. No account, no server, no tracking.</div>
+      <div class="notice mt12" style="text-align:left">🔒 <b>100% private.</b> Everything you enter stays on this device. No account, no server, no tracking.</div>
       <div class="notice" style="text-align:left">🩺 Revive supports your plan — it doesn’t diagnose or replace your doctor.</div>
     </div>`,
   () => `<h1 class="mb8">What should we call you?</h1><p class="muted">Just for greetings. Optional.</p>
@@ -33,14 +33,14 @@ const STEPS = [
       <label class="row mt8" style="gap:12px"><input type="checkbox" id="ob-ack" style="width:22px;height:22px"> <span>I understand</span></label>`,
   () => `<div class="col" style="min-height:60vh;justify-content:center;text-align:center;gap:14px">
       <div style="font-size:70px">🔒</div><h1>Lock Revive?</h1>
-      <p class="muted">Use Face ID with a PIN backup so nobody else can open your health data.</p>
-      <button class="btn primary block mt16" id="ob-lock">Set up Face ID + PIN</button>
+      <p class="muted">Use Face ID (iPhone) or Windows Hello (PC) with a PIN backup so nobody else can open your health data.</p>
+      <button class="btn primary block mt16" id="ob-lock">Set up lock + PIN</button>
       <button class="btn ghost block" id="ob-skip">Maybe later</button></div>`,
 ];
 
 export function render() {
   const last = step === STEPS.length - 1;
-  return `<main class="screen" style="padding-bottom:120px">
+  return `<main class="screen onboard" style="padding-bottom:120px">
     <div class="row mb12" style="gap:6px">${STEPS.map((_, i) => `<i style="flex:1;height:4px;border-radius:2px;background:${i <= step ? 'var(--amber)' : 'var(--surface3)'}"></i>`).join('')}</div>
     ${STEPS[step]()}
     ${last ? '' : `<div style="position:fixed;left:0;right:0;bottom:0;padding:16px 16px calc(var(--safe-bottom) + 18px);background:linear-gradient(transparent, var(--bg) 30%)">
