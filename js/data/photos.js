@@ -59,5 +59,83 @@ export const PHOTOS = {
   "credit": "Takeaway · CC BY-SA 3.0",
   "page": "https://commons.wikimedia.org/wiki/File:Smoked_chicken_and_avocado_wrap.jpg",
   "licence_url": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ "tuna_melt": {
+  "src": "img/food/tuna_melt.webp",
+  "credit": "kweez mcG from London, UK · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Tuna_melt_sandwich_with_fries.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "kebab_naan": {
+  "src": "img/food/kebab_naan.webp",
+  "credit": "raasiel · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Seekh_Kebab.JPG",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "egg_mayo_sandwich": {
+  "src": "img/food/egg_mayo_sandwich.webp",
+  "credit": "Famartin · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:2020-07-17_20_00_13_A_7-Eleven_Simply_Egg_Salad_Sandwich_(lightly_seasoned_hard_boiled_eggs,_mixed_with_reduced_fat_mayonnaise_and_Dijon_mustard)_at_the_Delaware_House_Service_Area_along_Interstate_95_(Delaware_Turnpike)_in_New_Castle_County,_Delaware.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "airfryer_chicken_curry": {
+  "src": "img/food/airfryer_chicken_curry.webp",
+  "credit": "Kskhh · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_Karahi_in_Pakistan.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "chapli_patties": {
+  "src": "img/food/chapli_patties.webp",
+  "credit": "Miansari66 · Public domain",
+  "page": "https://commons.wikimedia.org/wiki/File:Chapli_Kabab.JPG",
+  "licence_url": ""
+ },
+ "lamb_skewers_rice": {
+  "src": "img/food/lamb_skewers_rice.webp",
+  "credit": "Neil Conway from Oakland, USA · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Cumin_Lamb_(5179533335).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "chickpea_chaat": {
+  "src": "img/food/chickpea_chaat.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Punjabi_Chana_Chaat.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "tray_bake": {
+  "src": "img/food/tray_bake.webp",
+  "credit": "Silar · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:02023_0153_Roasted_Chicken,_Cucumber_Salad_and_Potatoes.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "paneer_tikka": {
+  "src": "img/food/paneer_tikka.webp",
+  "credit": "PallaviKhale · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Paneer_Tikka_Shashlik_PK012.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "sweet_potato_loaded": {
+  "src": "img/food/sweet_potato_loaded.webp",
+  "credit": "FitTasteTic · CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Baked_Sweet_Potato_on_Salad.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
+ },
+ "shaker_smoothie": {
+  "src": "img/food/shaker_smoothie.webp",
+  "credit": "S.C.J.Perera · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Banana-smoothie.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "wings": {
+  "src": "img/food/wings.webp",
+  "credit": "Paul Lowry · CC BY 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_Wings-_It%27s_been_a_while._Baton_Rouge_LA_2026.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0"
+ },
+ "samosa_plate": {
+  "src": "img/food/samosa_plate.webp",
+  "credit": "Swathi sri srinivasa raghavan · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Samosa_with_sweet_chutney.jpg",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
  }
 };
