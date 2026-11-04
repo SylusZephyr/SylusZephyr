@@ -108,8 +108,16 @@ function write() {
   try { localStorage.setItem(KEY, json); } catch (e) { console.warn('save failed', e); }
   if (persistHook) persistHook(json);
 }
-export function save() { clearTimeout(saveTimer); saveTimer = setTimeout(write, 60); }
-export function saveNow() { clearTimeout(saveTimer); write(); }
+export function save() { if (state) state.editedAt = Date.now(); clearTimeout(saveTimer); saveTimer = setTimeout(write, 60); }
+export function saveNow() { if (state) state.editedAt = Date.now(); clearTimeout(saveTimer); write(); }
+// Swap in a merged copy (from cloud sync) without marking it as a local edit.
+export function replace(next) {
+  const keep = { lock: state.lock, closedDays: state.closedDays, remindersSyncedFor: state.remindersSyncedFor, nativeReminders: state.nativeReminders };
+  state = deepMerge(defaults(), { ...next, ...keep });
+  clearTimeout(saveTimer);
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  listeners.forEach((l) => l(state));
+}
 
 export function get() { return state; }
 export function update(fn) { fn(state); save(); listeners.forEach((l) => l(state)); }

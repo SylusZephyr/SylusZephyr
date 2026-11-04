@@ -34,7 +34,10 @@ const out = (...p) => { const f = path.join(__dirname, '..', ...p); fs.mkdirSync
   }
   // Source images for Android / Windows generators
   await shot(1024, 1024, 0.62, false, out('resources', 'icon.png'));
-  await shot(1024, 1024, 0.5, false, out('resources', 'icon-foreground-pad.png'));
+  // Adaptive-icon foreground: mark only, transparent, inside the 66% safe zone
+  await p.setViewportSize({ width: 1024, height: 1024 });
+  await p.setContent(`<html><body style="margin:0;background:transparent"><div style="width:1024px;height:1024px;display:flex;align-items:center;justify-content:center"><div style="width:440px;height:440px">${MARK}</div></div></body></html>`);
+  await p.screenshot({ path: out('resources', 'icon-foreground.png'), omitBackground: true });
   await shot(2732, 2732, 0.16, true, out('resources', 'splash.png'));
   await b.close();
   console.log('assets rendered');

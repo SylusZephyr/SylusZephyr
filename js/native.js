@@ -102,3 +102,10 @@ export function initChrome() {
   const SS = plug('SplashScreen'); if (SS) setTimeout(() => SS.hide().catch(() => {}), 250);
   if (isNative) document.documentElement.classList.add('native');
 }
+
+// ---------- Android back button ----------
+export function onBackButton(handler) {
+  const A = plug('App'); if (!A) return;
+  A.addListener('backButton', handler).catch?.(() => {});
+}
+export function exitApp() { plug('App')?.exitApp(); }

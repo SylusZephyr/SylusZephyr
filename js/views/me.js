@@ -5,6 +5,7 @@ import * as P from '../plan.js';
 import * as Lock from '../lock.js';
 import * as ICS from '../ics.js';
 import * as Native from '../native.js';
+import * as Cloud from '../cloud.js';
 import { TIPS, RED_FLAGS, CRISIS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
 import { pfWeek } from './train.js';
 
@@ -27,7 +28,45 @@ export function render(parts) {
   if (sub === 'saved') return saved();
   if (sub === 'settings') return settings();
   if (sub === 'install') return install();
+  if (sub === 'account') return account();
   return main();
+}
+
+const ago = (t) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.round(m / 60)} h ago`; };
+let authEmail = '';
+let accountWatch = null;
+let accountRerender = null;
+let codeSent = false;
+
+function account() {
+  const st = Cloud.status; const cfg = Cloud.getConfig();
+  const head = `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Account & sync</h1><div class="sub">${st.user ? 'Signed in' : 'Optional — the app works fully without an account'}</div></div></div>`;
+  if (!st.configured) return head + `
+    <div class="card glow"><div class="kicker">☁️ Cloud sync</div><h3>Connect your Revive cloud</h3>
+      <p class="muted small">Sync runs on your own private Supabase project, so your data never sits on anyone else’s server. Paste the two values from Supabase → Project Settings → API.</p>
+      <div class="field"><label>Project URL</label><input id="cfg-url" placeholder="https://xxxx.supabase.co" autocomplete="off" autocapitalize="off"></div>
+      <div class="field"><label>Anon public key</label><input id="cfg-key" placeholder="eyJhbGciOi…" autocomplete="off" autocapitalize="off"></div>
+      <button class="btn primary block mt16" data-cfgsave>Connect</button></div>
+    <div class="notice">Setup takes about 5 minutes — see docs/SETUP.md in the project.</div>`;
+  if (!st.user) return head + `
+    <div class="card glow"><div class="kicker">Sign in</div><h3>Keep every device in step</h3>
+      <p class="muted small">Log a meal on your phone, see it on your PC instantly. Your data stays private to your account.</p>
+      ${codeSent ? `<div class="field"><label>6-digit code sent to ${UI.esc(authEmail)}</label><input id="au-code" inputmode="numeric" maxlength="8" placeholder="123456" autocomplete="one-time-code"></div>
+        <button class="btn primary block mt12" data-verify>Verify & sign in</button><button class="btn ghost block mt8" data-resend>Use a different email</button>`
+      : `<div class="field"><label>Email</label><input id="au-email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${UI.esc(authEmail)}"></div>
+        <button class="btn primary block mt12" data-sendcode>Email me a sign-in code</button>`}
+      <div class="row mt16" style="gap:10px"><div class="grow" style="height:1px;background:var(--line)"></div><span class="tiny muted">or</span><div class="grow" style="height:1px;background:var(--line)"></div></div>
+      <button class="btn block mt12" data-google><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg> Continue with Google</button>
+      <p class="tiny faint mt8">Google sign-in needs a VPN in mainland China. Email codes work everywhere.</p></div>
+    ${st.error ? `<div class="notice" style="color:var(--coral)">${UI.esc(st.error)}</div>` : ''}
+    <button class="btn ghost block mt12 small" data-cfgclear>Disconnect cloud project</button>`;
+  return head + `
+    <div class="card glow" style="text-align:center"><div style="font-size:46px">☁️</div><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
+      <p class="muted small">${st.user.provider === 'google' ? 'Google account' : 'Email account'} · ${st.online ? (st.syncing ? 'Syncing…' : st.lastSync ? 'Last synced ' + ago(st.lastSync) : 'Connecting…') : 'Offline — changes will sync when you reconnect'}</p>
+      <div class="grid2 mt16"><button class="btn" data-syncnow>🔄 Sync now</button><button class="btn danger" data-signout>Sign out</button></div></div>
+    ${st.error ? `<div class="notice" style="color:var(--coral)">${UI.esc(st.error)}</div>` : ''}
+    <div class="notice">Changes sync automatically within a few seconds. Your app lock and PIN stay on each device and are never uploaded.</div>
+    <button class="btn ghost danger block mt16 small" data-delacct>Delete my account and cloud data</button>`;
 }
 
 const back = (to = 'me') => `<a class="icon-btn" href="#${to}">${UI.ICON.back}</a>`;
@@ -48,6 +87,7 @@ function main() {
   <a class="card" href="#me/badges" style="display:block;color:inherit;text-decoration:none"><div class="row between"><div class="kicker">Badges</div><span class="small muted">${nb}/${G.BADGES.length}</span></div>
     <div class="row mt8" style="gap:6px;font-size:28px;overflow:hidden">${G.BADGES.filter((b) => st.game.badges[b.id]).slice(-8).map((b) => b.e).join('') || '<span class="small muted">Complete actions to earn badges</span>'}</div></a>
   <div class="card tight">
+    ${item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
     ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
     ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
@@ -259,6 +299,38 @@ export function bind(root, parts, { rerender }) {
     root.querySelector('[data-addvisit]').onclick = () => addVisit(rerender);
     root.querySelectorAll('[data-dellab]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete result?', '', 'Delete', true)) { m.labs = m.labs.filter((x) => x.id !== b.dataset.dellab); S.save(); rerender(); } });
     root.querySelectorAll('[data-delvisit]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete visit?', '', 'Delete', true)) { m.visits = m.visits.filter((x) => x.id !== b.dataset.delvisit); S.save(); rerender(); } });
+  }
+  if (sub === 'account') {
+    accountRerender = rerender;
+    if (!accountWatch) accountWatch = Cloud.onChange(() => { if (location.hash === '#me/account' && !document.querySelector('.sheet')) setTimeout(() => accountRerender?.(), 0); });
+    const busy = (b, label) => { b.disabled = true; b.textContent = label; };
+    root.querySelector('[data-cfgsave]')?.addEventListener('click', async () => {
+      const url = root.querySelector('#cfg-url').value, key = root.querySelector('#cfg-key').value;
+      if (!/^https:\/\/.+/.test(url.trim()) || key.trim().length < 20) { UI.toast('Check the URL and key', '⚠️'); return; }
+      Cloud.saveConfig(url, key); await Cloud.init(); UI.toast('Cloud connected', '☁️'); rerender();
+    });
+    root.querySelector('[data-cfgclear]')?.addEventListener('click', async () => { if (await UI.confirmSheet('Disconnect cloud?', 'This device stops syncing. Your local data stays.', 'Disconnect', true)) { Cloud.clearConfig(); location.reload(); } });
+    root.querySelector('[data-sendcode]')?.addEventListener('click', async (e) => {
+      authEmail = root.querySelector('#au-email').value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(authEmail)) { UI.toast('Enter a valid email', '⚠️'); return; }
+      busy(e.currentTarget, 'Sending…');
+      try { await Cloud.sendEmailCode(authEmail); codeSent = true; UI.toast('Code sent — check your inbox', '📧'); } catch (err) { UI.toast(err.message || 'Could not send code', '⚠️'); }
+      rerender();
+    });
+    root.querySelector('[data-verify]')?.addEventListener('click', async (e) => {
+      const code = root.querySelector('#au-code').value; busy(e.currentTarget, 'Checking…');
+      try { await Cloud.verifyEmailCode(authEmail, code); codeSent = false; G.award('cloud_signin', 50, null); UI.toast('Signed in — syncing', '☁️'); } catch (err) { UI.toast(err.message || 'Wrong or expired code', '⚠️'); }
+      rerender();
+    });
+    root.querySelector('[data-resend]')?.addEventListener('click', () => { codeSent = false; rerender(); });
+    root.querySelector('[data-google]')?.addEventListener('click', async () => { try { await Cloud.signInWithGoogle(); } catch (err) { UI.toast(err.message || 'Google sign-in failed', '⚠️'); } });
+    root.querySelector('[data-syncnow]')?.addEventListener('click', async () => { await Cloud.syncNow(); UI.toast('Synced', '🔄'); rerender(); });
+    root.querySelector('[data-delacct]')?.addEventListener('click', async () => {
+      if (!(await UI.confirmSheet('Delete account?', 'Your cloud account and all synced data are permanently deleted. Data on this device stays unless you also delete it in Settings.', 'Delete account', true))) return;
+      try { await Cloud.deleteAccount(); UI.toast('Account deleted', '🗑️'); } catch (err) { UI.toast(err.message || 'Could not delete account', '⚠️'); }
+      rerender();
+    });
+    root.querySelector('[data-signout]')?.addEventListener('click', async () => { if (await UI.confirmSheet('Sign out?', 'Your data stays on this device. It stops syncing until you sign in again.', 'Sign out', true)) { await Cloud.signOut(); rerender(); } });
   }
   if (sub === 'install') {
     root.querySelector('[data-installpc]')?.addEventListener('click', async () => { const ok = await window.__promptInstall?.(); if (ok) UI.toast('Installed! Find Revive in your Start menu', '🖥️'); rerender(); });

@@ -11,11 +11,16 @@ import * as Me from './views/me.js';
 import * as Onboard from './views/onboard.js';
 import * as Native from './native.js';
 import { reminderList } from './ics.js';
+import * as Cloud from './cloud.js';
+import { applyRemoteContent } from './content.js';
 
 await Native.restoreStorage();
 S.load();
-S.setPersistHook(Native.persist);
+S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
+applyRemoteContent();
+window.addEventListener('revive:content', () => { if (applyRemoteContent()) render({ keepScroll: true }); });
+window.addEventListener('revive:remote-update', () => { if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
 
 const TABS = [
   { id: 'today', label: 'Today', icon: UI.ICON.home, view: Today },
@@ -157,7 +162,21 @@ function boot() {
     if (S.get().onboarded) setTimeout(() => G.maybeWeeklyReview(), 900);
   });
   S.requestPersist();
-  if (Native.isNative) { Native.onNotificationTap((route) => { location.hash = route; }); syncReminders(); }
+  Cloud.init();
+  if (Native.isNative) {
+    Native.onNotificationTap((route) => { location.hash = route; });
+    syncReminders();
+    Native.onBackButton(() => {
+      const close = document.querySelector('.celebrate [data-close], .story-viewer [data-x], .cookmode [data-x], .trainer [data-x]');
+      if (close) { close.click(); return; }
+      if (document.querySelector('.sheet')) { UI.closeAllSheets(); return; }
+      if (document.querySelector('.lock')) { Native.exitApp(); return; }
+      const h = (location.hash || '#today').slice(1);
+      if (h.includes('/')) history.back();
+      else if (h !== 'today') location.hash = 'today';
+      else Native.exitApp();
+    });
+  }
   if (!Native.isNative && 'serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').then((reg) => {
       reg.addEventListener('updatefound', () => {
