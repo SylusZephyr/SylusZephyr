@@ -4,6 +4,7 @@ import * as G from '../gamify.js';
 import * as P from '../plan.js';
 import * as Lock from '../lock.js';
 import * as ICS from '../ics.js';
+import * as Native from '../native.js';
 import { TIPS, RED_FLAGS, CRISIS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
 import { pfWeek } from './train.js';
 
@@ -49,9 +50,9 @@ function main() {
   <div class="card tight">
     ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
-    ${item('me/reminders', '⏰', 'Reminders', 'Add daily alerts to iPhone Calendar')}
+    ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
     ${item('me/saved', '🔖', 'Saved cards', `${st.savedTips.length} saved`)}
-    ${item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
+    ${Native.isNative ? '' : item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
     ${item('me/settings', '⚙️', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
   </div>
   <div class="card danger"><div class="kicker">Emergency (China)</div>
@@ -132,6 +133,10 @@ function summary() {
 function reminders() {
   const st = S.get(); st.reminderPrefs = st.reminderPrefs || {};
   const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
+  if (Native.isNative) return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Reminders</h1><div class="sub">Daily notifications from Revive</div></div></div>
+  <div class="card"><div class="list-item"><div class="grow"><b>Notifications</b><div class="muted small">${st.nativeReminders ? 'On — they follow your sleep plan automatically' : 'Off'}</div></div><button class="toggle ${st.nativeReminders ? 'on' : ''}" data-nativerem></button></div></div>
+  <div class="card tight">${list.map((r) => `<div class="list-item"><div class="grow"><b>${UI.esc(r.title)}</b><div class="muted small">${S.prettyTime(r.time)} daily</div></div><button class="toggle ${r.on ? 'on' : ''}" data-rem="${r.id}" aria-label="toggle"></button></div>`).join('')}</div>
+  <div class="notice">Times update by themselves as your bedtime shifts earlier. Turn individual reminders on or off above.</div>`;
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Reminders</h1><div class="sub">Free daily alerts via iPhone Calendar</div></div></div>
   <div class="card tight">${list.map((r) => `<div class="list-item"><div class="grow"><b>${UI.esc(r.title)}</b><div class="muted small">${S.prettyTime(r.time)} daily</div></div><button class="toggle ${r.on ? 'on' : ''}" data-rem="${r.id}" aria-label="toggle"></button></div>`).join('')}</div>
   <button class="btn primary block" data-ics>📅 Add to iPhone Calendar</button>
@@ -259,7 +264,8 @@ export function bind(root, parts, { rerender }) {
     root.querySelector('[data-installpc]')?.addEventListener('click', async () => { const ok = await window.__promptInstall?.(); if (ok) UI.toast('Installed! Find Revive in your Start menu', '🖥️'); rerender(); });
   }
   if (sub === 'summary') {
-    root.querySelector('[data-print]').onclick = () => {
+    root.querySelector('[data-print]').onclick = async () => {
+      if (Native.isNative) { const html = '<!doctype html><meta charset="utf-8"><title>Revive summary</title><body style="font-family:-apple-system,sans-serif;padding:20px">' + root.querySelector('#print-html').innerHTML + '</body>'; if (await Native.shareFile('Revive-summary.html', html, 'Revive summary')) return; }
       let pr = document.getElementById('print-root'); if (!pr) { pr = document.createElement('div'); pr.id = 'print-root'; document.body.appendChild(pr); }
       pr.innerHTML = root.querySelector('#print-html').innerHTML; window.print();
     };
@@ -267,12 +273,19 @@ export function bind(root, parts, { rerender }) {
       const tmp = document.createElement('div'); tmp.innerHTML = root.querySelector('#print-html').innerHTML;
       tmp.querySelectorAll('h1,h2,p,li,tr').forEach((el) => el.append('\n')); tmp.querySelectorAll('td,th').forEach((el) => el.append('  '));
       const text = tmp.textContent.replace(/\n\s*\n+/g, '\n').trim();
+      if (await Native.shareText('Revive summary', text)) return;
       try { if (navigator.share) await navigator.share({ title: 'Revive summary', text }); else { await navigator.clipboard.writeText(text); UI.toast('Summary copied', '📋'); } } catch (e) {}
     };
   }
   if (sub === 'reminders') {
     st.reminderPrefs = st.reminderPrefs || {};
-    root.querySelectorAll('[data-rem]').forEach((b) => b.onclick = () => { const id = b.dataset.rem; const cur = b.classList.contains('on'); st.reminderPrefs[id] = !cur; S.save(); b.classList.toggle('on'); });
+    root.querySelectorAll('[data-rem]').forEach((b) => b.onclick = () => { const id = b.dataset.rem; const cur = b.classList.contains('on'); st.reminderPrefs[id] = !cur; S.save(); b.classList.toggle('on'); window.__syncReminders?.(true); });
+    root.querySelector('[data-nativerem]')?.addEventListener('click', async () => {
+      if (st.nativeReminders) { st.nativeReminders = false; S.save(); await Native.cancelReminders(); UI.toast('Reminders off', '🔕'); rerender(); return; }
+      if (!(await Native.requestNotifications())) { UI.toast('Allow notifications in iPhone Settings → Revive', '⚠️'); return; }
+      st.nativeReminders = true; S.save(); const n = await window.__syncReminders?.(true); G.award('reminders_setup', 30, null); UI.toast(`${n || 0} daily reminders scheduled`, '⏰'); rerender();
+    });
+    if (Native.isNative) return;
     root.querySelector('[data-ics]').onclick = () => {
       const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
       ICS.downloadICS(list); G.award('reminders_setup', 30, null); UI.toast('Opening Calendar…', '📅');
@@ -294,7 +307,8 @@ export function bind(root, parts, { rerender }) {
       p.weeklyBudget = +root.querySelector('#p-b').value || p.weeklyBudget; p.startKg = +root.querySelector('#p-s').value || p.startKg;
       S.save(); UI.toast('Profile saved', '✅'); rerender();
     };
-    root.querySelector('[data-export]').onclick = () => {
+    root.querySelector('[data-export]').onclick = async () => {
+      if (await Native.shareFile(`revive-${S.dayKey()}.json`, S.exportJSON(), 'Revive data')) return;
       const blob = new Blob([S.exportJSON()], { type: 'application/json' }); const a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = `revive-${S.dayKey()}.json`; document.body.appendChild(a); a.click(); a.remove();
     };
@@ -304,7 +318,7 @@ export function bind(root, parts, { rerender }) {
       catch (err) { UI.toast('That file could not be read', '⚠️'); }
     };
     root.querySelector('[data-reset]').onclick = async () => {
-      if (await UI.confirmSheet('Delete everything?', 'All your logs, progress, XP and settings will be erased from this phone. This cannot be undone.', 'Delete all', true)) { S.resetAll(); location.hash = ''; location.reload(); }
+      if (await UI.confirmSheet('Delete everything?', 'All your logs, progress, XP and settings will be erased from this phone. This cannot be undone.', 'Delete all', true)) { await Native.clearPersisted(); await Native.cancelReminders(); S.resetAll(); location.hash = ''; location.reload(); }
     };
   }
 }

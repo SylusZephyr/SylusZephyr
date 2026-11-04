@@ -1,5 +1,6 @@
 // Small UI helpers: escaping, icons, sheets, toasts, confetti, haptic-ish feedback.
 import * as S from './store.js';
+import * as Native from './native.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const $ = (sel, root = document) => root.querySelector(sel);
@@ -34,7 +35,9 @@ export const ICON = {
 
 // ---------- feedback ----------
 export function haptic(ms = 12) {
-  try { if (S.get().settings.haptics && navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms); } catch (e) {}
+  try {
+    if (!S.get().settings.haptics) return;
+    if (Native.haptic(ms >= 300 ? 'success' : ms >= 40 ? 'medium' : 'light')) return; if (S.get().settings.haptics && navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms); } catch (e) {}
 }
 let audioCtx = null;
 export function ding(kind = 'tick') {

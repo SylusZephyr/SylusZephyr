@@ -101,13 +101,15 @@ function deepMerge(base, over) {
 }
 
 let saveTimer = null;
-export function save() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { console.warn('save failed', e); }
-  }, 60);
+let persistHook = null;
+export function setPersistHook(fn) { persistHook = fn; }
+function write() {
+  const json = JSON.stringify(state);
+  try { localStorage.setItem(KEY, json); } catch (e) { console.warn('save failed', e); }
+  if (persistHook) persistHook(json);
 }
-export function saveNow() { clearTimeout(saveTimer); try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+export function save() { clearTimeout(saveTimer); saveTimer = setTimeout(write, 60); }
+export function saveNow() { clearTimeout(saveTimer); write(); }
 
 export function get() { return state; }
 export function update(fn) { fn(state); save(); listeners.forEach((l) => l(state)); }

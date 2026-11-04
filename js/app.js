@@ -9,8 +9,13 @@ import * as Train from './views/train.js';
 import * as Track from './views/track.js';
 import * as Me from './views/me.js';
 import * as Onboard from './views/onboard.js';
+import * as Native from './native.js';
+import { reminderList } from './ics.js';
 
+await Native.restoreStorage();
 S.load();
+S.setPersistHook(Native.persist);
+Native.initChrome();
 
 const TABS = [
   { id: 'today', label: 'Today', icon: UI.ICON.home, view: Today },
@@ -72,7 +77,21 @@ function onForeground() {
   G.dailyOpen();
   render({ keepScroll: true });
   G.maybeWeeklyReview();
+  syncReminders();
 }
+
+// Native: keep daily notifications in step with the (shifting) sleep plan — once a day.
+export async function syncReminders(force = false) {
+  const st = S.get();
+  if (!Native.isNative || !st.onboarded || !st.nativeReminders) return;
+  if (!force && st.remindersSyncedFor === S.dayKey()) return;
+  st.reminderPrefs = st.reminderPrefs || {};
+  const ROUTE = { breakfast: 'cook', lunch: 'cook', dinner: 'cook', snack: 'cook', prep: 'cook/r/overnight_oats', kegel1: 'train', kegel2: 'train', bed: 'today', winddown: 'today' };
+  const n = await Native.scheduleReminders(reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: st.reminderPrefs[r.id] ?? r.on })));
+  st.remindersSyncedFor = S.dayKey(); S.save();
+  return n;
+}
+window.__syncReminders = syncReminders;
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') { S.saveNow(); hiddenAt = Date.now(); }
   else {
@@ -118,7 +137,7 @@ window.__promptInstall = promptInstall;
 
 // Environment hints: WeChat's in-app browser can't install or keep data reliably.
 const UA = navigator.userAgent || '';
-const IN_WECHAT = /MicroMessenger/i.test(UA);
+const IN_WECHAT = !Native.isNative && /MicroMessenger/i.test(UA);
 const IS_STANDALONE = window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
 const IS_IOS = /iPhone|iPad|iPod/.test(UA);
 function wechatGate() {
@@ -138,7 +157,8 @@ function boot() {
     if (S.get().onboarded) setTimeout(() => G.maybeWeeklyReview(), 900);
   });
   S.requestPersist();
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  if (Native.isNative) { Native.onNotificationTap((route) => { location.hash = route; }); syncReminders(); }
+  if (!Native.isNative && 'serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').then((reg) => {
       reg.addEventListener('updatefound', () => {
         const nw = reg.installing; if (!nw) return;
