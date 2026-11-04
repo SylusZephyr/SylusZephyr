@@ -236,7 +236,7 @@ function settings() {
   <button class="btn danger block mt12" data-reset>Delete all data</button>
   <a class="list-item mt12" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
-  <p class="tiny faint mt16" style="text-align:center">Revive 1.0 · not medical advice</p>`;
+  <p class="tiny faint mt16" style="text-align:center">Revive 2.0 · not medical advice</p>`;
 }
 
 function install() {
