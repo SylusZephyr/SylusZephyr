@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Revive</string>
+    <string name="title_activity_main">Revive</string>
+    <string name="package_name">com.syluszephyr.revive</string>
+    <string name="custom_url_scheme">com.syluszephyr.revive</string>
+</resources>

@@ -1,0 +1,15 @@
+{
+  "appId": "com.syluszephyr.revive",
+  "appName": "Revive",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0b0f1a",
+    "scheme": "Revive",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 600, "backgroundColor": "#0b0f1a", "showSpinner": false, "launchAutoHide": true },
+    "LocalNotifications": { "iconColor": "#ffb547" }
+  }
+}
