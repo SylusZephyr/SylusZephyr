@@ -173,5 +173,53 @@ export const PHOTOS = {
   "credit": "N509FZ · CC BY-SA 4.0",
   "page": "https://commons.wikimedia.org/wiki/File:Mid-size_Dapanji_at_Brother_Ali%27s_Roast_Chicken,_Kashi_City_(20230923140009).jpg",
   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "d_polo": {
+  "src": "img/food/d_polo.webp",
+  "credit": "Yuet Man Lee · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Uyghur_polo_as_served_at_Jiang_Lai_in_Toshima,_Tokyo.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "d_samsa": {
+  "src": "img/food/d_samsa.webp",
+  "credit": "Mizu basyo · CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Uyghur_samsa.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ "d_kebab": {
+  "src": "img/food/d_kebab.webp",
+  "credit": "N509FZ · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Lamb_kebabs_on_tamarisk_skewers_at_G%C3%BClhan_Restaurant,_Beijing_(20210402165927).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "d_indian": {
+  "src": "img/food/d_indian.webp",
+  "credit": "ノボホショコロトソ · CC BY 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Naan_and_Curry_03.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0"
+ },
+ "d_shawarma": {
+  "src": "img/food/d_shawarma.webp",
+  "credit": "cyclone bill · CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Shawarma_closeup.png",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
+ },
+ "tikka_wrap": {
+  "src": "img/food/tikka_wrap.webp",
+  "credit": "Vivekpat30 · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken-kathi-roll-recipe.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "protein_milk_dates": {
+  "src": "img/food/protein_milk_dates.webp",
+  "credit": "Ella Olsson from Stockholm, Sweden · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Dates_%26_Nuts_(31752661288).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "kofta_tray": {
+  "src": "img/food/kofta_tray.webp",
+  "credit": "Foodista · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:K%C3%B6fte_kebabs.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
  }
 };

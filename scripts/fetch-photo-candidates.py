@@ -9,7 +9,7 @@ import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 QUERIES = {
     'egg_paratha': 'egg paratha', 'aloo_paratha_cheat': 'aloo paratha', 'egg_muffins': 'egg muffins',
     'overnight_oats': 'overnight oats', 'yogurt_bowl': 'yogurt granola bowl', 'naan_egg_cheese': 'egg naan',
-    'french_toast': 'french toast sticks', 'chicken_cheese_wrap': 'chicken wrap', 'tikka_wrap': 'chicken tikka roll',
+    'french_toast': 'french toast sticks', 'chicken_cheese_wrap': 'chicken wrap', 'tikka_wrap': 'kathi roll',
     'tuna_melt': 'tuna melt sandwich', 'kebab_naan': 'seekh kebab', 'egg_mayo_sandwich': 'egg mayonnaise sandwich',
     'chicken_pizza_naan': 'naan pizza', 'airfryer_chicken_curry': 'chicken karahi', 'tandoori_thighs': 'tandoori chicken',
     'chapli_patties': 'chapli kabab', 'masala_fish': 'fish and chips', 'honey_salmon': 'salmon broccoli',
