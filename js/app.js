@@ -46,9 +46,15 @@ export function render({ keepScroll = false } = {}) {
   const y = window.scrollY;
   const nightMode = inWindDown();
   document.body.classList.toggle('night', nightMode);
-  app.innerHTML = `<main class="screen" id="screen">${tab.view.render(r.parts, { night: nightMode })}</main>
+  let body;
+  try { body = tab.view.render(r.parts, { night: nightMode }); }
+  catch (e) { logError(e, 'render:' + r.tab); body = crashCard(); }
+  app.innerHTML = `<main class="screen" id="screen">${body}</main>
     <nav class="tabbar"><div class="brand"><span>🔥</span>Revive</div>${TABS.map((t, i) => `<a class="tab ${t.id === r.tab ? 'active' : ''}" href="#${t.id}" aria-label="${t.label}">${t.icon}<span>${t.label}</span>${IS_DESKTOP ? `<kbd>${i + 1}</kbd>` : ''}</a>`).join('')}${IS_DESKTOP ? '<div class="side-foot">Private · stored only on this PC<br>Keys: 1–5 tabs · Esc closes</div>' : ''}</nav>`;
-  tab.view.bind && tab.view.bind(UI.$('#screen'), r.parts, { rerender: () => render({ keepScroll: true }) });
+  try { tab.view.bind && tab.view.bind(UI.$('#screen'), r.parts, { rerender: () => render({ keepScroll: true }) }); }
+  catch (e) { logError(e, 'bind:' + r.tab); }
+  UI.$('#screen [data-crash-home]')?.addEventListener('click', () => { location.hash = 'today'; render(); });
+  UI.$('#screen [data-crash-reload]')?.addEventListener('click', () => location.reload());
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
   countUp();
 }
@@ -83,6 +89,30 @@ function closePastDays() {
   for (let i = 1; i <= 7; i++) { const k = S.addDays(S.dayKey(), -i); if (st.days[k] && !st.closedDays[k]) { closeDay(k); st.closedDays[k] = true; } }
   S.save();
 }
+
+// ---------- Error safety net ----------
+// Errors are kept in a small local ring buffer (never uploaded) and the UI degrades to a
+// recoverable card instead of a blank screen.
+const ERR_KEY = 'revive.errors';
+function logError(err, where = 'global') {
+  try {
+    const list = JSON.parse(localStorage.getItem(ERR_KEY) || '[]');
+    list.push({ at: new Date().toISOString(), where, msg: String(err?.message || err).slice(0, 300), stack: String(err?.stack || '').slice(0, 800) });
+    localStorage.setItem(ERR_KEY, JSON.stringify(list.slice(-20)));
+  } catch (e) {}
+  console.error(where, err);
+}
+function crashCard() {
+  return `<div class="card danger" style="margin-top:40px;text-align:center"><div style="font-size:42px">🛠️</div><h3 class="mt8">This screen hit a problem</h3>
+    <p class="muted small mt8">Your data is safe. Go back to Today or reload the app.</p>
+    <div class="grid2 mt16"><button class="btn" data-crash-home>Back to Today</button><button class="btn primary" data-crash-reload>Reload</button></div></div>`;
+}
+let errorToastShown = false;
+window.addEventListener('error', (e) => { logError(e.error || e.message, 'window'); if (!errorToastShown) { errorToastShown = true; UI.toast('Something went wrong — your data is safe', '🛠️'); } });
+window.addEventListener('unhandledrejection', (e) => logError(e.reason, 'promise'));
+window.addEventListener('revive:storage-full', () => UI.toast('Phone storage is almost full — older details were trimmed', '💾'));
+if (S.loadIssues.includes('recovered-corrupt')) setTimeout(() => UI.toast('Saved data could not be read. A copy was kept and the app started fresh.', '⚠️'), 800);
+if (S.loadIssues.includes('storage-unavailable')) setTimeout(() => UI.toast('Private browsing blocks storage — progress will not be saved', '⚠️'), 800);
 
 // Re-render when the day rolls over or the app comes back to foreground.
 let lastDay = S.dayKey();
