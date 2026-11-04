@@ -137,5 +137,41 @@ export const PHOTOS = {
   "credit": "Swathi sri srinivasa raghavan · CC0",
   "page": "https://commons.wikimedia.org/wiki/File:Samosa_with_sweet_chutney.jpg",
   "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "avocado_egg_toast": {
+  "src": "img/food/avocado_egg_toast.webp",
+  "credit": "Luca Nebuloni from Milan, Italy · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Avocado_toast_with_eggs_(28508171495).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "nugget_wrap": {
+  "src": "img/food/nugget_wrap.webp",
+  "credit": "Mx. Granger · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Impossible_chicken_nuggets_2.jpg",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "aloo_tikki": {
+  "src": "img/food/aloo_tikki.webp",
+  "credit": "Raveesh Vyas from [Ahmedabad, Noida], India · CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Aloo_Tikki_served_with_chutneys.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
+ },
+ "mango_lassi": {
+  "src": "img/food/mango_lassi.webp",
+  "credit": "Misaochan · CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Mango_Lassi_.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ "hummus_wrap": {
+  "src": "img/food/hummus_wrap.webp",
+  "credit": "Jennifer from Vancouver, Canada · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Vegetable_and_Basil-Garlic_Hummus_Wrap_(4800115998).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "d_dapanji": {
+  "src": "img/food/d_dapanji.webp",
+  "credit": "N509FZ · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Mid-size_Dapanji_at_Brother_Ali%27s_Roast_Chicken,_Kashi_City_(20230923140009).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
  }
 };
