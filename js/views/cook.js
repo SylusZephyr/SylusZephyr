@@ -42,9 +42,11 @@ export function suggest({ slot, feel, mins, budget } = {}) {
 const methodPill = (m) => m === 'airfryer' ? '<span class="pill amber method">♨️ Air fryer</span>' : '<span class="pill green method">🥄 No-cook</span>';
 
 // Photo if we have one, otherwise the illustrated gradient + emoji.
-export function art(r) {
+// Photos are real <img> elements so the browser can lazy-load and decode them off the main thread.
+export function art(r, { eager = false } = {}) {
   const p = PHOTOS[r.id];
-  return p ? { cls: 'has-photo', style: `background:#1c2438 url('${p.src}') center/cover no-repeat`, emoji: '' } : { cls: '', style: UI.grad(r.bg), emoji: r.emoji };
+  if (!p) return { cls: '', style: UI.grad(r.bg), emoji: r.emoji };
+  return { cls: 'has-photo', style: `background:${r.bg[1]}`, emoji: `<img class="ph" src="${p.src}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="720" height="540">` };
 }
 
 function recipeCard(r) {
@@ -107,7 +109,7 @@ function detail(r) {
   const missing = r.ing.filter((i) => !i.opt && !pantry.has(i.id));
   const cookedN = st.cooked[r.id] || 0;
   return `
-  <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav>${fav ? '❤️' : '🤍'}</button>${art(r).emoji}</div>
+  <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav>${fav ? '❤️' : '🤍'}</button>${art(r, { eager: true }).emoji}</div>
   ${PHOTOS[r.id] ? `<div class="photo-credit">Photo: ${UI.esc(PHOTOS[r.id].credit)}</div>` : ''}
   <div class="row wrap mb8" style="gap:6px">${methodPill(r.method)}${r.tags.map((t) => `<span class="pill">${t}</span>`).join('')}${cookedN ? `<span class="pill green">Cooked ${cookedN}×</span>` : ''}</div>
   <h1 style="font-size:28px">${UI.esc(r.name)}</h1>

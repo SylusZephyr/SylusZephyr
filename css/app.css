@@ -532,3 +532,10 @@ a.link { text-decoration: none; }
 .star { font-size: 26px; color: var(--surface3); padding: 2px 4px; transition: transform .15s; }
 .star.on { color: var(--amber); }
 .star:active { transform: scale(1.25); }
+/* Lazy photo elements fill their container like a cover background */
+.has-photo { position: relative; overflow: hidden; }
+.has-photo > img.ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0; transition: opacity .35s ease; }
+.has-photo > img.ph.loaded, .has-photo > img.ph[data-done] { opacity: 1; }
+.rcard .hero.has-photo::after, .hero-lg.has-photo::before { z-index: 1; }
+.hero-lg.has-photo > .icon-btn { z-index: 2; }
+.rcard .hero.has-photo > img.ph, .rwide .thumb.has-photo > img.ph { position: absolute; inset: 0; z-index: 0; }

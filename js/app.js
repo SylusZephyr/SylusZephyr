@@ -60,6 +60,7 @@ export function render({ keepScroll = false } = {}) {
   UI.$('#screen [data-crash-reload]')?.addEventListener('click', () => location.reload());
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
   countUp();
+  document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
 }
 
 // Numbers that changed since the last render roll up to their new value.
@@ -177,6 +178,9 @@ document.addEventListener('keydown', (e) => {
   }
   if (!document.querySelector('#overlay-root > *') && /^[1-5]$/.test(e.key)) location.hash = TABS[+e.key - 1].id;
 });
+
+// Photos fade in once decoded (capture phase catches load events from any image).
+document.addEventListener('load', (e) => { if (e.target.classList?.contains('ph')) e.target.classList.add('loaded'); }, true);
 
 // Phones: swipe left/right on the page to move between tabs.
 let swipe = null;
