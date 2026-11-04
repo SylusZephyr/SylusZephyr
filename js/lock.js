@@ -102,7 +102,7 @@ export function setupSheet(onDone) {
               try { st.lock.credId = await registerFaceId(); st.lock.faceId = true; face = true; } catch (e) { st.lock.faceId = false; }
             }
             S.saveNow(); unlocked = true; close();
-            UI.toast(face ? 'Lock on: Face ID + PIN' : 'Lock on: PIN', '🔒'); onDone && onDone();
+            UI.toast(face ? 'Lock on: Face ID / Windows Hello + PIN' : 'Lock on: PIN', '🔒'); onDone && onDone();
           } else { first = null; pin = ''; msg.textContent = 'PINs did not match — start again.'; paint(); UI.haptic(60); }
         }
       }));

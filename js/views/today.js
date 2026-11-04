@@ -88,6 +88,7 @@ export function render(_, { night }) {
     <div class="row between tiny muted mt8"><span>❄️ ${st.game.freezes} freeze${st.game.freezes === 1 ? '' : 's'}</span><span>Today +${d.xpToday || 0} XP</span><span>Best 🔥 ${st.game.bestStreak}</span></div>
   </button>
 
+  ${window.__canInstall ? `<a class="nudge blue" href="#me/install"><span class="n-e">🖥️</span><div class="grow"><b>Install Revive on this PC</b><span>Own window, Start menu icon, works offline.</span></div></a>` : ''}
   ${installHint() ? `<a class="nudge blue" href="#me/install"><span class="n-e">📲</span><div class="grow"><b>Install Revive on your Home Screen</b><span>Safari → Share → Add to Home Screen. Works offline and keeps your data in one place.</span></div></a>` : ''}
   ${night ? '' : nudges().map((n) => `<button class="nudge ${n.cls || ''}" data-nudge="${n.act}"><span class="n-e">${n.e}</span><div class="grow"><b>${n.t}</b><span>${n.s}</span></div><span class="pill amber">+XP</span></button>`).join('')}
 

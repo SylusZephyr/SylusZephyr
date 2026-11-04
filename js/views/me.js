@@ -51,7 +51,7 @@ function main() {
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
     ${item('me/reminders', '⏰', 'Reminders', 'Add daily alerts to iPhone Calendar')}
     ${item('me/saved', '🔖', 'Saved cards', `${st.savedTips.length} saved`)}
-    ${item('me/install', '📲', 'Install on iPhone', 'Home Screen + offline')}
+    ${item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
     ${item('me/settings', '⚙️', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
   </div>
   <div class="card danger"><div class="kicker">Emergency (China)</div>
@@ -161,7 +161,7 @@ function settings() {
   const tg = (key, label, sub, on) => `<div class="list-item"><div class="grow"><b>${label}</b>${sub ? `<div class="muted small">${sub}</div>` : ''}</div><button class="toggle ${on ? 'on' : ''}" data-set="${key}"></button></div>`;
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Settings</h1></div></div>
   <div class="card tight">
-    <div class="list-item"><div class="grow"><b>App lock</b><div class="muted small">${st.lock.enabled ? (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'Off'}</div></div><button class="toggle ${st.lock.enabled ? 'on' : ''}" data-lock></button></div>
+    <div class="list-item"><div class="grow"><b>App lock</b><div class="muted small">${st.lock.enabled ? (st.lock.faceId ? 'Face ID / Windows Hello + PIN' : 'PIN') : 'Off'}</div></div><button class="toggle ${st.lock.enabled ? 'on' : ''}" data-lock></button></div>
     ${tg('winddown', 'Wind-down mode', 'Calmer app & sleeping feed after your wind-down time', s.winddown)}
     ${tg('sounds', 'Sounds', 'Reward chimes', s.sounds)}
     ${tg('haptics', 'Vibration', 'Where supported', s.haptics)}
@@ -181,14 +181,22 @@ function settings() {
 }
 
 function install() {
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Install on iPhone</h1></div></div>
-  <div class="card"><div class="small" style="line-height:1.8">
-    1. Open this page in <b>Safari</b> (not WeChat’s browser).<br>
-    2. Tap the <b>Share</b> button (square with arrow).<br>
-    3. Scroll and tap <b>Add to Home Screen</b> → <b>Add</b>.<br>
-    4. Open <b>Revive</b> from your Home Screen. It runs full-screen and works offline.<br><br>
-    <b>In China:</b> github.io can be slow or blocked on some networks. Load it once (use a VPN if needed) — after that it’s cached and works offline.</div></div>
-  <div class="notice">Data lives inside the Home Screen app. Use the same Home Screen icon every time — opening the site in normal Safari is a separate copy.</div>`;
+  const canPc = !!window.__canInstall;
+  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Install Revive</h1><div class="sub">iPhone and Windows PC</div></div></div>
+  <div class="card"><div class="kicker">🖥️ Windows PC</div>
+    ${canPc ? '<button class="btn primary block mb12" data-installpc>Install on this PC</button>' : ''}
+    <div class="small" style="line-height:1.8">
+    1. Open <b>https://syluszephyr.github.io/SylusZephyr/</b> in <b>Microsoft Edge</b> or <b>Google Chrome</b>.<br>
+    2. Click the <b>Install</b> icon in the address bar (a monitor with ⬇), or menu <b>⋯ → Apps → Install Revive</b>.<br>
+    3. Revive opens in its own window and appears in the <b>Start menu</b> — right-click it to <b>Pin to taskbar</b>.<br>
+    4. Works offline. Lock with <b>Windows Hello</b> (face, fingerprint or PIN) in Settings.<br>
+    Keyboard: <kbd>1</kbd>–<kbd>5</kbd> switch tabs · <kbd>Esc</kbd> closes · type your PIN on the lock screen.</div></div>
+  <div class="card"><div class="kicker">📱 iPhone</div><div class="small" style="line-height:1.8">
+    1. Open the same link in <b>Safari</b> (not WeChat’s browser).<br>
+    2. Tap <b>Share</b> → <b>Add to Home Screen</b> → <b>Add</b>.<br>
+    3. Always open Revive from the Home Screen icon.</div></div>
+  <div class="card"><div class="kicker">🔄 Phone ⇄ PC</div><p class="small muted" style="line-height:1.6">Each device keeps its own private data — nothing is uploaded, so they don’t sync automatically. To move your progress, use <b>Me → Settings → Export file</b> on one device and <b>Import file</b> on the other (AirDrop, WeChat File Transfer or a USB cable).</p></div>
+  <div class="notice">In China, github.io can be slow — load it once (VPN if needed). After that it works offline on both devices.</div>`;
 }
 
 // ---------- add sheets ----------
@@ -246,6 +254,9 @@ export function bind(root, parts, { rerender }) {
     root.querySelector('[data-addvisit]').onclick = () => addVisit(rerender);
     root.querySelectorAll('[data-dellab]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete result?', '', 'Delete', true)) { m.labs = m.labs.filter((x) => x.id !== b.dataset.dellab); S.save(); rerender(); } });
     root.querySelectorAll('[data-delvisit]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete visit?', '', 'Delete', true)) { m.visits = m.visits.filter((x) => x.id !== b.dataset.delvisit); S.save(); rerender(); } });
+  }
+  if (sub === 'install') {
+    root.querySelector('[data-installpc]')?.addEventListener('click', async () => { const ok = await window.__promptInstall?.(); if (ok) UI.toast('Installed! Find Revive in your Start menu', '🖥️'); rerender(); });
   }
   if (sub === 'summary') {
     root.querySelector('[data-print]').onclick = () => {

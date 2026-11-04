@@ -395,3 +395,46 @@ details[open] summary .faint svg { transform: rotate(90deg); }
 .nudge.red { background: rgba(255,107,107,.12); border-color: rgba(255,107,107,.4); }
 
 a.link { text-decoration: none; }
+
+/* ================= Desktop / Windows layout ================= */
+.brand { display: none; }
+@media (hover: hover) {
+  .btn:hover, .chip:hover, .icon-btn:hover { filter: brightness(1.15); }
+  .rcard, .rwide, a.card { transition: transform .15s ease, border-color .15s ease; }
+  .rcard:hover, .rwide:hover, a.card:hover { transform: translateY(-2px); border-color: rgba(255,181,71,.35); }
+  .tab:hover { color: var(--text); }
+}
+@media (min-width: 900px) {
+  :root { --side-w: 232px; }
+  .tabbar {
+    top: 0; bottom: 0; right: auto; width: var(--side-w); height: auto; padding: 22px 14px;
+    flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 4px;
+    border-top: 0; border-right: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; padding: 4px 12px 22px; letter-spacing: -0.02em; }
+  .brand span { font-size: 26px; }
+  .tab { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 12px 14px; border-radius: 14px; font-size: 15px; }
+  .tab.active { background: rgba(255,181,71,0.10); }
+  .tab kbd { margin-left: auto; opacity: .5; }
+  .side-foot { margin-top: auto; padding: 12px; font-size: 12px; color: var(--faint); line-height: 1.5; }
+  .screen { margin-left: calc(var(--side-w) + max(24px, (100vw - var(--side-w) - 860px) / 2)); margin-right: auto; max-width: 860px; padding: 32px 0 60px; }
+  .topbar h1 { font-size: 34px; }
+  .recipe-grid { grid-template-columns: repeat(4, 1fr); }
+  .rcard .hero { height: 130px; }
+  .hero-lg { margin: 0 0 20px; border-radius: 28px; height: 260px; padding-top: 0; }
+  .heat { max-width: 460px; }
+  .hero-lg .back, .hero-lg .fav { top: 16px; }
+  .badge-grid { grid-template-columns: repeat(6, 1fr); }
+  .sheet { bottom: 50%; transform: translateY(50%); border-radius: 26px; border: 1px solid var(--line); max-height: 86vh; animation: popIn .22s cubic-bezier(.2,.9,.3,1.2); padding-bottom: 22px; }
+  @keyframes popIn { from { opacity: 0; transform: translateY(52%) scale(.96); } to { opacity: 1; transform: translateY(50%); } }
+  .sheet .grabber { display: none; }
+  .story-viewer { width: 440px; margin: 0 auto; box-shadow: 0 0 0 100vmax rgba(0,0,0,.85); }
+  .cookmode, .trainer { padding-left: max(20px, calc(50vw - 340px)); padding-right: max(20px, calc(50vw - 340px)); }
+  #toast-root { top: 18px; }
+  .chips.scroll { margin: 0; padding: 2px 0 6px; flex-wrap: wrap; }
+  .stories { margin: 0 0 16px; padding: 4px 0; }
+}
+@media (min-width: 1300px) {
+  .recipe-grid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (min-width: 900px) { .screen.onboard { margin-left: auto; margin-right: auto; max-width: 560px; } }
