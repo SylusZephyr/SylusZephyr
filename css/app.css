@@ -539,3 +539,4 @@ a.link { text-decoration: none; }
 .rcard .hero.has-photo::after, .hero-lg.has-photo::before { z-index: 1; }
 .hero-lg.has-photo > .icon-btn { z-index: 2; }
 .rcard .hero.has-photo > img.ph, .rwide .thumb.has-photo > img.ph { position: absolute; inset: 0; z-index: 0; }
+.dthumb { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 14px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 34px; }

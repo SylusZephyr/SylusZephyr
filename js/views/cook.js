@@ -147,7 +147,7 @@ function pantryView() {
 function deliveryView() {
   return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Halal delivery</h1><div class="sub">Meituan 美团 · Ele.me 饿了么</div></div></div>
   <div class="notice mb12">Search <b>清真</b> in the app and sort by rating. Ask for <b>少盐</b> (less salt) and <b>加蛋 / 加肉</b> (extra egg / meat) for protein. Ordering still counts — eating something is the win.</div>
-  ${DELIVERY.map((d) => `<div class="card tight"><div class="row"><div class="rwide" style="border:0;padding:0;margin:0;background:none"><div class="thumb ${PHOTOS[d.id] ? 'has-photo' : ''}" style="${PHOTOS[d.id] ? `background:url('${PHOTOS[d.id].src}') center/cover` : 'background:var(--surface2)'}">${PHOTOS[d.id] ? '' : d.emoji}</div></div>
+  ${DELIVERY.map((d) => `<div class="card tight"><div class="row" style="align-items:flex-start"><div class="dthumb ${PHOTOS[d.id] ? 'has-photo' : ''}">${PHOTOS[d.id] ? `<img class="ph" src="${PHOTOS[d.id].src}" alt="" loading="lazy" decoding="async">` : d.emoji}</div>
     <div class="grow"><b>${UI.esc(d.name)}</b><div class="small" style="color:var(--amber)">${UI.esc(d.zh)}</div><div class="muted small">~¥${d.cost} · ${d.kcal} kcal · ${d.protein} g protein</div></div></div>
     <p class="small muted mt8">💡 ${UI.esc(d.tip)}</p>
     <div class="grid2 mt8"><button class="btn sm" data-copy="${UI.esc(d.zh)}">📋 Copy search</button><button class="btn sm primary" data-ate-del="${d.id}">✅ I ate this</button></div></div>`).join('')}`;
