@@ -55,7 +55,7 @@ def main(out):
     for rid, q in QUERIES.items():
         if meta.get(rid):
             continue
-        time.sleep(4)
+        time.sleep(9)
         params = {'action': 'query', 'format': 'json', 'generator': 'search', 'gsrnamespace': '6',
                   'gsrsearch': f'{q} filetype:bitmap', 'gsrlimit': '12', 'prop': 'imageinfo',
                   'iiprop': 'url|extmetadata|size|mime', 'iiurlwidth': '480'}
