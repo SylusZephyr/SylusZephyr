@@ -13,9 +13,11 @@ import * as Native from './native.js';
 import { reminderList } from './ics.js';
 import * as Cloud from './cloud.js';
 import * as A11y from './a11y.js';
+import { t, locale, dir } from './i18n.js';
 import { applyRemoteContent } from './content.js';
 
 await Native.restoreStorage();
+document.documentElement.lang = locale; document.documentElement.dir = dir;
 S.load();
 S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
@@ -24,11 +26,11 @@ window.addEventListener('revive:content', () => { if (applyRemoteContent()) rend
 window.addEventListener('revive:remote-update', () => { if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
 
 const TABS = [
-  { id: 'today', label: 'Today', icon: UI.ICON.home, view: Today },
-  { id: 'cook', label: 'Cook', icon: UI.ICON.cook, view: Cook },
-  { id: 'train', label: 'Train', icon: UI.ICON.train, view: Train },
-  { id: 'track', label: 'Track', icon: UI.ICON.track, view: Track },
-  { id: 'me', label: 'Me', icon: UI.ICON.me, view: Me },
+  { id: 'today', label: t('tab.today'), icon: UI.ICON.home, view: Today },
+  { id: 'cook', label: t('tab.cook'), icon: UI.ICON.cook, view: Cook },
+  { id: 'train', label: t('tab.train'), icon: UI.ICON.train, view: Train },
+  { id: 'track', label: t('tab.track'), icon: UI.ICON.track, view: Track },
+  { id: 'me', label: t('tab.me'), icon: UI.ICON.me, view: Me },
 ];
 
 export function route() {
@@ -104,8 +106,8 @@ function logError(err, where = 'global') {
   console.error(where, err);
 }
 function crashCard() {
-  return `<div class="card danger" style="margin-top:40px;text-align:center"><div style="font-size:42px">🛠️</div><h3 class="mt8">This screen hit a problem</h3>
-    <p class="muted small mt8">Your data is safe. Go back to Today or reload the app.</p>
+  return `<div class="card danger" style="margin-top:40px;text-align:center"><div style="font-size:42px">🛠️</div><h3 class="mt8">${t('error.screen')}</h3>
+    <p class="muted small mt8">${t('error.safe')}</p>
     <div class="grid2 mt16"><button class="btn" data-crash-home>Back to Today</button><button class="btn primary" data-crash-reload>Reload</button></div></div>`;
 }
 let errorToastShown = false;

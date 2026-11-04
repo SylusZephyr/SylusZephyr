@@ -1,5 +1,5 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-d76e1be159d6';
+const VERSION = 'revive-f0f0ff173793';
 const ASSETS = [
   './',
   'css/app.css',
@@ -57,6 +57,7 @@ const ASSETS = [
   'js/data/recipes-more.js',
   'js/data/recipes.js',
   'js/gamify.js',
+  'js/i18n.js',
   'js/ics.js',
   'js/lock.js',
   'js/native.js',

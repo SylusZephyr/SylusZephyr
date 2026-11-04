@@ -27,7 +27,8 @@ export function prettyTime(hhmm) {
   return `${h}:${pad(m)}${ap}`;
 }
 export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'numeric' }) {
-  return keyToDate(k).toLocaleDateString('en-GB', opts);
+  const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'en';
+  return keyToDate(k).toLocaleDateString(lang === 'en' ? 'en-GB' : lang, opts);
 }
 
 export const SCHEMA_VERSION = 2;

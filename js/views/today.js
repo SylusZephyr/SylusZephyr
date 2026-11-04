@@ -7,6 +7,7 @@ import { TIPS, STORIES } from '../data/content.js';
 import { RECIPES, RECIPE } from '../data/recipes.js';
 import { suggest, planToday, art } from './cook.js';
 import * as Search from './search.js';
+import { t } from '../i18n.js';
 
 function dayPhase() {
   const h = new Date().getHours();
@@ -15,7 +16,7 @@ function dayPhase() {
 
 function greeting() {
   const h = new Date().getHours(); const n = S.get().profile.name;
-  const g = h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Late night';
+  const g = t(h < 5 ? 'greet.night' : h < 12 ? 'greet.morning' : h < 17 ? 'greet.afternoon' : h < 22 ? 'greet.evening' : 'greet.late');
   return n ? `${g}, ${UI.esc(n)}` : g;
 }
 
@@ -227,7 +228,7 @@ function feedItems(k) {
 function feedHtml(k) {
   const items = feedItems(k);
   return `<div id="feed">${items.slice(0, feedShown).join('')}</div>` +
-    (items.length > feedShown ? '<div id="feed-more" class="feed-loader" aria-hidden="true"><span></span><span></span><span></span></div>' : '<div class="empty"><span class="e">🎉</span>You’re all caught up. New cards tomorrow.</div>');
+    (items.length > feedShown ? '<div id="feed-more" class="feed-loader" aria-hidden="true"><span></span><span></span><span></span></div>' : `<div class="empty"><span class="e">🎉</span>${t('feed.caughtUp')}</div>`);
 }
 
 export function bind(root, _, { rerender }) {
@@ -306,7 +307,7 @@ export function bind(root, _, { rerender }) {
       const next = items.slice(feedShown, feedShown + FEED_PAGE); feedShown += next.length;
       const tmp = document.createElement('div'); tmp.innerHTML = next.join('');
       [...tmp.children].forEach((c) => { c.classList.add('feed-in'); feed.appendChild(c); if (c.dataset.tip) io.observe(c); });
-      if (feedShown >= items.length) { loader.disconnect(); more.outerHTML = '<div class="empty"><span class="e">🎉</span>You’re all caught up. New cards tomorrow.</div>'; }
+      if (feedShown >= items.length) { loader.disconnect(); more.outerHTML = `<div class="empty"><span class="e">🎉</span>${t('feed.caughtUp')}</div>`; }
     }, { rootMargin: '600px 0px' });
     loader.observe(more);
   }
