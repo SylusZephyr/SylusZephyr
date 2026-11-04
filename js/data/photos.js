@@ -347,5 +347,17 @@ export const PHOTOS = {
   "credit": "Miansari66 · CC0",
   "page": "https://commons.wikimedia.org/wiki/File:Falafel_1.JPG",
   "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "sweet_potato_fries": {
+  "src": "img/food/sweet_potato_fries.webp",
+  "credit": "Thriving Vegetarian · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Baked_Sweet_Potato_Fries_With_Rosemary_and_Parmesan_-_8420845814.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "green_chutney_chicken": {
+  "src": "img/food/green_chutney_chicken.webp",
+  "credit": "Joegoaukfishcurry2 · CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_Hariyali_Kabab_(7843205634).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
  }
 };
