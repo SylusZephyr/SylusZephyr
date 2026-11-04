@@ -12,6 +12,7 @@ import * as Onboard from './views/onboard.js';
 import * as Native from './native.js';
 import { reminderList } from './ics.js';
 import * as Cloud from './cloud.js';
+import * as A11y from './a11y.js';
 import { applyRemoteContent } from './content.js';
 
 await Native.restoreStorage();
@@ -207,6 +208,7 @@ function boot() {
   });
   S.requestPersist();
   Cloud.init();
+  A11y.start();
   if (Native.isNative) {
     Native.onNotificationTap((route) => { location.hash = route; });
     syncReminders();
