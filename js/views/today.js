@@ -34,6 +34,7 @@ function todayStory() {
 
 // Context-aware nudges (replace push notifications when the app is open).
 function installHint() {
+  if (window.Capacitor?.isNativePlatform?.()) return false;
   const ua = navigator.userAgent || '';
   const standalone = window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
   return /iPhone|iPad|iPod/.test(ua) && !standalone;

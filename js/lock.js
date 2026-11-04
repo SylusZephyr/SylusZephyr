@@ -2,6 +2,7 @@
 // Note: this is a privacy screen for the app UI. Data lives in this browser's storage.
 import * as S from './store.js';
 import * as UI from './ui.js';
+import * as Native from './native.js';
 
 const enc = new TextEncoder();
 const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
@@ -14,12 +15,14 @@ export async function hashPin(pin) {
 }
 
 export async function faceIdAvailable() {
+  if (Native.isNative) return Native.biometricAvailable();
   try {
     return !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
   } catch (e) { return false; }
 }
 
 export async function registerFaceId() {
+  if (Native.isNative) { if (await Native.biometricVerify('Turn on Face ID for Revive')) return 'native'; throw new Error('cancelled'); }
   const challenge = crypto.getRandomValues(new Uint8Array(32));
   const userId = crypto.getRandomValues(new Uint8Array(16));
   const cred = await navigator.credentials.create({
@@ -36,6 +39,7 @@ export async function registerFaceId() {
 }
 
 export async function verifyFaceId(credId) {
+  if (Native.isNative) return Native.biometricVerify('Unlock Revive');
   const challenge = crypto.getRandomValues(new Uint8Array(32));
   const res = await navigator.credentials.get({
     publicKey: { challenge, allowCredentials: [{ type: 'public-key', id: unb64(credId) }], userVerification: 'required', timeout: 60000 },
