@@ -7,6 +7,7 @@ import * as ICS from '../ics.js';
 import * as Native from '../native.js';
 import * as Cloud from '../cloud.js';
 import { PHOTOS } from '../data/photos.js';
+import * as ShareCard from '../sharecard.js';
 import { RECIPE, DELIVERY } from '../data/recipes.js';
 import { TIPS, RED_FLAGS, CRISIS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
 import { pfWeek } from './train.js';
@@ -92,7 +93,8 @@ function main() {
     <div class="lvlbar mt12"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
     <div class="muted small mt8">${st.game.xp} XP total · ${lv.need - lv.into} XP to level ${lv.level + 1}</div>
     <div class="grid3 mt16"><div class="macro"><b>🔥 ${G.streak()}</b><span>streak</span></div><div class="macro"><b>🪙 ${st.game.coins}</b><span>coins</span></div><div class="macro"><b>❄️ ${st.game.freezes}</b><span>freezes</span></div></div>
-    <button class="btn sm mt12" data-buyfreeze ${st.game.coins < 100 || st.game.freezes >= 3 ? 'disabled' : ''}>Buy streak freeze · 🪙100</button>
+    <div class="row mt12" style="justify-content:center;gap:8px"><button class="btn sm primary" data-sharecard>📤 Share progress</button>
+    <button class="btn sm" data-buyfreeze ${st.game.coins < 100 || st.game.freezes >= 3 ? 'disabled' : ''}>❄️ Freeze · 🪙100</button></div>
   </div>
   <a class="card" href="#me/badges" style="display:block;color:inherit;text-decoration:none"><div class="row between"><div class="kicker">Badges</div><span class="small muted">${nb}/${G.BADGES.length}</span></div>
     <div class="row mt8" style="gap:6px;font-size:28px;overflow:hidden">${G.BADGES.filter((b) => st.game.badges[b.id]).slice(-8).map((b) => b.e).join('') || '<span class="small muted">Complete actions to earn badges</span>'}</div></a>
@@ -293,6 +295,7 @@ function addVisit(rerender) {
 export function bind(root, parts, { rerender }) {
   const st = S.get(); const sub = parts[0];
   if (!sub) {
+    root.querySelector('[data-sharecard]')?.addEventListener('click', async () => { try { await ShareCard.share(); G.award('share_card', 10, null, { silent: true }); } catch (e) { UI.toast('Could not create the image', '⚠️'); } });
     root.querySelector('[data-buyfreeze]')?.addEventListener('click', () => { if (st.game.coins >= 100 && st.game.freezes < 3) { st.game.coins -= 100; st.game.freezes++; S.save(); UI.toast('Streak freeze bought', '❄️'); rerender(); } });
   }
   if (sub === 'medical') {

@@ -37,6 +37,7 @@ function overview() {
   <div class="card cool glow"><div class="kicker">4-week plan · week ${Math.min(wk, 4)}${wk > 4 ? ' (maintenance)' : ''}</div><h3>${UI.esc(prog.t)}</h3>
     ${prog.goals.map((g) => `<div class="small" style="padding:4px 0">• ${UI.esc(g)}</div>`).join('')}</div>
   ${insightsCard()}
+  ${journalCard()}
   <div class="card"><div class="kicker">Daily XP · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: st.days[k]?.xpToday || 0, label: S.prettyDate(k, { day: 'numeric' }), color: k === S.dayKey() ? '#ffb547' : '#5aa9ff' })), { h: 120 })}</div>`;
 }
 
@@ -67,6 +68,14 @@ export function insights() {
   out.sort((x, y) => Math.abs(y.diff) - Math.abs(x.diff));
   return { need: 0, list: out.slice(0, 4) };
 }
+function journalCard() {
+  const st = S.get();
+  const notes = Object.entries(st.days).filter(([, d]) => d.notes).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 5);
+  return `<div class="card"><div class="row between"><div class="kicker">📓 Journal</div><button class="btn sm" data-journal>${S.day().notes ? 'Edit today' : '+ Write'}</button></div>
+    ${notes.length ? notes.map(([k, d]) => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="tiny muted">${S.prettyDate(k)} ${d.mood != null ? ['😞', '😕', '😐', '🙂', '😄'][d.mood] : ''}</div><div class="small" style="white-space:pre-wrap;margin-top:4px">${UI.esc(d.notes)}</div></div>`).join('')
+      : '<p class="muted small mt8">A line a day about what helped or got in the way. Patterns become obvious after a week.</p>'}</div>`;
+}
+
 function insightsCard() {
   const r = insights();
   return `<div class="card cool glow"><div class="kicker">🔍 Your patterns</div>
@@ -183,5 +192,6 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-weigh]')?.addEventListener('click', () => Sh.weighSheet(rerender));
   root.querySelectorAll('[data-delw]').forEach((b) => b.onclick = async () => { if (await UI.confirmSheet('Delete weigh-in?', '', 'Delete', true)) { st.weights = st.weights.filter((w) => w.date !== b.dataset.delw); S.save(); rerender(); } });
   root.querySelectorAll('[data-ci]').forEach((b) => b.onclick = () => Sh.checkinSheet(b.dataset.ci, rerender));
+  root.querySelector('[data-journal]')?.addEventListener('click', () => Sh.energySheet(rerender));
   root.querySelector('[data-sx]')?.addEventListener('click', () => Sh.sxSheet(rerender));
 }

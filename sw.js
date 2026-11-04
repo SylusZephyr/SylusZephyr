@@ -1,10 +1,10 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-v1.11.0';
+const VERSION = 'revive-v1.12.0';
 const ASSETS = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/store.js', 'js/ui.js', 'js/gamify.js', 'js/plan.js', 'js/lock.js', 'js/ics.js', 'js/charts.js',
   'js/data/ingredients.js', 'js/data/recipes.js', 'js/data/content.js',
-  'js/native.js', 'js/cloud.js', 'js/sync.js', 'js/config.js', 'js/content.js', 'js/nutrition.js', 'js/data/foods.js', 'js/data/photos.js', 'js/views/today.js', 'js/views/cook.js', 'js/views/train.js', 'js/views/track.js', 'js/views/me.js', 'js/views/onboard.js', 'js/views/shared.js',
+  'js/native.js', 'js/cloud.js', 'js/sync.js', 'js/config.js', 'js/content.js', 'js/nutrition.js', 'js/data/foods.js', 'js/data/photos.js', 'js/sharecard.js', 'js/views/today.js', 'js/views/cook.js', 'js/views/train.js', 'js/views/track.js', 'js/views/me.js', 'js/views/onboard.js', 'js/views/shared.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
 ];
 self.addEventListener('install', (e) => {

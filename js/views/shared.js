@@ -235,6 +235,7 @@ export function energySheet(onDone) {
     <div class="field"><label>Energy</label>${UI.scaleButtons('energy', 5, energy, ['🪫', '😮‍💨', '😐', '🙂', '⚡'], true)}</div>
     <div class="field"><label>Mood</label>${UI.scaleButtons('mood', 5, mood, ['😞', '😕', '😐', '🙂', '😄'], true)}</div>
     <div class="field"><label>Appetite</label>${UI.scaleButtons('appetite', 5, appetite, ['🚫', '🥄', '🍽️', '😋', '🤤'], true)}</div>
+    <div class="field"><label>Journal <span class="faint">(optional, private)</span></label><textarea id="en-note" rows="3" maxlength="600" placeholder="What helped today? What got in the way?">${UI.esc(d.notes || '')}</textarea></div>
     <button class="btn primary block mt16" id="en-save">Save</button>`, {
     onMount: (sh, close) => {
       sh.querySelectorAll('[data-scale] button').forEach((b) => b.onclick = () => {
@@ -242,7 +243,7 @@ export function energySheet(onDone) {
         if (n === 'energy') energy = v; if (n === 'mood') mood = v; if (n === 'appetite') appetite = v;
         b.parentElement.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); UI.haptic(6);
       });
-      sh.querySelector('#en-save').onclick = (ev) => { d.energy = energy; d.mood = mood; d.appetite = appetite; S.save(); G.award('energy_log', 10, ev); G.evaluateQuests(); close(); onDone && onDone(); };
+      sh.querySelector('#en-save').onclick = (ev) => { d.energy = energy; d.mood = mood; d.appetite = appetite; const note = sh.querySelector('#en-note').value.trim(); if (note && note !== d.notes) G.award('journal', 10, null, { silent: true }); d.notes = note; S.save(); G.award('energy_log', 10, ev); G.evaluateQuests(); close(); onDone && onDone(); };
     },
   });
 }
