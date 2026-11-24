@@ -10,10 +10,10 @@ const draft = { name: '', wake: '10:00', bed: '03:30', kg: 62, pantry: new Set(S
 
 const STEPS = [
   () => `<div class="col" style="min-height:70vh;justify-content:center;text-align:center;gap:16px">
-      <div class="ob-badge big">🔥</div>
+      <img src="icons/mark.svg" alt="" width="96" height="96" style="margin:0 auto">
       <h1 style="font-size:40px;letter-spacing:-0.03em">Revive</h1>
       <p class="muted" style="font-size:17px">Your private recovery companion.<br>Food that is easy. Sleep that settles. Training that works. Progress you can see.</p>
-      <div class="notice mt12" style="text-align:left">🔒 <b>Private by design.</b> Works fully offline with no account. Optional sync stays private to you. No ads, no tracking.</div>
+      <div class="notice mt12" style="text-align:left"><b>Private by design.</b> Works fully offline with no account. Optional sync stays private to you. No ads, no tracking.</div>
       <div class="notice" style="text-align:left">🩺 Revive supports your plan — it doesn’t diagnose or replace your doctor.</div>
     </div>`,
   () => `<div class="ob-badge">👋</div><h1 class="mb8">What should we call you?</h1><p class="muted">Just for greetings. Optional.</p>
