@@ -7,6 +7,7 @@ import { suggest, planToday, art } from './cook.js';
 import * as Search from './search.js';
 import * as Caf from '../caffeine.js';
 import * as Pr from '../prayer.js';
+import * as Progress from '../progress.js';
 
 const I = UI.ICON;
 const nowMin = (d = new Date()) => d.getHours() * 60 + d.getMinutes();
@@ -97,6 +98,16 @@ function drinkSheet(onDone, onRemove) {
   });
 }
 
+function challengeCard() {
+  const c = Progress.thisWeek();
+  return `<section class="card challenge ${c.done ? 'done' : ''}">
+    <div class="row between"><div class="kicker" style="margin:0">This week’s challenge</div><span class="small muted">${c.done ? 'Complete' : c.daysLeft ? `${c.daysLeft} day${c.daysLeft === 1 ? '' : 's'} left` : 'Last day'}</span></div>
+    <h3 class="mt8">${UI.esc(c.t)}</h3>
+    <div class="segbar mt12" aria-label="${c.value} of ${c.goal}">${Array.from({ length: c.goal }, (_, i) => `<i class="${i < c.value ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="row between mt8 small"><span class="muted">${c.done ? 'Earned 150 XP and a streak freeze' : UI.esc(c.why)}</span><b style="white-space:nowrap;margin-left:12px">${c.value} / ${c.goal}</b></div>
+  </section>`;
+}
+
 function prayerCard() {
   const cfg = Pr.settings(); const now = new Date();
   const fast = Pr.fasting(now) ? Pr.fastWindow(now) : null;
@@ -168,6 +179,7 @@ export function render(_, { night }) {
     <div class="next-list">${next.map((x) => `<button class="nx ${x.now || x.soon ? 'now' : ''}" data-act="${x.act}"><span class="ico">${x.icon}</span><span class="grow"><div class="t">${x.t}</div><div class="s">${x.s}</div></span><span class="when">${x.anytime ? 'Today' : x.now ? 'Now' : S.prettyTime(S.fmtMin(x.at))}</span></button>`).join('') || '<p class="small muted">Nothing else scheduled today.</p>'}</div>
   </section>
   </div><div class="t-col">
+  ${challengeCard()}
   ${prayerCard()}
   ${cafCard(k)}
 

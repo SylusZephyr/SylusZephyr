@@ -105,6 +105,7 @@ export function ding(kind = 'tick') {
 const toastQueue = [];
 let toastActive = 0;
 export function toast(msg, icon) {
+  msg = String(msg).replace(EMOJI, '').replace(/\s{2,}/g, ' ').trim();
   toastQueue.push([msg, icon]); pumpToasts();
 }
 function pumpToasts() {

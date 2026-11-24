@@ -17,6 +17,7 @@ import { t, locale, dir } from './i18n.js';
 import { applyRemoteContent } from './content.js';
 import * as Theme from './theme.js';
 import * as Prayer from './prayer.js';
+import * as Progress from './progress.js';
 
 await Native.restoreStorage();
 document.documentElement.lang = locale; document.documentElement.dir = dir;
@@ -64,6 +65,7 @@ export function render({ keepScroll = false } = {}) {
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
   UI.stripEmoji(UI.$('#screen'));
   countUp();
+  try { Progress.evaluate(); Progress.checkMoments(); } catch (e) { logError(e, 'progress'); }
   document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
 }
 
@@ -236,7 +238,7 @@ function boot() {
   Lock.showLock(() => {
     if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
     render();
-    if (S.get().onboarded) setTimeout(() => G.maybeWeeklyReview(), 900);
+    if (S.get().onboarded) { setTimeout(() => G.maybeWeeklyReview(), 900); Progress.maybeMonthlyRecap(); }
   });
   S.requestPersist();
   Cloud.init();

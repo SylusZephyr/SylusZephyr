@@ -14,6 +14,7 @@ import { pfWeek } from './train.js';
 import * as Pr from '../prayer.js';
 import * as Caf from '../caffeine.js';
 import * as Theme from '../theme.js';
+import * as Progress from '../progress.js';
 
 const LABS = [
   { name: 'Testosterone (morning, total)', unit: 'nmol/L', ref: '~8.6–29' },
@@ -92,15 +93,18 @@ function main() {
   const qs = (st.medical.questions || []); const open = qs.filter((q) => !q.done).length;
   return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><a class="icon-btn" href="#me/settings" aria-label="Settings">${UI.ICON.gear}</a></div>
   <div class="card">
-    <div class="grid3">
+    <div class="small muted">Level ${lv.level}</div><h2 style="font-size:24px;margin-top:2px">${lv.title}</h2>
+    <p class="small muted mt8">${G.TITLE_NOTE[Math.min(G.TITLE_NOTE.length - 1, Math.floor((lv.level - 1) / 2))]}</p>
+    <div class="grid3 mt12">
       <div class="macro"><b>${G.streak()}</b><span>day streak</span></div>
       <div class="macro"><b>${st.game.bestStreak}</b><span>best streak</span></div>
-      <div class="macro"><b>${lv.level}</b><span>level</span></div>
+      <div class="macro"><b>${Object.values(st.game.challenges || {}).filter((c) => c.done).length}</b><span>challenges</span></div>
     </div>
     <div class="row between small muted mt12"><span>${lv.need - lv.into} XP to level ${lv.level + 1}</span><span>${st.game.freezes} streak freeze${st.game.freezes === 1 ? '' : 's'}</span></div>
     <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
     <button class="btn block mt12" data-sharecard>Share progress image</button>
   </div>
+  <button class="card" data-recap style="display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left"><span><b>Monthly recap</b><div class="small muted">${Progress.monthData(Progress.lastMonthKey()).label}</div></span><span class="chev">${UI.ICON.chev}</span></button>
   <a class="card" href="#me/badges" style="display:flex;align-items:center;justify-content:space-between;color:inherit;text-decoration:none"><span><b>Milestones</b><div class="small muted">${nb} of ${G.BADGES.length} reached</div></span><span class="chev">${UI.ICON.chev}</span></a>
   <div class="card tight">
     ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
@@ -352,6 +356,7 @@ export function bind(root, parts, { rerender }) {
   const st = S.get(); const sub = parts[0];
   if (!sub) {
     root.querySelector('[data-sharecard]')?.addEventListener('click', async () => { try { await ShareCard.share(); G.award('share_card', 10, null, { silent: true }); } catch (e) { UI.toast('Could not create the image', '⚠️'); } });
+    root.querySelector('[data-recap]')?.addEventListener('click', () => Progress.openRecap(Progress.lastMonthKey()));
     root.querySelector('[data-buyfreeze]')?.addEventListener('click', () => { if (st.game.coins >= 100 && st.game.freezes < 3) { st.game.coins -= 100; st.game.freezes++; S.save(); UI.toast('Streak freeze bought', '❄️'); rerender(); } });
   }
   if (sub === 'medical') {
