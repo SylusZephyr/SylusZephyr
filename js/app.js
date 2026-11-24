@@ -46,7 +46,7 @@ let lastScroll = {};
 export function render({ keepScroll = false } = {}) {
   const app = UI.$('#app');
   const st = S.get();
-  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); return; }
+  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); UI.stripEmoji(app); return; }
   const r = route();
   const tab = TABS.find((t) => t.id === r.tab);
   const y = window.scrollY;
@@ -62,6 +62,7 @@ export function render({ keepScroll = false } = {}) {
   UI.$('#screen [data-crash-home]')?.addEventListener('click', () => { location.hash = 'today'; render(); });
   UI.$('#screen [data-crash-reload]')?.addEventListener('click', () => location.reload());
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
+  UI.stripEmoji(UI.$('#screen'));
   countUp();
   document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
 }

@@ -48,13 +48,17 @@ const methodPill = (m) => m === 'airfryer' ? '<span class="pill amber method">�
 // Photos are real <img> elements so the browser can lazy-load and decode them off the main thread.
 export function art(r, { eager = false } = {}) {
   const p = PHOTOS[r.id];
-  if (!p) return { cls: '', style: UI.grad(r.bg), emoji: r.emoji };
+  if (!p) {
+    // No photo yet: a quiet monogram tile tinted with the dish's colour, not a giant emoji.
+    const mono = r.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter((w) => w.length > 2 && !/^(the|and|with|air|fryer|quick|cheat|big|easy)$/i.test(w)).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+    return { cls: 'mono-tile', style: `--tint:${r.bg[0]}`, emoji: `<span class="mono">${mono}</span>` };
+  }
   return { cls: 'has-photo', style: `background:${r.bg[1]}`, emoji: `<img class="ph" src="${p.src}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="720" height="540">` };
 }
 
 function recipeCard(r) {
   const fav = S.get().favorites.includes(r.id); const a = art(r);
-  return `<a class="rcard" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? '<span class="fav">❤️</span>' : ''}${methodPill(r.method)}</div>
+  return `<a class="rcard" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? `<span class="fav" style="color:var(--coral)">${UI.ICON.heartFill}</span>` : ''}${methodPill(r.method)}</div>
     <div class="body"><div class="name">${UI.esc(r.name)}</div><div class="meta">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div></div></a>`;
 }
 
@@ -82,7 +86,7 @@ function main() {
   const shopN = (st.shopping || []).filter((x) => !x.done).length;
   return `
   <div class="topbar"><div><div class="sub">Air fryer · no-cook · halal</div><h1>Cook</h1></div>
-    <div class="row"><button class="icon-btn" data-search aria-label="Search">🔍</button><a class="icon-btn" href="#cook/shop" aria-label="Shopping list" style="position:relative">🛒${shopN ? `<span class="pill coral" style="position:absolute;top:-6px;right:-8px">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">🧺</a></div></div>
+    <div class="row"><button class="icon-btn" data-search aria-label="Search">${UI.ICON.search}</button><a class="icon-btn" href="#cook/shop" aria-label="Shopping list" style="position:relative">${UI.ICON.cart}${shopN ? `<span class="pill coral" style="position:absolute;top:-6px;right:-8px">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">${UI.ICON.pantry}</a></div></div>
 
   <div class="card glow">
     <div class="kicker">What can I make right now?</div>
@@ -113,7 +117,7 @@ function detail(r) {
   const missing = r.ing.filter((i) => !i.opt && !pantry.has(i.id));
   const cookedN = st.cooked[r.id] || 0;
   return `
-  <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav>${fav ? '❤️' : '🤍'}</button>${art(r, { eager: true }).emoji}</div>
+  <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav aria-pressed="${fav}" aria-label="Favourite" style="${fav ? 'color:var(--coral)' : ''}">${fav ? UI.ICON.heartFill : UI.ICON.heart}</button>${art(r, { eager: true }).emoji}</div>
   ${PHOTOS[r.id] ? `<div class="photo-credit">Photo: ${UI.esc(PHOTOS[r.id].credit)}</div>` : ''}
   <div class="row wrap mb8" style="gap:6px">${methodPill(r.method)}${r.tags.map((t) => `<span class="pill">${t}</span>`).join('')}${cookedN ? `<span class="pill green">Cooked ${cookedN}×</span>` : ''}</div>
   <h1 style="font-size:28px">${UI.esc(r.name)}</h1>

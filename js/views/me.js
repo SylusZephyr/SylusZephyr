@@ -90,25 +90,25 @@ const item = (href, ico, title, subt) => `<a class="list-item" href="#${href}" s
 function main() {
   const st = S.get(); const lv = G.levelInfo(); const nb = Object.keys(st.game.badges).length;
   const qs = (st.medical.questions || []); const open = qs.filter((q) => !q.done).length;
-  return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><a class="icon-btn" href="#me/settings">⚙️</a></div>
-  <div class="card glow" style="text-align:center">
-    <div style="font-size:54px">${lv.level >= 10 ? '👑' : lv.level >= 6 ? '🦾' : lv.level >= 3 ? '🔥' : '🌱'}</div>
-    <h2 class="mt8">Level ${lv.level} · ${lv.title}</h2>
-    <div class="lvlbar mt12"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
-    <div class="muted small mt8">${st.game.xp} XP total · ${lv.need - lv.into} XP to level ${lv.level + 1}</div>
-    <div class="grid3 mt16"><div class="macro"><b>🔥 ${G.streak()}</b><span>streak</span></div><div class="macro"><b>🪙 ${st.game.coins}</b><span>coins</span></div><div class="macro"><b>❄️ ${st.game.freezes}</b><span>freezes</span></div></div>
-    <div class="row mt12" style="justify-content:center;gap:8px"><button class="btn sm primary" data-sharecard>📤 Share progress</button>
-    <button class="btn sm" data-buyfreeze ${st.game.coins < 100 || st.game.freezes >= 3 ? 'disabled' : ''}>❄️ Freeze · 🪙100</button></div>
+  return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><a class="icon-btn" href="#me/settings" aria-label="Settings">${UI.ICON.gear}</a></div>
+  <div class="card">
+    <div class="grid3">
+      <div class="macro"><b>${G.streak()}</b><span>day streak</span></div>
+      <div class="macro"><b>${st.game.bestStreak}</b><span>best streak</span></div>
+      <div class="macro"><b>${lv.level}</b><span>level</span></div>
+    </div>
+    <div class="row between small muted mt12"><span>${lv.need - lv.into} XP to level ${lv.level + 1}</span><span>${st.game.freezes} streak freeze${st.game.freezes === 1 ? '' : 's'}</span></div>
+    <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
+    <button class="btn block mt12" data-sharecard>Share progress image</button>
   </div>
-  <a class="card" href="#me/badges" style="display:block;color:inherit;text-decoration:none"><div class="row between"><div class="kicker">Badges</div><span class="small muted">${nb}/${G.BADGES.length}</span></div>
-    <div class="row mt8" style="gap:6px;font-size:28px;overflow:hidden">${G.BADGES.filter((b) => st.game.badges[b.id]).slice(-8).map((b) => b.e).join('') || '<span class="small muted">Complete actions to earn badges</span>'}</div></a>
+  <a class="card" href="#me/badges" style="display:flex;align-items:center;justify-content:space-between;color:inherit;text-decoration:none"><span><b>Milestones</b><div class="small muted">${nb} of ${G.BADGES.length} reached</div></span><span class="chev">${UI.ICON.chev}</span></a>
   <div class="card tight">
     ${item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
     ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
     ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
     ${item('me/prayer', '🕌', 'Prayer times & Ramadan', Pr.settings().enabled ? `${UI.esc(Pr.settings().cityName)} · ${Pr.fasting() ? 'fasting mode on' : 'next: ' + Pr.next().label}` : 'Off · offline, no location needed')}
-    ${item('me/saved', '🔖', 'Saved cards', `${st.savedTips.length} saved`)}
+    ${item('me/saved', '🔖', 'Library', `${TIPS.length} short reads · ${st.savedTips.length} saved`)}
     ${Native.isNative || window.reviveDesktop ? '' : item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
     ${item('me/settings', '⚙️', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
   </div>
@@ -207,15 +207,20 @@ function reminders() {
 }
 
 function badges() {
-  const st = S.get();
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Badges</h1><div class="sub">${Object.keys(st.game.badges).length} of ${G.BADGES.length} unlocked</div></div></div>
-  <div class="badge-grid">${G.BADGES.map((b) => `<div class="badge ${st.game.badges[b.id] ? '' : 'locked'}"><div class="b">${b.e}</div><span>${UI.esc(b.n)}</span><span class="faint" style="font-weight:500">${UI.esc(b.d)}</span></div>`).join('')}</div>`;
+  const st = S.get(); const got = G.BADGES.filter((b) => st.game.badges[b.id]); const left = G.BADGES.filter((b) => !st.game.badges[b.id]);
+  const row = (b, done) => `<div class="list-item"><div class="li-ico" style="${done ? 'background:var(--green);color:#0b0c0e' : ''}">${done ? UI.ICON.check : UI.ICON.lock}</div><div class="grow"><b style="${done ? '' : 'color:var(--muted)'}">${UI.esc(b.n)}</b><div class="small muted">${UI.esc(b.d)}</div></div></div>`;
+  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Milestones</h1><div class="sub">${got.length} of ${G.BADGES.length} reached</div></div></div>
+  ${got.length ? `<div class="section-title">Reached</div><div class="card tight">${got.map((b) => row(b, true)).join('')}</div>` : ''}
+  <div class="section-title">Ahead</div><div class="card tight">${left.map((b) => row(b, false)).join('')}</div>`;
 }
 
+let libCat = 'all';
 function saved() {
-  const st = S.get(); const tips = TIPS.filter((t) => st.savedTips.includes(t.id));
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Saved</h1></div></div>
-  ${tips.length ? tips.map((t) => `<div class="tipcard" style="${UI.grad(t.bg)}"><div class="big">${t.e}</div><h3>${UI.esc(t.title)}</h3><p>${UI.esc(t.body)}</p></div>`).join('') : '<div class="empty"><span class="e">🔖</span>Save cards from your feed to read later</div>'}`;
+  const st = S.get(); const cats = [...new Set(TIPS.map((t) => t.cat))];
+  const list = TIPS.filter((t) => libCat === 'all' || (libCat === 'saved' ? st.savedTips.includes(t.id) : t.cat === libCat));
+  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Library</h1><div class="sub">${TIPS.length} short reads on food, sleep, training and mood</div></div></div>
+  <div class="chips scroll mb12">${[['all', 'All'], ['saved', `Saved (${st.savedTips.length})`], ...cats.map((c) => [c, c])].map(([id, l]) => `<button class="chip ${libCat === id ? 'on' : ''}" data-libcat="${UI.esc(id)}">${UI.esc(l)}</button>`).join('')}</div>
+  ${list.length ? list.map((t) => { const sv = st.savedTips.includes(t.id); return `<article class="card"><div class="row between"><span class="small muted">${UI.esc(t.cat)}</span><button class="icon-btn" style="width:32px;height:32px" data-libsave="${t.id}" aria-pressed="${sv}" aria-label="Save">${sv ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div><h3 class="mt8">${UI.esc(t.title)}</h3><p class="small muted mt8" style="line-height:1.55">${UI.esc(t.body)}</p></article>`; }).join('') : '<div class="empty">Nothing saved yet.</div>'}`;
 }
 
 function prayer() {
@@ -285,7 +290,7 @@ function settings() {
   <button class="btn danger block mt12" data-reset>Delete all data</button>
   <a class="list-item mt12" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
-  <p class="tiny faint mt16" style="text-align:center">Revive 3.0 · not medical advice</p>`;
+  <p class="tiny faint mt16" style="text-align:center">Revive 4.0 · not medical advice</p>`;
 }
 
 function install() {
@@ -430,6 +435,10 @@ export function bind(root, parts, { rerender }) {
       const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
       try { if (!(await ICS.shareICS(list))) UI.toast('Sharing not supported — open Revive in Safari and try again', '⚠️'); else G.award('reminders_setup', 30, null); } catch (e) {}
     };
+  }
+  if (sub === 'saved') {
+    root.querySelectorAll('[data-libcat]').forEach((b) => b.onclick = () => { libCat = b.dataset.libcat; rerender(); });
+    root.querySelectorAll('[data-libsave]').forEach((b) => b.onclick = () => { const id = b.dataset.libsave; const i = st.savedTips.indexOf(id); if (i >= 0) st.savedTips.splice(i, 1); else st.savedTips.push(id); S.save(); rerender(); });
   }
   if (sub === 'prayer') {
     const pr = () => (st.prayer = st.prayer || {});

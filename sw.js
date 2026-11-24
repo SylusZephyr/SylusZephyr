@@ -1,8 +1,9 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-dcf69fac9197';
+const VERSION = 'revive-cffe2bcef0f7';
 const ASSETS = [
   './',
   'css/app.css',
+  'css/v4.css',
   'icons/apple-touch-icon.png',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -79,6 +80,7 @@ const ASSETS = [
   'js/data/ingredients.js',
   'js/data/photos.js',
   'js/data/recipes-more.js',
+  'js/data/recipes-ramadan.js',
   'js/data/recipes.js',
   'js/gamify.js',
   'js/i18n.js',

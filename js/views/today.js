@@ -3,242 +3,69 @@ import * as UI from '../ui.js';
 import * as G from '../gamify.js';
 import * as P from '../plan.js';
 import * as Sh from './shared.js';
-import { TIPS, STORIES } from '../data/content.js';
-import { RECIPES, RECIPE } from '../data/recipes.js';
 import { suggest, planToday, art } from './cook.js';
 import * as Search from './search.js';
-import { t } from '../i18n.js';
 import * as Caf from '../caffeine.js';
 import * as Pr from '../prayer.js';
 
-function dayPhase() {
-  const h = new Date().getHours();
-  return h < 5 ? 'night' : h < 11 ? 'morning' : h < 17 ? 'day' : h < 21 ? 'evening' : 'night';
-}
+const I = UI.ICON;
+const nowMin = (d = new Date()) => d.getHours() * 60 + d.getMinutes();
+// Minutes since the 4 AM day boundary, so late-night items sort after evening ones.
+const dm = (min) => ((min - S.DAY_ROLLOVER_HOUR * 60) + 1440) % 1440;
+
+const FAST_ESS = { breakfast: 'Suhoor before dawn', lunch: 'Late meal', dinner: 'Iftar', caffeine: 'No coffee in the 6 h before bed' };
+const ESS_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', fluids: 'Fluids, 1.5 L or more', sleep: 'Sleep plan', outdoors: 'Time outdoors', caffeine: 'No coffee after cutoff' };
+function essLabel(e) { return (Pr.fasting() && FAST_ESS[e.id]) || ESS_LABEL[e.id] || e.label; }
 
 function greeting() {
   const h = new Date().getHours(); const n = S.get().profile.name;
-  const g = t(h < 5 ? 'greet.night' : h < 12 ? 'greet.morning' : h < 17 ? 'greet.afternoon' : h < 22 ? 'greet.evening' : 'greet.late');
-  return n ? `${g}, ${UI.esc(n)}` : g;
+  const g = h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Late night';
+  return n ? `${g}, ${UI.esc(n.split(' ')[0])}` : g;
 }
 
-function shuffledTips(k) {
-  // Daily shuffled feed with saved/liked ones mixed later.
-  let h = 0; for (const c of k) h = (h * 31 + c.charCodeAt(0)) | 0;
-  const arr = [...TIPS];
-  for (let i = arr.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) | 0; const j = Math.abs(h) % (i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; }
-  return arr;
+// Three rings, Apple-Fitness style: essentials, calories, water.
+function rings(vals) {
+  const R = [58, 44, 30], W = 11, C = 66;
+  return `<div class="rings" role="img" aria-label="${vals.map((v) => `${v.label} ${Math.round(v.pct * 100)}%`).join(', ')}"><svg viewBox="0 0 132 132">
+    ${vals.map((v, i) => { const c = 2 * Math.PI * R[i]; const off = c * (1 - Math.max(0, Math.min(1, v.pct)));
+      return `<circle class="track" cx="${C}" cy="${C}" r="${R[i]}" stroke-width="${W}"/><circle cx="${C}" cy="${C}" r="${R[i]}" stroke-width="${W}" stroke="${v.color}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>`; }).join('')}
+  </svg></div>`;
 }
 
-function todayStory() {
-  const st = S.get(); const d = S.day(); const t = P.sleepTargets(); const n = G.essentialsDone();
-  const s = P.currentSlot(); const rec = suggest({ slot: s })[0]?.r;
-  return [
-    { e: '🔥', bg: ['#7c2d12', '#000'], title: `Day ${G.streak()} streak`, body: `${n}/7 essentials done. Hit 5 to secure today.` },
-    { e: '⏰', bg: ['#1e1b4b', '#000'], title: `Wake ${S.prettyTime(t.wake)} · Bed ${S.prettyTime(t.bed)}`, body: t.reached ? 'You’ve reached your target bedtime. Hold it steady.' : `Bedtime moves 15 min earlier every 3 days. About ${t.daysLeft} days to your ideal ${S.prettyTime(t.ideal)}.` },
-    rec ? { e: rec.emoji, bg: rec.bg, title: `Try: ${rec.name}`, body: `${rec.mins} min · ${rec.kcal} kcal · ${rec.protein} g protein. ${rec.desc}`, cta: { label: 'Open recipe', href: `#cook/r/${rec.id}` } } : null,
-    { e: '☕', bg: ['#422006', '#000'], title: `Coffee cutoff ${S.prettyTime(st.profile.caffeineCutoff)}`, body: d.coffee.length ? `${d.coffee.length} coffee${d.coffee.length > 1 ? 's' : ''} so far today.` : 'No coffee logged yet today.' },
-  ].filter(Boolean);
-}
-
-// Context-aware nudges (replace push notifications when the app is open).
-function installHint() {
-  if (window.Capacitor?.isNativePlatform?.() || window.reviveDesktop) return false;
-  const ua = navigator.userAgent || '';
-  const standalone = window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
-  return /iPhone|iPad|iPod/.test(ua) && !standalone;
-}
-
-function fastingNudges(now) {
-  const d = S.day(); const f = Pr.fastWindow(now); const out = [];
-  if (f.state === 'suhoor' && f.toSuhoorEnd <= 75 && !d.checks.breakfast) out.push({ e: '🌌', t: `Suhoor closes in ${Pr.countdown(f.toSuhoorEnd)}`, s: 'Slow energy: oats, eggs, yogurt, dates, plus 2 big glasses of water.', act: 'meal' });
-  if (f.state === 'fasting' && f.toIftar <= 45) out.push({ e: '🌙', t: `Iftar in ${Pr.countdown(f.toIftar)}`, s: 'Open with dates and water, pray, then eat a proper plate.', act: 'none' });
-  if (f.state === 'open') {
-    const since = now.getHours() * 60 + now.getMinutes() - f.iftar;
-    if (since > 20 && !d.checks.dinner) out.push({ e: '🌙', t: 'Logged your iftar?', s: 'Breaking the fast properly is today’s most important meal.', act: 'meal' });
-    const goal = S.get().profile.waterGoalMl; const window = Math.max(1, f.suhoorEnd + 1440 - f.iftar);
-    const expected = Math.min(1, Math.max(0, since) / window) * goal;
-    if (since > 60 && d.waterMl < expected - 400) out.push({ e: '💧', t: 'Water between iftar and suhoor', s: `${(d.waterMl / 1000).toFixed(1)} L so far. Sip a glass every hour, not all at once.`, act: 'water', cls: 'blue' });
-  }
-  return out.slice(0, 2);
-}
-
-export function nudges(now = new Date()) {
-  if (Pr.fasting(now)) return fastingNudges(now);
-  const st = S.get(); const d = S.day(); const out = [];
-  const m = now.getHours() * 60 + now.getMinutes();
+// What matters next, in time order. Replaces scattered nudges and banners.
+export function upNext(now = new Date()) {
+  const st = S.get(); const d = S.day(); const m = nowMin(now); const items = [];
+  const mt = P.mealTimes(); const t = P.sleepTargets(); const fasting = Pr.fasting(now);
+  const add = (o) => items.push(o);
   const wake = S.minutesOf(st.profile.wakeAnchor);
-  const since = (m - wake + 1440) % 1440;
-  const mt = P.mealTimes();
-  if (!d.sleep.wake && since < 300) out.push({ e: '🌙', t: 'Log last night’s sleep', s: 'Takes 5 seconds. Builds your sleep chart.', act: 'sleep', cls: 'blue' });
-  for (const slot of ['dinner', 'lunch', 'breakfast']) {
-    const due = (S.minutesOf(mt[slot]) - wake + 1440) % 1440;
-    if (since >= due && !d.checks[slot]) { out.push({ e: P.SLOT_EMOJI[slot], t: `${P.SLOT_LABEL[slot]} time — eaten yet?`, s: since - due > 90 ? 'Hungry-but-not-eating is the pattern we’re breaking. Even a shake counts.' : 'Tap to log it, or open Cook for a 10-min idea.', act: 'meal' }); break; }
+  if (!d.sleep.wake && dm(m) < dm(wake) + 300) add({ id: 'sleep', at: wake, icon: I.moon, t: 'Log last night', s: 'Bed and wake time', act: 'sleep', now: true });
+  for (const slot of ['breakfast', 'lunch', 'dinner']) {
+    if (d.checks[slot]) continue;
+    const at = S.minutesOf(mt[slot]); const late = dm(m) - dm(at);
+    if (late > 180) continue; // missed — don't nag hours later
+    add({ id: slot, at, icon: I.meal, t: P.SLOT_LABEL[slot], s: late >= 0 ? 'Due now — tap to log' : planToday(slot) ? UI.esc(planToday(slot).name) : 'Tap to log', act: 'meal:' + slot, now: late >= 0 });
   }
-  const awake = 960; const expected = Math.min(1, since / awake) * st.profile.waterGoalMl;
-  if (since > 120 && since < awake && d.waterMl < expected - 500) out.push({ e: '💧', t: 'Water check', s: `You’re at ${(d.waterMl / 1000).toFixed(1)} L — aim for ${(expected / 1000).toFixed(1)} L by now.`, act: 'water', cls: 'blue' });
-  const cut = S.minutesOf(st.profile.caffeineCutoff);
-  if (m >= cut - 45 && m < cut) out.push({ e: '☕', t: 'Last call for coffee', s: `Cutoff at ${S.prettyTime(st.profile.caffeineCutoff)}. After that, water or decaf.`, act: 'none' });
-  if (!(d.pf > 0) && since > 360 && since < awake) out.push({ e: '💪', t: 'Pelvic-floor session', s: 'About 2 minutes. Lie down, tap Start.', act: 'train' });
-  return out.slice(0, 2);
+  if (!fasting) {
+    const cut = S.minutesOf(st.profile.caffeineCutoff);
+    if (dm(cut) > dm(m)) add({ id: 'cutoff', at: cut, icon: I.cup, t: 'Coffee cutoff', s: 'Water or decaf after this', act: 'none' });
+  }
+  const cfg = Pr.settings();
+  if (cfg.enabled) { const nx = Pr.next(now); add({ id: 'prayer', at: nx.min % 1440, icon: I.crescent, t: nx.label, s: `in ${Pr.countdown(nx.inMin)}`, act: 'prayer', soon: nx.inMin <= 20 }); }
+  if (fasting) { const f = Pr.fastWindow(now); if (f.state === 'fasting') add({ id: 'iftar', at: f.iftar, icon: I.crescent, t: 'Iftar', s: `in ${Pr.countdown(f.toIftar)}`, act: 'none' }); }
+  add({ id: 'winddown', at: S.minutesOf(t.windDown), icon: I.moon, t: 'Wind down', s: 'Lights low, screens away', act: 'breath' });
+  add({ id: 'bed', at: S.minutesOf(t.bed), icon: I.bed, t: 'Bedtime', s: t.reached ? 'Target reached — hold it' : `Moving 15 min earlier every 3 days`, act: 'none' });
+  const upcoming = items.filter((x) => x.now || dm(x.at) >= dm(m) - 5).sort((a, b) => (b.now - a.now) || dm(a.at) - dm(b.at));
+  const extra = [];
+  if ((d.pf || 0) < 3 && dm(m) > dm(wake) + 120) extra.push({ id: 'pf', icon: I.pulse, t: 'Pelvic-floor session', s: `${d.pf || 0} of 3 today · 2 min`, act: 'train', anytime: true });
+  if (d.energy == null && dm(m) > dm(wake) + 240) extra.push({ id: 'energy', icon: I.mood, t: 'How do you feel?', s: 'Energy and mood, 10 seconds', act: 'energy', anytime: true });
+  return [...upcoming.slice(0, 3), ...extra].slice(0, 5);
 }
 
-export function render(_, { night }) {
-  const st = S.get(); const k = S.dayKey(); const d = S.day(k);
-  const lv = G.levelInfo(); const streak = G.streak(); const n = G.essentialsDone(k);
-  const quests = G.todaysQuests(k); const loot = G.lootState(k);
-  const tg = P.nutritionTargets(); const tot = P.dayTotals(k); const t = P.sleepTargets();
-  const slot = P.currentSlot(); let sug = suggest({ slot }).slice(0, 3);
-  const planned = planToday(slot);
-  if (planned) sug = [suggest({ slot }).find((x) => x.r.id === planned.id), ...sug.filter((x) => x.r.id !== planned.id)].filter(Boolean).slice(0, 3);
-  const cmp = G.weekCompare();
-  const wk = S.weekKey(); const ci = st.checkins[wk] || {};
-  const ciMissing = ['erection', 'mood', 'energy'].filter((x) => !ci[x]);
-  const weighDone = st.weights.some((w) => S.weekKey(w.date) === wk);
-  const lateCoffee = P.isAfterCutoff(S.hm());
-  const glasses = Math.round(d.waterMl / 250); const goalGl = Math.round(st.profile.waterGoalMl / 250);
-  const seen = st.storiesSeen || {};
-
-  return `
-  <section class="hero-today ${dayPhase()}">
-    <div class="hero-sky"></div>
-    <div class="row between" style="position:relative">
-      <div><div class="sub">${S.prettyDate(k, { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>${greeting()}</h1></div>
-      <div class="hud">
-        <button class="stat" data-search aria-label="Search"><span class="ico">🔍</span></button>
-        <div class="stat" title="Streak"><span class="ico ${streak ? 'flame' : ''}">🔥</span><span data-count="${streak}">${streak}</span></div>
-        <div class="stat" title="Coins"><span class="ico">🪙</span><span data-count="${st.game.coins}">${st.game.coins}</span></div>
-      </div>
-    </div>
-    <button class="hero-level" data-go="me">
-      <div class="row between small"><b>Level ${lv.level} · ${lv.title}</b><span>${lv.into}/${lv.need} XP</span></div>
-      <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
-      <div class="row between tiny mt8" style="opacity:.8"><span>❄️ ${st.game.freezes} freeze${st.game.freezes === 1 ? '' : 's'}</span><span>Today +${d.xpToday || 0} XP</span><span>Best 🔥 ${st.game.bestStreak}</span></div>
-    </button>
-  </section>
-
-  ${window.__canInstall ? `<a class="nudge blue" href="#me/install"><span class="n-e">🖥️</span><div class="grow"><b>Install Revive on this PC</b><span>Own window, Start menu icon, works offline.</span></div></a>` : ''}
-  ${installHint() ? `<a class="nudge blue" href="#me/install"><span class="n-e">📲</span><div class="grow"><b>Install Revive on your Home Screen</b><span>Safari → Share → Add to Home Screen. Works offline and keeps your data in one place.</span></div></a>` : ''}
-  ${night ? '' : nudges().map((n) => `<button class="nudge ${n.cls || ''}" data-nudge="${n.act}"><span class="n-e">${n.e}</span><div class="grow"><b>${n.t}</b><span>${n.s}</span></div><span class="pill amber">+XP</span></button>`).join('')}
-
-  ${prayerCard()}
-
-  <div class="stories">${STORIES.map((s) => `<button class="story ${seen[s.id] === k ? 'seen' : ''}" data-story="${s.id}"><div class="ring"><div class="inner">${s.e}</div></div><span>${s.label}</span></button>`).join('')}</div>
-
-  ${night ? `<div class="card winddown-banner">
-      <div class="kicker" style="color:#c4b5fd">Wind-down mode 🌙</div>
-      <h3>Bedtime target ${S.prettyTime(t.bed)}</h3>
-      <p class="muted small">The feed is asleep until morning. Do the 2-minute breathing, prep tomorrow’s breakfast, then put the phone down.</p>
-      <div class="grid3 mt12">
-        <div class="macro"><b>${n}/7</b><span>essentials</span></div>
-        <div class="macro"><b>${tot.kcal}</b><span>kcal</span></div>
-        <div class="macro"><b>${(d.waterMl / 1000).toFixed(1)}L</b><span>water</span></div></div>
-      <p class="small mt12">${n >= 5 ? '🔥 Streak secured. Great day — rest now.' : n >= 3 ? `So close: ${5 - n} more essential${5 - n === 1 ? '' : 's'} would have secured it. Tomorrow.` : 'Tough day? That’s OK. Tomorrow: just breakfast within 2 hours of waking.'}</p>
-      <p class="small muted">Tomorrow: wake ${S.prettyTime(t.wake)} · ${planToday('breakfast') ? `breakfast: ${planToday('breakfast').emoji} ${UI.esc(planToday('breakfast').name)}` : 'breakfast within 2 h'}</p>
-      <div class="grid2 mt12"><button class="btn cool" data-breath>🌬️ Breathe 2 min</button><button class="btn" data-go="cook/r/overnight_oats">🥣 Prep oats</button></div>
-    </div>` : ''}
-
-  <div class="card glow">
-    ${G.combo() >= 3 ? `<div class="combo">🔥 COMBO ×${G.combo()}</div>` : ''}
-    <div class="row" style="gap:16px">
-      ${UI.ring(n / 7, 104, 11, n >= G.STREAK_THRESHOLD ? 'url(#gradGreen)' : 'url(#gradWarm)', `${n}/7`, n >= 5 ? 'secured' : `${5 - n} to streak`)}
-      <div class="grow"><div class="kicker">Today’s essentials</div><h3>${n >= 7 ? 'Flawless day 💯' : n >= 5 ? 'Streak secured 🔥' : 'Tick 5 to keep the streak'}</h3>
-        <p class="muted small">5 out of 7 is a full win. Don’t chase perfect.</p></div>
-    </div>
-    <div class="mt12">${G.ESSENTIALS.map((e) => `<button class="check ${d.checks[e.id] ? 'done' : ''}" data-ess="${e.id}" style="width:100%;text-align:left">
-      <span class="box">${UI.ICON.check}</span><span class="emoji">${e.e}</span><span class="label">${essLabel(e)}${e.id === 'caffeine' && !Pr.fasting() ? ` <span class="muted small">(${S.prettyTime(st.profile.caffeineCutoff)})</span>` : ''}</span><span class="xp">+${e.xp}</span></button>`).join('')}</div>
-  </div>
-
-  <div class="card loot ${loot.unlocked ? '' : 'locked'}">
-    ${loot.opened ? `<div class="chest" style="animation:none">${{ COMMON: '🎁', RARE: '💎', EPIC: '🔮', LEGENDARY: '👑' }[loot.result.rarity]}</div><h3 class="mt8">Today’s chest: ${loot.result.rarity}</h3><p class="muted small">New chest tomorrow. Come back!</p>`
-      : `<div class="chest">🎁</div><h3 class="mt8">${loot.unlocked ? 'Mystery chest unlocked!' : 'Daily mystery chest'}</h3>
-         <p class="muted small">${loot.unlocked ? 'Tap to open. Could be legendary…' : `Tick ${loot.need} more essential${loot.need === 1 ? '' : 's'} to unlock`}</p>
-         ${loot.unlocked ? '<button class="btn primary mt12" data-loot>Open chest</button>' : ''}`}
-  </div>
-
-  <div class="card">
-    <div class="row between"><div><div class="kicker">Daily quests</div><h3>${quests.filter((q) => q.done).length}/3 complete</h3></div><span class="pill amber">resets 4 am</span></div>
-    ${quests.map((q) => `<div class="quest ${q.done ? 'done' : ''}"><div class="q-ico">${q.done ? '✅' : q.e}</div><div class="grow small" style="font-weight:600">${UI.esc(q.t)}</div><div class="reward">+${q.xp}</div></div>`).join('')}
-  </div>
-
-  <div class="section-title">Eat next <a class="link" href="#cook">Cookbook</a></div>
-  <div class="card">
-    <div class="row between"><div><div class="kicker">${P.SLOT_EMOJI[slot]} ${P.SLOT_LABEL[slot]} suggestion</div>
-      <div class="small muted">${tot.kcal} / ${tg.kcal} kcal · ${tot.protein} / ${tg.protein} g protein</div></div>
-      <button class="btn sm primary" data-logmeal>+ Log</button></div>
-    <div class="lvlbar mt8"><i style="width:${Math.min(100, Math.round(tot.kcal / tg.kcal * 100))}%;background:var(--grad-green)"></i></div>
-    <div class="mt12">${sug.map(({ r, have, total }) => `<a class="rwide" href="#cook/r/${r.id}"><div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div>
-      <div class="grow"><div style="font-weight:700" class="ellipsis">${planned && planned.id === r.id ? '📅 ' : ''}${UI.esc(r.name)}</div><div class="muted small">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div>
-      <div class="match" style="color:${have === total ? 'var(--green)' : 'var(--amber)'}">${have === total ? 'You have everything ✓' : `Have ${have}/${total} ingredients`}</div></div></a>`).join('')}</div>
-    <a class="btn block sm" href="#cook/delivery">😮‍💨 Too tired? Halal delivery ideas</a>
-  </div>
-
-  <div class="grid2">
-    <div class="card" style="margin:0">
-      <div class="kicker">💧 Water</div>
-      <div class="counter"><div class="val">${(d.waterMl / 1000).toFixed(2).replace(/0$/, '')}<span class="unit"> L</span></div></div>
-      <div class="water-glasses">${Array.from({ length: goalGl }, (_, i) => `<i class="${i < glasses ? 'full' : ''}"></i>`).join('')}</div>
-      <div class="row mt12"><button class="btn sm grow" data-water="-250">−</button><button class="btn sm cool grow" data-water="250">+250</button></div>
-    </div>
-    <div class="card" style="margin:0">
-      <div class="kicker">☕ Coffee</div>
-      <div class="counter"><div class="val">${d.coffee.length}<span class="unit"> cups</span></div></div>
-      <div class="small ${lateCoffee ? '' : 'muted'} mt8" style="${lateCoffee ? 'color:var(--coral)' : ''};min-height:36px">${lateCoffee ? `Past cutoff — coffee now will push sleep later` : `Cutoff ${S.prettyTime(st.profile.caffeineCutoff)}${d.coffee.length ? ` · last ${S.prettyTime(d.coffee.at(-1))}` : ''}`}</div>
-      <div class="row mt12"><button class="btn sm grow" data-coffee="-1" aria-label="Remove last drink">−</button><button class="btn sm grow" data-coffee="1" aria-label="Add a cup">+1</button><button class="btn sm" data-drinks aria-label="Pick a drink">▾</button></div>
-    </div>
-  </div>
-  ${cafCard(k)}
-
-  <div class="grid2 mt12">
-    <button class="card" style="margin:0;text-align:left" data-sleep>
-      <div class="kicker">🌙 Sleep</div>
-      ${d.sleep.wake ? `<div style="font-weight:800;font-size:18px">${S.prettyTime(d.sleep.bed)} → ${S.prettyTime(d.sleep.wake)}</div><div class="muted small">${Math.floor((P.sleepDurationMin(d.sleep.bed, d.sleep.wake) || 0) / 60)}h ${(P.sleepDurationMin(d.sleep.bed, d.sleep.wake) || 0) % 60}m</div>`
-        : `<div style="font-weight:800;font-size:18px">Log last night</div><div class="muted small">Anchor ${S.prettyTime(t.wake)}</div>`}
-    </button>
-    <button class="card" style="margin:0;text-align:left" data-energy>
-      <div class="kicker">⚡ Energy & mood</div>
-      ${d.energy != null ? `<div style="font-size:26px">${['🪫', '😮‍💨', '😐', '🙂', '⚡'][d.energy]} ${['😞', '😕', '😐', '🙂', '😄'][d.mood ?? 2]}</div>` : `<div style="font-weight:800;font-size:18px">How do you feel?</div><div class="muted small">10-second check</div>`}
-    </button>
-  </div>
-
-  ${(ciMissing.length || !weighDone) ? `<div class="card cool glow mt12">
-    <div class="kicker">This week</div><h3>Weekly check-ins</h3>
-    <p class="muted small">Track change over time and show your doctor. +40 XP each.</p>
-    <div class="chips mt12">
-      ${!weighDone ? '<button class="chip" data-weigh>⚖️ Weigh-in</button>' : ''}
-      ${ciMissing.map((x) => `<button class="chip" data-ci="${x}">${{ erection: '🫀 Erection', mood: '🧠 Mood', energy: '🔋 Energy & cold' }[x]}</button>`).join('')}
-    </div></div>` : ''}
-
-  <div class="card">
-    <div class="kicker">You vs. last week (same point)</div>
-    <div class="grid2 mt8">
-      <div><div class="score-big" style="font-size:30px">${cmp.thisW.xp}</div><div class="muted small">XP this week</div></div>
-      <div><div class="score-big" style="font-size:30px;color:var(--muted)">${cmp.lastW.xp}</div><div class="muted small">XP last week</div></div>
-    </div>
-    <p class="small mt8" style="color:${cmp.thisW.xp >= cmp.lastW.xp ? 'var(--green)' : 'var(--amber)'};font-weight:700">${cmp.thisW.xp >= cmp.lastW.xp ? (cmp.lastW.xp ? `You’re ahead by ${cmp.thisW.xp - cmp.lastW.xp} XP 🏁` : 'First week — set the bar high 🏁') : `${cmp.lastW.xp - cmp.thisW.xp} XP behind last-week you. Catch him 👀`}</p>
-  </div>
-
-  <div class="section-title">For you</div>
-  ${night ? `<div class="empty"><span class="e">😴</span>Your feed is sleeping until morning.<br><span class="small">Revive protects your bedtime — see you tomorrow.</span></div>` : feedHtml(k)}
-  `;
-}
-
-const FAST_ESS = { breakfast: 'Eat suhoor before dawn', lunch: 'A proper late meal', dinner: 'Break the fast at iftar', caffeine: 'No coffee in the 6 h before bed' };
-function essLabel(e) { return (Pr.fasting() && FAST_ESS[e.id]) || e.label; }
-
-function prayerCard() {
-  const cfg = Pr.settings(); if (!cfg.enabled && !Pr.fasting()) return '';
-  const now = new Date(); const nx = Pr.next(now); const list = Pr.todayList(now);
-  const fast = Pr.fasting(now) ? Pr.fastWindow(now) : null;
-  return `<div class="card prayer-card ${fast ? 'fasting' : ''}">
-    ${fast ? `<div class="row between"><div><div class="kicker">🌙 ${Pr.isRamadanDate(now) ? `Ramadan${Pr.hijri(now) ? ` · day ${Pr.hijri(now).day}` : ''}` : 'Fasting today'}</div>
-        <h3>${fast.state === 'fasting' ? `Iftar in ${Pr.countdown(fast.toIftar)}` : fast.state === 'suhoor' ? `Suhoor ends in ${Pr.countdown(fast.toSuhoorEnd)}` : `Fast opened · suhoor ends ${S.prettyTime(Pr.fastWindow(new Date(now.getTime() + 864e5)).suhoorClock)}`}</h3></div>
-        <span class="pill purple">${Pr.countdown(fast.lengthMin)} fast</span></div>
-      <div class="lvlbar mt8 fastbar"><i style="width:${Math.round(fast.pct * 100)}%"></i></div>
-      <div class="row between tiny mt8 muted"><span>Suhoor ${S.prettyTime(fast.suhoorClock)}</span><span>Iftar ${S.prettyTime(fast.iftarClock)}</span></div>` : ''}
-    ${cfg.enabled ? `<div class="row between ${fast ? 'mt12' : ''}"><div class="kicker">🕌 ${UI.esc(cfg.cityName)}</div><span class="small" style="font-weight:700">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
-    <div class="prayer-row mt8">${list.map((p) => `<div class="pr ${p.id === nx.id && !nx.tomorrow ? 'next' : ''} ${p.id === 'sunrise' ? 'faint' : ''}"><span>${p.label}</span><b>${p.clock ? S.prettyTime(p.clock).replace(/(am|pm)$/, '<small>$1</small>') : '—'}</b></div>`).join('')}</div>` : ''}
-  </div>`;
+function weekDue() {
+  const st = S.get(); const wk = S.weekKey(); const ci = st.checkins[wk] || {};
+  const due = ['erection', 'mood', 'energy'].filter((x) => !ci[x]);
+  if (!st.weights.some((w) => S.weekKey(w.date) === wk)) due.unshift('weigh');
+  return due;
 }
 
 function cafCard(k) {
@@ -246,134 +73,160 @@ function cafCard(k) {
   if (!d?.coffee?.length && sum.now < 10) return '';
   const tone = sum.safeAtBed ? 'var(--green)' : 'var(--coral)';
   return `<div class="card mt12 caf-card">
-    <div class="row between"><div class="kicker">☕ Caffeine in your body</div><span class="pill ${sum.overLimit ? 'coral' : ''}">${sum.total} mg today</span></div>
+    <div class="row between"><div class="kicker">Caffeine</div><span class="pill ${sum.overLimit ? 'coral' : ''}">${sum.total} mg today</span></div>
     <div class="grid2 mt8"><div class="macro"><b>≈${sum.now} mg</b><span>right now</span></div>
-      <div class="macro"><b style="color:${tone}">≈${sum.atBed} mg ${sum.safeAtBed ? '✓' : '⚠️'}</b><span>at bed (${S.prettyTime(sum.bedClock)})</span></div></div>
+      <div class="macro"><b style="color:${tone}">≈${sum.atBed} mg</b><span>at bed (${S.prettyTime(sum.bedClock)})</span></div></div>
     ${Caf.curveSvg(k)}
     <p class="small muted mt8">${sum.safeAtBed
       ? (sum.ifOneMore >= Caf.SLEEP_SAFE_MG ? `Another cup now would leave ≈${sum.ifOneMore} mg at your ${S.prettyTime(sum.bedClock)} bedtime — enough to delay sleep.` : `You have room: one more cup still clears before ${S.prettyTime(sum.bedClock)}.`)
       : `Still ≈${sum.atBed} mg at bedtime. Expect it to take longer to fall asleep${sum.clearClock ? `; it drops below ${Caf.SLEEP_SAFE_MG} mg around ${S.prettyTime(sum.clearClock)}` : ''}. Dim lights and skip screens to help.`}
       ${sum.overLimit ? ` Over ${Caf.DAILY_LIMIT_MG} mg today — that can raise heart rate and anxiety.` : ''}</p>
-    <p class="tiny muted">Estimate using a 5-hour half-life. Real clearance varies from person to person.</p>
+    
   </div>`;
 }
 
-function drinkSheet(onDone) {
-  UI.openSheet(`<h2>☕ What are you drinking?</h2><p class="muted small">Sets the caffeine estimate. Your usual cup is ${Caf.cupMg()} mg — change it in Me → Settings.</p>
-    <div class="mt12">${Caf.DRINKS.map((x) => `<button class="list-item" data-mg="${x.mg}"><div class="li-ico">${x.e}</div><div class="grow"><b>${x.label}</b></div><span class="muted small">${x.mg} mg</span></button>`).join('')}</div>`, {
-    onMount: (sh, close) => sh.querySelectorAll('[data-mg]').forEach((b) => b.onclick = () => { close(); onDone(+b.dataset.mg); }),
+function drinkSheet(onDone, onRemove) {
+  const d = S.day();
+  UI.openSheet(`<h2>Log a drink</h2><p class="muted small mt8">Your usual cup is ${Caf.cupMg()} mg. Change it in Settings.</p>
+    <div class="mt12">${Caf.DRINKS.map((x) => `<button class="list-item" data-mg="${x.mg}"><div class="grow"><b>${x.label}</b></div><span class="muted small">${x.mg} mg</span></button>`).join('')}</div>
+    ${d.coffee.length ? `<button class="btn block mt12" data-rm>Remove last (${S.prettyTime(d.coffee.at(-1))})</button>` : ''}`, {
+    onMount: (sh, close) => {
+      sh.querySelectorAll('[data-mg]').forEach((b) => b.onclick = () => { close(); onDone(+b.dataset.mg); });
+      sh.querySelector('[data-rm]')?.addEventListener('click', () => { close(); onRemove(); });
+    },
   });
 }
 
-const FEED_PAGE = 6;
-let feedShown = FEED_PAGE;
-function feedItems(k) {
-  const st = S.get(); const tips = shuffledTips(k);
-  const recs = [...RECIPES].sort((a, b) => ((a.id.charCodeAt(0) * 31 + k.charCodeAt(9)) % 17) - ((b.id.charCodeAt(0) * 31 + k.charCodeAt(9)) % 17)).slice(0, 8);
-  const items = [];
-  tips.forEach((t, i) => {
-    const liked = st.likedTips.includes(t.id), saved = st.savedTips.includes(t.id);
-    items.push(`<div class="tipcard" style="${UI.grad(t.bg)}" data-tip="${t.id}">
-      <div class="row between"><span class="pill">${t.cat}</span></div>
-      <div class="big mt8">${t.e}</div><h3>${UI.esc(t.title)}</h3><p>${UI.esc(t.body)}</p>
-      <div class="actions"><button data-like="${t.id}" class="${liked ? 'liked' : ''}" aria-pressed="${liked}">${liked ? UI.ICON.heartFill : UI.ICON.heart}</button>
-      <button data-save="${t.id}" class="${saved ? 'saved' : ''}" aria-pressed="${saved}">${saved ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div></div>`);
-    if (i % 4 === 2 && recs.length) {
-      const r = recs.shift(); const a = art(r);
-      items.push(`<a class="card" href="#cook/r/${r.id}" style="display:block;padding:0;color:inherit;text-decoration:none">
-        <div class="${a.cls}" style="${a.style};height:170px;display:flex;align-items:center;justify-content:center;font-size:80px;border-radius:var(--radius) var(--radius) 0 0">${a.emoji}</div>
-        <div style="padding:14px"><div class="kicker">Recipe for you</div><h3>${UI.esc(r.name)}</h3><p class="muted small">${r.mins} min · ${r.kcal} kcal · ${r.protein} g protein · ¥${r.cost}</p></div></a>`);
-    }
-  });
-  return items;
+function prayerCard() {
+  const cfg = Pr.settings(); const now = new Date();
+  const fast = Pr.fasting(now) ? Pr.fastWindow(now) : null;
+  if (!cfg.enabled && !fast) return '';
+  const nx = Pr.next(now); const list = Pr.todayList(now);
+  return `<div class="card prayer-card">
+    ${fast ? `<div class="row between"><div class="kicker">${Pr.isRamadanDate(now) ? `Ramadan${Pr.hijri(now) ? `, day ${Pr.hijri(now).day}` : ''}` : 'Fasting'}</div><span class="small muted">${Pr.countdown(fast.lengthMin)} fast</span></div>
+      <h3>${fast.state === 'fasting' ? `Iftar in ${Pr.countdown(fast.toIftar)}` : fast.state === 'suhoor' ? `Suhoor ends in ${Pr.countdown(fast.toSuhoorEnd)}` : 'Fast complete'}</h3>
+      <div class="lvlbar mt8 fastbar"><i style="width:${Math.round(fast.pct * 100)}%"></i></div>
+      <div class="row between tiny mt8 muted"><span>Suhoor ${S.prettyTime(fast.suhoorClock)}</span><span>Iftar ${S.prettyTime(fast.iftarClock)}</span></div>` : ''}
+    ${cfg.enabled ? `<div class="row between ${fast ? 'mt12' : ''}"><div class="kicker">${UI.esc(cfg.cityName.split(' ')[0])}</div><span class="small">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
+    <div class="prayer-row mt8">${list.map((p) => `<div class="pr ${p.id === nx.id && !nx.tomorrow ? 'next' : ''} ${p.id === 'sunrise' ? 'faint' : ''}"><span>${p.label}</span><b>${p.clock ? S.prettyTime(p.clock).replace(/(am|pm)$/, '<small>$1</small>') : '—'}</b></div>`).join('')}</div>` : ''}
+  </div>`;
 }
-function feedHtml(k) {
-  const items = feedItems(k);
-  return `<div id="feed">${items.slice(0, feedShown).join('')}</div>` +
-    (items.length > feedShown ? '<div id="feed-more" class="feed-loader" aria-hidden="true"><span></span><span></span><span></span></div>' : `<div class="empty"><span class="e">🎉</span>${t('feed.caughtUp')}</div>`);
+
+export function render(_, { night }) {
+  const st = S.get(); const k = S.dayKey(); const d = S.day(k);
+  const streak = G.streak(); const n = G.essentialsDone(k);
+  const tg = P.nutritionTargets(); const tot = P.dayTotals(k);
+  const slot = P.currentSlot(); const planned = planToday(slot);
+  let sug = suggest({ slot })[0];
+  if (planned) sug = suggest({ slot }).find((x) => x.r.id === planned.id) || sug;
+  const goalMl = st.profile.waterGoalMl; const due = weekDue();
+  const sleepMin = d.sleep.wake ? P.sleepDurationMin(d.sleep.bed, d.sleep.wake) : null;
+  const next = upNext();
+  const ringVals = [
+    { label: 'Essentials', pct: n / 7, color: 'var(--ring-1)' },
+    { label: 'Calories', pct: tot.kcal / tg.kcal, color: 'var(--ring-2)' },
+    { label: 'Water', pct: d.waterMl / goalMl, color: 'var(--ring-3)' },
+  ];
+  const a = sug ? art(sug.r) : null;
+
+  return `
+  <header class="t-head">
+    <div><div class="date">${S.prettyDate(k, { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>${greeting()}</h1></div>
+    <div class="actions">
+      <span class="streak-chip ${streak ? '' : 'off'}" title="Streak: days with 5 or more essentials">${I.flame}<span data-count="${streak}">${streak}</span></span>
+      <button class="icon-btn" data-search aria-label="Search">${I.search}</button>
+    </div>
+  </header>
+  <div class="t-grid"><div class="t-col">
+  <section class="card">
+    <div class="summary">
+      ${rings(ringVals)}
+      <div class="legend-v">
+        <div class="lg"><i class="dot" style="background:var(--ring-1)"></i><span class="k">Essentials</span><span class="v">${n}<small> / 7</small></span></div>
+        <div class="lg"><i class="dot" style="background:var(--ring-2)"></i><span class="k">Calories</span><span class="v">${tot.kcal.toLocaleString('en')}<small> / ${tg.kcal.toLocaleString('en')}</small></span></div>
+        <div class="lg"><i class="dot" style="background:var(--ring-3)"></i><span class="k">Water</span><span class="v">${(d.waterMl / 1000).toFixed(1)}<small> / ${(goalMl / 1000).toFixed(1)} L</small></span></div>
+      </div>
+    </div>
+    <div class="summary-foot"><span>Protein <b>${tot.protein}</b> / ${tg.protein} g</span><span>${n >= G.STREAK_THRESHOLD ? '<b>Day secured</b>' : `<b>${G.STREAK_THRESHOLD - n}</b> more to keep the streak`}</span></div>
+  </section>
+
+  <div class="quick">
+    <button class="qk" data-logmeal aria-label="Log a meal">${I.meal}<b>${d.meals.length}</b><span>Meals</span></button>
+    <button class="qk" data-water="250" aria-label="Add 250 ml water">${I.drop}<b>${(d.waterMl / 1000).toFixed(2).replace(/0$/, '')} L</b><span>+250 ml</span></button>
+    <button class="qk" data-drinks aria-label="Log coffee or tea">${I.cup}<b>${d.coffee.length}</b><span>Coffee</span></button>
+    <button class="qk" data-sleep aria-label="Log sleep">${I.moon}<b>${sleepMin != null ? `${Math.floor(sleepMin / 60)}h ${sleepMin % 60}m` : '—'}</b><span>Sleep</span></button>
+  </div>
+
+  ${night ? `<section class="card">
+    <div class="kicker">Wind-down</div><h3>Bed at ${S.prettyTime(P.sleepTargets().bed)}</h3>
+    <p class="small muted mt8">Two minutes of slow breathing, then put the phone away.</p>
+    <div class="grid2 mt12"><button class="btn primary" data-breath>Breathe 2 min</button><a class="btn" href="#cook/r/${Pr.fasting() ? 'suhoor_oats_dates' : 'overnight_oats'}">Prep tomorrow</a></div>
+  </section>` : ''}
+
+  <section class="card">
+    <div class="row between mb8"><div class="kicker" style="margin:0">Up next</div><span class="small muted">${S.prettyTime(S.hm())}</span></div>
+    <div class="next-list">${next.map((x) => `<button class="nx ${x.now || x.soon ? 'now' : ''}" data-act="${x.act}"><span class="ico">${x.icon}</span><span class="grow"><div class="t">${x.t}</div><div class="s">${x.s}</div></span><span class="when">${x.anytime ? 'Today' : x.now ? 'Now' : S.prettyTime(S.fmtMin(x.at))}</span></button>`).join('') || '<p class="small muted">Nothing else scheduled today.</p>'}</div>
+  </section>
+  </div><div class="t-col">
+  ${prayerCard()}
+  ${cafCard(k)}
+
+  ${sug ? `<div class="section-title">Eat next <a class="link" href="#cook">All recipes</a></div>
+  <a class="rwide" href="#cook/r/${sug.r.id}"><div class="thumb ${a.cls}" style="${a.style}">${a.emoji}</div>
+    <div class="grow"><div style="font-weight:600" class="ellipsis">${UI.esc(sug.r.name)}</div><div class="muted small">${sug.r.mins} min · ${sug.r.kcal} kcal · ${sug.r.protein} g protein</div>
+    <div class="small" style="color:${sug.have === sug.total ? 'var(--green)' : 'var(--muted)'}">${sug.have === sug.total ? 'You have everything' : `You have ${sug.have} of ${sug.total}`}</div></div></a>` : ''}
+
+  <div class="section-title">Essentials</div>
+  <section class="card ess-list">
+    ${G.ESSENTIALS.map((e) => `<button class="check ${d.checks[e.id] ? 'done' : ''}" data-ess="${e.id}" style="width:100%;text-align:left">
+      <span class="box">${I.check}</span><span class="label">${essLabel(e)}</span></button>`).join('')}
+  </section>
+
+  ${due.length ? `<button class="card" style="display:flex;width:100%;text-align:left;align-items:center;gap:12px" data-weekly>
+    <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div style="font-weight:600">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left · ${due.map((x) => ({ weigh: 'weight', erection: 'erection', mood: 'mood', energy: 'energy' }[x])).join(', ')}</div></span><span class="chev">${I.chev}</span></button>` : ''}
+  </div></div>
+  `;
+}
+
+function weeklySheet(rerender) {
+  const due = weekDue();
+  UI.openSheet(`<h2>Weekly check-in</h2><p class="muted small mt8">A few questions, once a week. Your doctor summary uses these.</p>
+    <div class="mt12">${due.map((x) => `<button class="list-item" data-w="${x}"><div class="grow"><b>${{ weigh: 'Weigh-in', erection: 'Erection & confidence', mood: 'Mood & worry', energy: 'Energy & cold' }[x]}</b></div><span class="chev">${I.chev}</span></button>`).join('')}</div>`, {
+    onMount: (sh, close) => sh.querySelectorAll('[data-w]').forEach((b) => b.onclick = () => { close(); const w = b.dataset.w; if (w === 'weigh') Sh.weighSheet(rerender); else Sh.checkinSheet(w, rerender); }),
+  });
 }
 
 export function bind(root, _, { rerender }) {
-  const st = S.get(); const k = S.dayKey(); const d = S.day(k);
-  root.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => { location.hash = b.dataset.go; }));
+  const k = S.dayKey(); const d = S.day(k);
   root.querySelector('[data-search]')?.addEventListener('click', () => Search.open());
   root.querySelectorAll('[data-ess]').forEach((b) => b.addEventListener('click', (ev) => {
-    const id = b.dataset.ess; const on = !d.checks[id]; G.setEssential(id, on, ev); G.updateBestStreak(); G.evaluateQuests();
-    b.classList.toggle('done', on); setTimeout(rerender, 350);
+    const id = b.dataset.ess; const on = !d.checks[id]; G.setEssential(id, on, ev); G.updateBestStreak(); G.evaluateQuests(undefined, false, true);
+    b.classList.toggle('done', on); setTimeout(rerender, 250);
   }));
-  root.querySelector('[data-loot]')?.addEventListener('click', async () => { await G.openLoot(); rerender(); });
-  root.querySelectorAll('[data-water]').forEach((b) => b.addEventListener('click', (ev) => {
-    const v = +b.dataset.water; d.waterMl = Math.max(0, d.waterMl + v); S.save();
-    if (v > 0) { G.award(`water_${d.waterMl}`, 3, ev, { silent: true }); UI.haptic(8); UI.ding('tick'); }
+  root.querySelector('[data-water]')?.addEventListener('click', (ev) => {
+    d.waterMl += 250; S.save(); G.award(`water_${d.waterMl}`, 3, ev, { silent: true }); UI.haptic(8);
     if (d.waterMl >= 1500 && !d.checks.fluids) G.setEssential('fluids', true, ev);
-    if (d.waterMl >= 2000 && v > 0 && d.waterMl - v < 2000) { UI.confetti(50); UI.toast('2 L reached — hydration hero!', '💧'); }
-    G.evaluateQuests(); G.checkBadges(); rerender();
-  }));
+    rerender();
+    UI.undoToast(`Water ${(d.waterMl / 1000).toFixed(2).replace(/0$/, '')} L`, () => { d.waterMl = Math.max(0, d.waterMl - 250); if (d.waterMl < 1500 && d.checks.fluids) G.setEssential('fluids', false); S.save(); rerender(); }, 4000);
+  });
   const addCoffee = (mg) => {
     d.coffee.push(mg == null || mg === Caf.cupMg() ? S.hm() : `${S.hm()}@${mg}`);
-    if (P.isAfterCutoff(S.hm()) && mg !== 5) {
-      if (d.checks.caffeine) G.setEssential('caffeine', false);
-      UI.toast('Logged. After cutoff — try decaf or water next time', '☕');
-    }
+    if (P.isAfterCutoff(S.hm()) && mg !== 5 && d.checks.caffeine) G.setEssential('caffeine', false);
     UI.haptic(8); S.save(); rerender();
+    UI.undoToast(P.isAfterCutoff(S.hm()) && mg !== 5 ? 'Logged — past your cutoff' : 'Logged', () => { d.coffee.pop(); S.save(); rerender(); }, 4000);
   };
-  root.querySelector('[data-drinks]')?.addEventListener('click', () => drinkSheet(addCoffee));
-  root.querySelectorAll('[data-coffee]').forEach((b) => b.addEventListener('click', () => {
-    const v = +b.dataset.coffee;
-    if (v > 0) { addCoffee(); return; }
-    d.coffee.pop(); S.save(); rerender();
-  }));
+  root.querySelector('[data-drinks]')?.addEventListener('click', () => drinkSheet(addCoffee, () => { d.coffee.pop(); S.save(); rerender(); }));
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
-  root.querySelectorAll('[data-nudge]').forEach((b) => b.addEventListener('click', (ev) => {
-    const a = b.dataset.nudge;
-    if (a === 'sleep') Sh.sleepSheet(rerender);
-    else if (a === 'meal') Sh.mealSheet(rerender);
-    else if (a === 'train') location.hash = 'train';
-    else if (a === 'water') { d.waterMl += 250; S.save(); G.award(`water_${d.waterMl}`, 3, ev); if (d.waterMl >= 1500) G.setEssential('fluids', true, ev); G.evaluateQuests(); rerender(); }
-    else b.remove();
-  }));
   root.querySelector('[data-sleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
-  root.querySelector('[data-energy]')?.addEventListener('click', () => Sh.energySheet(rerender));
   root.querySelector('[data-breath]')?.addEventListener('click', () => Sh.breathing({ onDone: rerender }));
-  root.querySelector('[data-weigh]')?.addEventListener('click', () => Sh.weighSheet(rerender));
-  root.querySelectorAll('[data-ci]').forEach((b) => b.addEventListener('click', () => Sh.checkinSheet(b.dataset.ci, rerender)));
-  root.querySelectorAll('[data-story]').forEach((b) => b.addEventListener('click', () => {
-    const s = STORIES.find((x) => x.id === b.dataset.story);
-    const slides = s.slides === 'dynamic' ? todayStory() : s.slides.map((x, i) => ({ ...x, bg: [['#1e1b4b', '#000'], ['#4c0519', '#000'], ['#14532d', '#000'], ['#0c4a6e', '#000'], ['#713f12', '#000']][i % 5] }));
-    Sh.storyViewer(s, slides, () => { st.storiesSeen[s.id] = k; G.award(`story_${s.id}`, 5, null, { silent: true }); S.save(); rerender(); });
+  root.querySelector('[data-weekly]')?.addEventListener('click', () => weeklySheet(rerender));
+  root.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => {
+    const a = b.dataset.act;
+    if (a === 'sleep') Sh.sleepSheet(rerender);
+    else if (a.startsWith('meal:')) Sh.mealSheet(rerender, { slot: a.split(':')[1] });
+    else if (a === 'train') location.hash = 'train';
+    else if (a === 'energy') Sh.energySheet(rerender);
+    else if (a === 'breath') Sh.breathing({ onDone: rerender });
+    else if (a === 'prayer') location.hash = 'me/prayer';
   }));
-  // Feed: delegated like/save so cards added later work too
-  root.querySelector('#feed')?.addEventListener('click', (e) => {
-    const like = e.target.closest('[data-like]'); const save = e.target.closest('[data-save]');
-    if (like) {
-      const id = like.dataset.like; const i = st.likedTips.indexOf(id);
-      if (i >= 0) st.likedTips.splice(i, 1); else { st.likedTips.push(id); UI.haptic(10); }
-      S.save(); like.classList.toggle('liked', i < 0); like.setAttribute('aria-pressed', String(i < 0)); like.innerHTML = i >= 0 ? UI.ICON.heart : UI.ICON.heartFill;
-    } else if (save) {
-      const id = save.dataset.save; const i = st.savedTips.indexOf(id);
-      if (i >= 0) st.savedTips.splice(i, 1); else { st.savedTips.push(id); UI.toast('Saved to Me → Saved', '🔖'); }
-      S.save(); save.classList.toggle('saved', i < 0); save.setAttribute('aria-pressed', String(i < 0)); save.innerHTML = i >= 0 ? UI.ICON.bookmark : UI.ICON.bookmarkFill;
-    }
-  });
-  // Count tips read as they scroll into view (feed engagement → quest).
-  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
-    if (e.isIntersecting) {
-      io.unobserve(e.target); const id = e.target.dataset.tip;
-      d.readTips = d.readTips || []; if (!d.readTips.includes(id)) { d.readTips.push(id); d.tipsRead = d.readTips.length; S.save(); if (d.tipsRead === 3) G.evaluateQuests(); }
-    }
-  }), { threshold: 0.7 });
-  root.querySelectorAll('[data-tip]').forEach((el) => io.observe(el));
-  // Infinite feed: append the next page when the loader nears the viewport.
-  const more = root.querySelector('#feed-more');
-  if (more) {
-    const loader = new IntersectionObserver((entries) => {
-      if (!entries.some((e) => e.isIntersecting)) return;
-      const items = feedItems(k); const feed = root.querySelector('#feed');
-      const next = items.slice(feedShown, feedShown + FEED_PAGE); feedShown += next.length;
-      const tmp = document.createElement('div'); tmp.innerHTML = next.join('');
-      [...tmp.children].forEach((c) => { c.classList.add('feed-in'); feed.appendChild(c); if (c.dataset.tip) io.observe(c); });
-      if (feedShown >= items.length) { loader.disconnect(); more.outerHTML = `<div class="empty"><span class="e">🎉</span>${t('feed.caughtUp')}</div>`; }
-    }, { rootMargin: '600px 0px' });
-    loader.observe(more);
-  }
 }

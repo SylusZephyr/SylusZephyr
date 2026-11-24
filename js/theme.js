@@ -2,16 +2,16 @@
 import * as S from './store.js';
 
 export const ACCENTS = [
-  { id: 'ember', label: 'Ember', c1: '#ffb547', c2: '#ff6b6b', ink: '#1a1206', glow: 'rgba(255,140,80,0.25)' },
-  { id: 'ocean', label: 'Ocean', c1: '#38bdf8', c2: '#6366f1', ink: '#04121f', glow: 'rgba(56,189,248,0.25)' },
-  { id: 'jade', label: 'Jade', c1: '#34d399', c2: '#0ea5e9', ink: '#03150e', glow: 'rgba(52,211,153,0.25)' },
-  { id: 'violet', label: 'Violet', c1: '#c084fc', c2: '#f472b6', ink: '#1a0820', glow: 'rgba(192,132,252,0.25)' },
-  { id: 'gold', label: 'Gold', c1: '#fde047', c2: '#f59e0b', ink: '#1a1404', glow: 'rgba(250,204,21,0.25)' },
+  { id: 'ember', label: 'Ember', c1: '#ff7a45', c2: '#ff7a45', ink: '#0b0c0e', glow: 'transparent' },
+  { id: 'ocean', label: 'Ocean', c1: '#3b9eff', c2: '#3b9eff', ink: '#0b0c0e', glow: 'transparent' },
+  { id: 'jade', label: 'Jade', c1: '#2fd08a', c2: '#2fd08a', ink: '#0b0c0e', glow: 'transparent' },
+  { id: 'violet', label: 'Violet', c1: '#9d7bff', c2: '#9d7bff', ink: '#0b0c0e', glow: 'transparent' },
+  { id: 'gold', label: 'Gold', c1: '#f5b83d', c2: '#f5b83d', ink: '#0b0c0e', glow: 'transparent' },
 ];
 export const BACKGROUNDS = [
-  { id: 'midnight', label: 'Midnight', vars: {} },
+  { id: 'midnight', label: 'Graphite', vars: {} },
   { id: 'oled', label: 'OLED black', vars: { '--bg': '#000000', '--bg2': '#050505', '--surface': '#0e0e12', '--surface2': '#16161c', '--surface3': '#202028' } },
-  { id: 'slate', label: 'Slate', vars: { '--bg': '#121417', '--bg2': '#16191d', '--surface': '#1d2126', '--surface2': '#252a31', '--surface3': '#30363f' } },
+  { id: 'slate', label: 'Navy', vars: { '--bg': '#0b0f1a', '--bg2': '#0f1422', '--surface': '#151b2b', '--surface2': '#1c2438', '--surface3': '#252f47' } },
 ];
 export const SIZES = [
   { id: 'normal', label: 'Normal', zoom: 1 },
@@ -33,12 +33,12 @@ export function apply() {
   const c = current(); const root = document.documentElement.style;
   const a = ACCENTS.find((x) => x.id === c.accent);
   root.setProperty('--a1', a.c1); root.setProperty('--a2', a.c2); root.setProperty('--a-ink', a.ink); root.setProperty('--a-glow', a.glow);
-  root.setProperty('--grad-warm', `linear-gradient(135deg, ${a.c1} 0%, ${a.c2} 100%)`);
+  root.setProperty('--grad-warm', a.c1);
   root.setProperty('--accent', a.c1);
   const bg = BACKGROUNDS.find((x) => x.id === c.bg);
   BG_KEYS.forEach((k) => (bg.vars[k] ? root.setProperty(k, bg.vars[k]) : root.removeProperty(k)));
   root.setProperty('--zoom', String(SIZES.find((z) => z.id === c.size).zoom));
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg.vars['--bg'] || '#0b0f1a');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg.vars['--bg'] || '#0b0c0e');
 }
 
 export function set(patch) {

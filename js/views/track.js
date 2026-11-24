@@ -24,22 +24,16 @@ function overview() {
   const avg7 = lastNDays(7).reduce((s, k) => s + G.essentialsDone(k), 0) / 7;
   return `
   <div class="grid3">
-    <div class="macro"><b>🔥 ${G.streak()}</b><span>streak</span></div>
+    <div class="macro"><b>${G.streak()}</b><span>streak</span></div>
     <div class="macro"><b>${st.game.bestStreak}</b><span>best</span></div>
-    <div class="macro"><b>${avg7.toFixed(1)}</b><span>avg /7 this wk</span></div>
-  </div>
-  <div class="card mt12"><div class="kicker">Last 5 weeks · essentials per day</div>
-    <div class="heat mt8">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((x) => `<span class="tiny muted" style="text-align:center">${x}</span>`).join('')}
-    ${Array.from({ length: firstWd }, () => '<i style="background:transparent"></i>').join('')}
-    ${days.map((k) => { const n = G.essentialsDone(k); const fr = st.game.frozen?.[k]; return `<i class="${n >= 7 ? 'l4' : n >= 5 ? 'l3' : n >= 3 ? 'l2' : n >= 1 ? 'l1' : ''} ${k === S.dayKey() ? 'today' : ''}" style="${fr ? 'background:rgba(90,169,255,.35)' : ''}" title="${k}: ${n}/7"></i>`; }).join('')}</div>
-    <div class="legend"><span><i style="background:var(--surface2)"></i>0</span><span><i style="background:rgba(52,211,153,.45)"></i>3–4</span><span><i style="background:rgba(52,211,153,.7)"></i>5–6 (streak)</span><span><i style="background:var(--green)"></i>7</span><span><i style="background:rgba(90,169,255,.35)"></i>freeze</span></div>
+    <div class="macro"><b>${avg7.toFixed(1)}</b><span>avg per day, 7 d</span></div>
   </div>
   <div class="card cool glow"><div class="kicker">4-week plan · week ${Math.min(wk, 4)}${wk > 4 ? ' (maintenance)' : ''}</div><h3>${UI.esc(prog.t)}</h3>
     ${prog.goals.map((g) => `<div class="small" style="padding:4px 0">• ${UI.esc(g)}</div>`).join('')}</div>
   ${yearCard()}
   ${insightsCard()}
   ${journalCard()}
-  <div class="card"><div class="kicker">Daily XP · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: st.days[k]?.xpToday || 0, label: S.prettyDate(k, { day: 'numeric' }), color: k === S.dayKey() ? '#ffb547' : '#5aa9ff' })), { h: 120 })}</div>`;
+  <div class="card"><div class="kicker">Essentials per day · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: G.essentialsDone(k), label: S.prettyDate(k, { day: 'numeric' }), color: G.essentialsDone(k) >= G.STREAK_THRESHOLD ? '#4ade80' : '#3a3d45' })), { h: 120, max: 7, goal: G.STREAK_THRESHOLD })}</div>`;
 }
 
 // Half a year of consistency, one square per day (columns are weeks).
