@@ -21,7 +21,7 @@ function essLabel(e) { return (Pr.fasting() && FAST_ESS[e.id]) || ESS_LABEL[e.id
 function greeting() {
   const h = new Date().getHours(); const n = S.get().profile.name;
   const g = h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Late night';
-  return n ? `${g}, ${UI.esc(n.split(' ')[0])}` : g;
+  return n ? `<span>${g}</span>, ${UI.esc(n.split(' ')[0])}` : g;
 }
 
 // Three rings, Apple-Fitness style: essentials, calories, water.
@@ -118,7 +118,7 @@ function prayerCard() {
       <h3>${fast.state === 'fasting' ? `Iftar in ${Pr.countdown(fast.toIftar)}` : fast.state === 'suhoor' ? `Suhoor ends in ${Pr.countdown(fast.toSuhoorEnd)}` : 'Fast complete'}</h3>
       <div class="lvlbar mt8 fastbar"><i style="width:${Math.round(fast.pct * 100)}%"></i></div>
       <div class="row between tiny mt8 muted"><span>Suhoor ${S.prettyTime(fast.suhoorClock)}</span><span>Iftar ${S.prettyTime(fast.iftarClock)}</span></div>` : ''}
-    ${cfg.enabled ? `<div class="row between ${fast ? 'mt12' : ''}"><div class="kicker">${UI.esc(cfg.cityName.split(' ')[0])}</div><span class="small">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
+    ${cfg.enabled ? `<div class="row between ${fast ? 'mt12' : ''}"><div class="kicker">${UI.esc(cfg.cityName.split(' ')[0])}</div><span class="small"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
     <div class="prayer-row mt8">${list.map((p) => `<div class="pr ${p.id === nx.id && !nx.tomorrow ? 'next' : ''} ${p.id === 'sunrise' ? 'faint' : ''}"><span>${p.label}</span><b>${p.clock ? S.prettyTime(p.clock).replace(/(am|pm)$/, '<small>$1</small>') : '—'}</b></div>`).join('')}</div>` : ''}
   </div>`;
 }
@@ -195,7 +195,7 @@ export function render(_, { night }) {
   </section>
 
   ${due.length ? `<button class="card" style="display:flex;width:100%;text-align:left;align-items:center;gap:12px" data-weekly>
-    <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div style="font-weight:600">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left · ${due.map((x) => ({ weigh: 'weight', erection: 'erection', mood: 'mood', energy: 'energy' }[x])).join(', ')}</div></span><span class="chev">${I.chev}</span></button>` : ''}
+    <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div style="font-weight:600">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left</div></span><span class="chev">${I.chev}</span></button>` : ''}
   </div></div>
   `;
 }

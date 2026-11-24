@@ -1,0 +1,61 @@
+// Pieces of sentences assembled at runtime, times shown 24-hour outside English.
+at bed (#:#)	就寝时（#:#）	سونے کے وقت (#:#)
+at bed (#:#am)	就寝时（#:#）	سونے کے وقت (#:#)
+at bed (#:#pm)	就寝时（#:#）	سونے کے وقت (#:#)
+You have room: one more cup still clears before #:#.	还有余量：再喝一杯也能在 #:# 前代谢掉。	گنجائش ہے: ایک اور کپ بھی #:# سے پہلے ختم ہو جائے گا۔
+Another cup now would leave ≈# mg at your #:# bedtime — enough to delay sleep.	现在再喝一杯，到 #:# 就寝时还会剩 ≈# 毫克——足以推迟入睡。	ابھی ایک اور کپ سے #:# سونے کے وقت ≈# ملی گرام رہ جائے گی — نیند میں تاخیر کے لیے کافی۔
+Still ≈# mg at bedtime. Expect it to take longer to fall asleep; it drops below # mg around #:#. Dim lights and skip screens to help.	就寝时仍有 ≈# 毫克，可能更难入睡；约 #:# 降到 # 毫克以下。调暗灯光、远离屏幕会有帮助。	سونے کے وقت ابھی ≈# ملی گرام۔ سونے میں دیر لگ سکتی ہے؛ یہ تقریباً #:# پر # ملی گرام سے کم ہوگی۔ روشنی کم کریں اور اسکرین سے دور رہیں۔
+Remove last (#:#)	删除上一杯（#:#）	آخری ہٹائیں (#:#)
+Bed at #:#	#:# 就寝	سونے کا وقت #:#
+Suhoor #:#	封斋饭 #:#	سحری #:#
+Iftar #:#	开斋 #:#	افطار #:#
+#:# daily	每天 #:#	روزانہ #:#
+#:# · # kcal · # g	#:# · # 千卡 · # 克	#:# · # کیلوری · # گرام
+#:#am · # kcal · # g	#:# · # 千卡 · # 克	#:# · # کیلوری · # گرام
+#:#pm · # kcal · # g	#:# · # 千卡 · # 克	#:# · # کیلوری · # گرام
+Bedtime moves # min earlier every # days · ~# days to go. Wind-down starts #:#.	就寝时间每 # 天提前 # 分钟 · 还需约 # 天。放松时间从 #:# 开始。	سونے کا وقت ہر # دن بعد # منٹ پہلے ہوتا ہے · تقریباً # دن باقی۔ آرام کا وقت #:# سے شروع ہوتا ہے۔
+Bedtime moves # min earlier every # days · ~# days to go. Wind-down starts #:#pm.	就寝时间每 # 天提前 # 分钟 · 还需约 # 天。放松时间从 #:# 开始。	سونے کا وقت ہر # دن بعد # منٹ پہلے ہوتا ہے · تقریباً # دن باقی۔ آرام کا وقت #:# سے شروع ہوتا ہے۔
+You’ve reached your ideal bedtime — hold it steady. Wind-down starts #:#.	你已达到理想就寝时间——保持住。放松时间从 #:# 开始。	آپ مثالی سونے کے وقت تک پہنچ گئے — اسے برقرار رکھیں۔ آرام کا وقت #:# سے شروع ہوتا ہے۔
+# of # left	还剩 # 项（共 # 项）	# میں سے # باقی
+Week of	周起始	ہفتہ
+Fasting mode on	斋戒模式已开启	روزہ موڈ آن
+At # kg/week you reach # kg by	按每周 # 公斤的速度，你将达到 # 公斤，时间约在	# کلو فی ہفتہ کی رفتار سے آپ # کلو تک پہنچیں گے، تقریباً
++# kg/week	每周 +# 公斤	+# کلو فی ہفتہ
+−# kg/week	每周 −# 公斤	−# کلو فی ہفتہ
+right on track (#–# target)	完全在正轨上（目标 #–#）	بالکل درست راستے پر (ہدف #–#)
+faster than planned — fine, but no need to push	比计划快——没问题，但不必刻意加速	منصوبے سے تیز — ٹھیک ہے، مگر زور دینے کی ضرورت نہیں
+flat — add a daily shake	持平——每天加一杯奶昔	ایک جگہ رکا ہوا — روزانہ ایک شیک شامل کریں
+Weigh in weekly to see your trend.	每周称重即可看到趋势。	رجحان دیکھنے کے لیے ہفتہ وار وزن کریں۔
+Trend is in your goal zone. Now hold it.	趋势已进入目标区间。现在保持住。	رجحان آپ کے ہدف میں ہے۔ اب اسے برقرار رکھیں۔
+Generated	生成于	تیار کردہ
+last # days · self-reported	最近 # 天 · 自我报告	پچھلے # دن · خود رپورٹ کردہ
+♨️ Air fryer	空气炸锅	ایئر فرائر
+🥄 No-cook	免开火	بغیر پکائے
+Milestone	里程碑	سنگ میل
+Your favourite desi breakfast, made with frozen 手抓饼 — golden flaky outside, soft egg inside.	你最爱的南亚早餐，用速冻手抓饼做——外面金黄起酥，里面是嫩鸡蛋。	آپ کا پسندیدہ دیسی ناشتہ، منجمد پراٹھے (手抓饼) سے — باہر سے سنہری خستہ، اندر نرم انڈا۔
+Cheese melt: add a slice in the last minute	芝士版：最后一分钟加一片芝士	چیز میلٹ: آخری منٹ میں ایک سلائس ڈالیں
+Green chili + coriander in the egg	蛋液里加青辣椒和香菜	انڈے میں ہری مرچ + دھنیا
+Add torn ready-chicken for +# g protein	加入撕好的熟鸡肉，多 # 克蛋白质	+# گرام پروٹین کے لیے پکی مرغی کے ٹکڑے ڈالیں
+Tomato-onion masala egg	番茄洋葱玛萨拉蛋	ٹماٹر پیاز مصالحہ انڈا
+Put the frozen paratha straight in the air fryer (no oil). #°C.	冷冻手抓饼直接放进空气炸锅（不用油）。#°C。	منجمد پراٹھا سیدھا ایئر فرائر میں رکھیں (بغیر تیل)۔ #°C۔
+While it cooks, beat # eggs with salt, chili and onion in a mug.	趁加热时，在杯子里把 # 个鸡蛋加盐、辣椒和洋葱打散。	پکنے کے دوران مگ میں # انڈے نمک، مرچ اور پیاز کے ساتھ پھینٹیں۔
+Pull the basket, fold up the paratha edges into a little boat and pour the egg in. (Or pour egg into a small oven-safe dish next to it.)	拉出炸篮，把饼边折成小船形，倒入蛋液。（或把蛋液倒进旁边的小耐热盘。）	باسکٹ نکالیں، پراٹھے کے کنارے موڑ کر کشتی بنائیں اور انڈا ڈالیں۔ (یا ساتھ میں چھوٹی اوون سیف ڈش میں انڈا ڈالیں۔)
+Back in at #°C until the egg sets.	放回去 #°C 炸至鸡蛋凝固。	دوبارہ #°C پر انڈا جمنے تک۔
+Add the cheese slice for the last minute if you like. Fold, eat with yogurt and a banana.	喜欢的话最后一分钟加片芝士。折起来，配酸奶和一根香蕉吃。	پسند ہو تو آخری منٹ میں چیز سلائس ڈالیں۔ موڑیں، دہی اور کیلے کے ساتھ کھائیں۔
+#. Tap the button above → Safari shows the calendar events → tap	#. 点击上方按钮 → Safari 会显示日历事件 → 点击	#. اوپر بٹن ٹیپ کریں ← Safari کیلنڈر ایونٹس دکھائے گا ← ٹیپ کریں
+#. Each one repeats daily with an alert. They come from your current sleep plan.	#. 每个事件每天重复并带提醒。它们来自你当前的睡眠计划。	#. ہر ایک روزانہ الرٹ کے ساتھ دہراتا ہے۔ یہ آپ کے موجودہ نیند کے منصوبے سے ہیں۔
+#. When your bedtime shifts (every # days), delete the “Revive” events in Calendar and add them again — or just keep them; meals follow your fixed wake time.	#. 就寝时间调整时（每 # 天），在日历中删除“Revive”事件后重新添加——也可以保留；吃饭时间跟随固定的起床时间。	#. جب سونے کا وقت بدلے (ہر # دن)، کیلنڈر میں “Revive” ایونٹس حذف کر کے دوبارہ شامل کریں — یا رہنے دیں؛ کھانے مقررہ جاگنے کے وقت کے مطابق ہیں۔
+#. Tip: Calendar → Calendars → put them in a new calendar named	#. 提示：日历 → 日历列表 → 把它们放进一个新日历，命名为	#. مشورہ: کیلنڈر ← کیلنڈرز ← انہیں نئے کیلنڈر میں رکھیں جس کا نام ہو
+so they are easy to remove.	，方便删除。	تاکہ آسانی سے ہٹائے جا سکیں۔
+Shortcuts app → Automation →	快捷指令 App → 自动化 →	شارٹ کٹس ایپ ← آٹومیشن ←
+(your wake time) →	（你的起床时间）→	(آپ کا جاگنے کا وقت) ←
+→ Safari → Revive. It opens Revive every morning.	→ Safari → Revive。每天早上自动打开 Revive。	← Safari ← Revive۔ یہ ہر صبح Revive کھولتا ہے۔
+Fajr in #m	# 分钟后晨礼	فجر # منٹ میں
+in #h #m	# 小时 # 分钟后	# گھنٹے # منٹ میں
+fasting mode on	斋戒模式已开启	روزہ موڈ آن
+Weigh in weekly to see your trend	每周称重即可看到趋势	رجحان دیکھنے کے لیے ہفتہ وار وزن کریں
+Trend # kg/week — not climbing yet, so no goal date. One extra shake a day (≈+# kcal) usually starts it moving.	趋势每周 # 公斤——还没有上升，所以无法估算达标日期。每天多喝一杯奶昔（≈+# 千卡）通常就能开始见效。	رجحان # کلو فی ہفتہ — ابھی نہیں بڑھ رہا، اس لیے ہدف کی تاریخ نہیں۔ روزانہ ایک اضافی شیک (≈+# کیلوریز) عموماً اسے حرکت دیتا ہے۔
+Trend +# kg/week — not climbing yet, so no goal date. One extra shake a day (≈+# kcal) usually starts it moving.	趋势每周 +# 公斤——还没有上升，所以无法估算达标日期。每天多喝一杯奶昔（≈+# 千卡）通常就能开始见效。	رجحان +# کلو فی ہفتہ — ابھی نہیں بڑھ رہا، اس لیے ہدف کی تاریخ نہیں۔ روزانہ ایک اضافی شیک (≈+# کیلوریز) عموماً اسے حرکت دیتا ہے۔
+/ # g	/ # 克	/ # گرام
+/ # L	/ # 升	/ # لیٹر
+# L	# 升	# لیٹر

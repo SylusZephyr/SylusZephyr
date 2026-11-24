@@ -362,7 +362,7 @@ function planView() {
   const wk = S.weekKey();
   let cost = 0, kcal = 0;
   if (has) st.weekPlan.days.forEach((d) => PLAN_SLOTS.forEach((sl) => { const r = RECIPE[d[sl]]; if (r) { cost += r.cost; kcal += r.kcal; } }));
-  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Meal plan</h1><div class="sub">Week of ${S.prettyDate(wk, { day: 'numeric', month: 'short' })}</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Meal plan</h1><div class="sub"><span>Week of</span> ${S.prettyDate(wk, { day: 'numeric', month: 'short' })}</div></div></div>
   ${has ? `<div class="grid3 mb12"><div class="macro"><b>¥${cost}</b><span>whole week</span></div><div class="macro"><b>${Math.round(kcal / 7)}</b><span>kcal/day</span></div><div class="macro"><b>${planIngredients().filter((id) => !st.pantry.includes(id)).length}</b><span>to buy</span></div></div>
     ${st.weekPlan.days.map((d, i) => { const k = S.addDays(wk, i); return `<div class="card tight" style="${i === todayIdx ? 'border-color:var(--line2)' : ''}">
       <div class="row between mb8"><b>${S.prettyDate(k, { weekday: 'long' })}${i === todayIdx ? ' · today' : ''}</b><span class="muted small">${PLAN_SLOTS.reduce((s, sl) => s + (RECIPE[d[sl]]?.kcal || 0), 0)} kcal</span></div>

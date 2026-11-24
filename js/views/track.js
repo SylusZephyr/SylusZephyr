@@ -50,7 +50,7 @@ function yearCard() {
     cells.push(`<i class="${n >= 7 ? 'l4' : n >= 5 ? 'l3' : n >= 3 ? 'l2' : n >= 1 ? 'l1' : ''} ${k === today ? 'today' : ''}" title="${S.prettyDate(k)}: ${n}/7"></i>`);
   }
   const months = []; let lastM = -1;
-  for (let w = 0; w < weeks; w++) { const d = S.keyToDate(S.addDays(start, w * 7)); if (d.getMonth() !== lastM) { months.push({ w, l: d.toLocaleDateString('en-GB', { month: 'short' }) }); lastM = d.getMonth(); } }
+  for (let w = 0; w < weeks; w++) { const d = S.keyToDate(S.addDays(start, w * 7)); if (d.getMonth() !== lastM) { months.push({ w, l: d.toLocaleDateString(S.uiLocale(), { month: 'short' }) }); lastM = d.getMonth(); } }
   return `<div class="card"><div class="row between"><div class="kicker">6 months of showing up</div><span class="small muted">${secured} streak days</span></div>
     <div style="position:relative;height:14px;margin-top:6px">${months.map((m) => `<span class="tiny muted" style="position:absolute;left:${m.w * 15}px">${m.l}</span>`).join('')}</div>
     <div class="yheat" role="img" aria-label="${secured} days with 5 or more essentials in the last 6 months">${cells.join('')}</div>
@@ -169,7 +169,7 @@ function body() {
   <div class="grid3"><div class="macro"><b>${last ? last.kg.toFixed(1) : '—'}</b><span>kg now</span></div><div class="macro"><b>${bmi ? bmi.toFixed(1) : '—'}</b><span>BMI</span></div><div class="macro"><b>${toGoal != null ? toGoal.toFixed(1) : '—'}</b><span>kg to ${st.profile.goalKgMin}</span></div></div>
   <div class="card mt12"><div class="kicker">Weight · goal zone ${st.profile.goalKgMin}–${st.profile.goalKgMax} kg</div>${C.lineChart(pts, { band: [st.profile.goalKgMin, st.profile.goalKgMax], unit: '' })}
     ${etaLine()}
-    <p class="small mt8" style="color:${rate == null ? 'var(--muted)' : rate > 0.4 ? 'var(--amber)' : rate >= 0.05 ? 'var(--green)' : 'var(--muted)'}">${rate == null ? 'Weigh in weekly to see your trend.' : `${rate >= 0 ? '+' : ''}${rate.toFixed(2)} kg/week · ${rate > 0.4 ? 'faster than planned — fine, but no need to push' : rate >= 0.05 ? 'right on track (0.1–0.25 target)' : 'flat — add a daily shake'}`}</p></div>
+    <p class="small mt8" style="color:${rate == null ? 'var(--muted)' : rate > 0.4 ? 'var(--amber)' : rate >= 0.05 ? 'var(--green)' : 'var(--muted)'}">${rate == null ? 'Weigh in weekly to see your trend.' : `<span>${rate >= 0 ? '+' : '−'}${Math.abs(rate).toFixed(2)} kg/week</span> · <span>${rate > 0.4 ? 'faster than planned — fine, but no need to push' : rate >= 0.05 ? 'right on track (0.1–0.25 target)' : 'flat — add a daily shake'}</span>`}</p></div>
   <button class="btn primary block" data-weigh>⚖️ Weigh in</button>
   <div class="card mt12"><div class="kicker">History</div>${ws.length ? [...ws].reverse().map((w) => `<div class="list-item"><div class="grow"><b>${w.kg.toFixed(1)} kg</b><div class="muted small">${S.prettyDate(w.date)}</div></div><button class="icon-btn" data-delw="${w.date}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty">No weigh-ins</div>'}</div>`;
 }
@@ -179,7 +179,7 @@ function etaLine() {
   if (!tr) return '';
   if (tr.eta === 'reached') return `<p class="small mt8" style="color:var(--green);font-weight:700">🎯 Trend is in your goal zone. Now hold it.</p>`;
   if (!tr.eta) return `<p class="small mt8 muted">Trend ${tr.perWeek >= 0 ? '+' : ''}${tr.perWeek.toFixed(2)} kg/week — not climbing yet, so no goal date. One extra shake a day (≈+300 kcal) usually starts it moving.</p>`;
-  return `<p class="small mt8">📈 At ${tr.perWeek.toFixed(2)} kg/week you reach <b>${goal} kg around ${tr.eta.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: tr.eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b>.</p>`;
+  return `<p class=\"small mt8\"><span>At ${tr.perWeek.toFixed(2)} kg/week you reach ${goal} kg by</span> <b>${tr.eta.toLocaleDateString(S.uiLocale(), { day: 'numeric', month: 'long', year: tr.eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b></p>`;
 }
 
 function sxCard() {

@@ -1,6 +1,7 @@
 // XP, levels, streaks, quests, loot chests, badges.
 import * as S from './store.js';
 import * as UI from './ui.js';
+import { tr } from './i18n.js';
 import { TIPS } from './data/content.js';
 
 export const ESSENTIALS = [
@@ -227,7 +228,7 @@ export function checkBadges() {
   }
   if (!fresh.length) return;
   S.save();
-  if (fresh.length === 1) setTimeout(() => UI.toast(`Milestone: ${fresh[0].n}`), 500);
+  if (fresh.length === 1) setTimeout(() => UI.toast(`${tr('Milestone')}: ${tr(fresh[0].n)}`), 500);
   else if (fresh.length > 1) setTimeout(() => UI.toast(`${fresh.length} milestones reached`), 500);
 }
 function safe(fn) { try { return fn(); } catch (e) { return false; } }

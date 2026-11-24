@@ -4,12 +4,14 @@ import * as Lock from '../lock.js';
 import { INGREDIENTS, STARTER_PANTRY } from '../data/ingredients.js';
 import { RED_FLAGS, DOCTOR_QUESTIONS } from '../data/content.js';
 import * as Pr from '../prayer.js';
+import { LANGUAGES, locale, setLocale } from '../i18n.js';
 
 let step = 0;
 const draft = { name: '', wake: '10:00', bed: '03:30', kg: 62, pantry: new Set(STARTER_PANTRY), prayer: null, city: 'beijing' };
 
 const STEPS = [
   () => `<div class="col" style="min-height:70vh;justify-content:center;text-align:center;gap:16px">
+      <div class="seg lang-pick" style="max-width:320px;margin:0 auto 12px" data-no-tr>${LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${locale === l.code ? 'on' : ''}" lang="${l.code}">${l.native}</button>`).join('')}</div>
       <img src="icons/mark.svg" alt="" width="96" height="96" style="margin:0 auto">
       <h1 style="font-size:40px;letter-spacing:-0.03em">Revive</h1>
       <p class="muted" style="font-size:17px">Your private recovery companion.<br>Food that is easy. Sleep that settles. Training that works. Progress you can see.</p>
@@ -68,6 +70,7 @@ export function bind(root, done) {
   root.querySelectorAll('[data-ing]').forEach((c) => c.addEventListener('click', () => {
     const id = c.dataset.ing; draft.pantry.has(id) ? draft.pantry.delete(id) : draft.pantry.add(id); c.classList.toggle('on'); UI.haptic(6);
   }));
+  root.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.lang === locale) return; setLocale(b.dataset.lang); location.reload(); }));
   root.querySelectorAll('[data-pr]').forEach((b) => b.addEventListener('click', () => { collect(); draft.prayer = b.dataset.pr === '1'; rer(); }));
   root.querySelector('#ob-back')?.addEventListener('click', () => { collect(); step--; rer(); });
   root.querySelector('#ob-next')?.addEventListener('click', () => {

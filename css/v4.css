@@ -333,3 +333,15 @@ details.learn p { padding: 0 2px 14px; line-height: 1.55; }
 .trainer .phase { font-weight: 650; }
 .list-item .li-ico svg { width: 18px; height: 18px; }
 .list-item .li-ico { color: var(--muted); }
+
+/* ---- Languages ---- */
+:lang(zh) body, html[lang="zh"] body { font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
+html[lang="ur"] body { font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting", "Noto Sans Arabic", -apple-system, "Segoe UI", sans-serif; line-height: 1.75; }
+html[lang="ur"] h1, html[lang="ur"] h2, html[lang="ur"] h3 { line-height: 1.6; letter-spacing: 0; }
+.lang-pick button[lang="ur"] { font-family: "Noto Nastaliq Urdu", "Urdu Typesetting", sans-serif; }
+[dir="rtl"] .chev svg, [dir="rtl"] .icon-btn.back svg, [dir="rtl"] a.icon-btn[href="#cook"] svg { transform: scaleX(-1); }
+[dir="rtl"] .rings svg { transform: rotate(-90deg) scaleY(-1); }
+[dir="rtl"] .num, [dir="rtl"] .legend-v .v, [dir="rtl"] .when, [dir="rtl"] .prayer-row b { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] .qk b, [dir="rtl"] .macro b, [dir="rtl"] .summary-foot b, [dir="rtl"] .ready, [dir="rtl"] .segbar + .row b, [dir="rtl"] .ww span { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] .searchbar input, [dir="rtl"] input[type="number"], [dir="rtl"] input[type="time"] { text-align: right; }
+[dir="rtl"] .carousel { direction: rtl; }

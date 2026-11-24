@@ -15,6 +15,7 @@ import * as Pr from '../prayer.js';
 import * as Caf from '../caffeine.js';
 import * as Theme from '../theme.js';
 import * as Progress from '../progress.js';
+import { LANGUAGES, locale, setLocale } from '../i18n.js';
 
 const LABS = [
   { name: 'Testosterone (morning, total)', unit: 'nmol/L', ref: '~8.6–29' },
@@ -111,7 +112,7 @@ function main() {
     ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
     ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
-    ${item('me/prayer', '🕌', 'Prayer times & Ramadan', Pr.settings().enabled ? `${UI.esc(Pr.settings().cityName)} · ${Pr.fasting() ? 'fasting mode on' : 'next: ' + Pr.next().label}` : 'Off · offline, no location needed')}
+    ${item('me/prayer', '🕌', 'Prayer times & Ramadan', Pr.settings().enabled ? `<span>${UI.esc(Pr.settings().cityName)}</span> · <span>${Pr.fasting() ? 'Fasting mode on' : Pr.next().label}</span> <span>${S.prettyTime(Pr.next().clock)}</span>` : 'Off · offline, no location needed')}
     ${item('me/saved', '🔖', 'Library', `${TIPS.length} short reads · ${st.savedTips.length} saved`)}
     ${Native.isNative || window.reviveDesktop ? '' : item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
     ${item('me/settings', '⚙️', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
@@ -158,7 +159,7 @@ function summary() {
   const energyRed = weeks.some((w) => st.checkins[w].energy?.score?.redFlag);
   const html = `
     <h1>Revive — patient summary</h1>
-    <p>Generated ${new Date().toLocaleString('en-GB')} · last 28 days · self-reported</p>
+    <p><span>Generated</span> ${S.prettyDate(S.dayKey(), { day: 'numeric', month: 'long', year: 'numeric' })} ${S.prettyTime(S.hm())} · <span>last 28 days · self-reported</span></p>
     <h2>Profile</h2><p>Male, ${st.profile.age} y · ${st.profile.heightCm} cm · ${ws.at(-1)?.kg ?? st.profile.startKg} kg (start ${st.profile.startKg} kg) · Halal diet · Lives in China</p>
     <h2>Main concerns (from 200-question self-assessment)</h2>
     <ul><li>Erections enlarge but not hard; lose erection almost always; rarely without direct stimulation; 6–12 months. High desire.</li>
@@ -242,7 +243,7 @@ function prayer() {
     <div class="field"><label>Calculation method</label><select id="pr-method">${Object.entries(Pr.METHODS).map(([id, m]) => `<option value="${id}" ${cfg.method === id ? 'selected' : ''}>${m.name}</option>`).join('')}</select></div>
     <div class="field"><label>Asr</label><div class="seg" id="pr-asr"><button data-asr="standard" class="${cfg.asr === 'standard' ? 'on' : ''}">Standard</button><button data-asr="hanafi" class="${cfg.asr === 'hanafi' ? 'on' : ''}">Hanafi</button></div></div>
   </div>
-  <div class="card"><div class="row between"><div class="kicker">Today · ${UI.esc(cfg.cityName)}</div><span class="small" style="font-weight:700">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
+  <div class="card"><div class="row between"><div class="kicker"><span>Today</span> · <span>${UI.esc(cfg.cityName)}</span></div><span class="small" style="font-weight:700"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
     ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span style="font-weight:800">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
     <p class="tiny muted mt8">If your local mosque’s timetable differs, follow the mosque.</p></div>
   <div class="section-title" style="font-size:16px">Ramadan fasting mode</div>
@@ -269,6 +270,8 @@ function settings() {
     ${tg('sounds', 'Sounds', 'Reward chimes', s.sounds)}
     ${tg('haptics', 'Vibration', 'Where supported', s.haptics)}
   </div>
+  <div class="section-title" style="font-size:16px">Language</div>
+  <div class="card"><div class="seg lang-pick" data-no-tr>${LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${locale === l.code ? 'on' : ''}" lang="${l.code}">${l.native}</button>`).join('')}</div></div>
   <div class="section-title" style="font-size:16px">Look</div>
   <div class="card">
     <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
@@ -471,6 +474,7 @@ export function bind(root, parts, { rerender }) {
       p.weeklyBudget = +root.querySelector('#p-b').value || p.weeklyBudget; p.startKg = +root.querySelector('#p-s').value || p.startKg;
       S.save(); UI.toast('Profile saved', '✅'); rerender();
     };
+    root.querySelectorAll('[data-lang]').forEach((b) => b.onclick = () => { if (b.dataset.lang === locale) return; S.get().settings.locale = b.dataset.lang; S.saveNow(); setLocale(b.dataset.lang); location.reload(); });
     const cup = root.querySelector('#p-cup'); const cut = root.querySelector('#p-cut');
     cup.onchange = () => { const v = Math.round(+cup.value); if (v >= 5 && v <= 400) { st.profile.cupMg = v; S.save(); UI.toast('Cup size saved', '☕'); } else cup.value = Caf.cupMg(); };
     cut.onchange = () => { if (/^\d{2}:\d{2}$/.test(cut.value)) { st.profile.caffeineCutoff = cut.value; S.save(); UI.toast('Cutoff saved', '☕'); } };

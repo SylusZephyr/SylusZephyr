@@ -111,7 +111,7 @@ export function monthData(ym) {
   const water = keys.filter((k) => (st.days[k]?.waterMl || 0) >= 1500).length;
   let best = 0, run = 0; for (const k of keys) { if (G.essentialsDone(k) >= G.STREAK_THRESHOLD) { run++; best = Math.max(best, run); } else run = 0; }
   return { ym, days: n, logged: logged.length, onTrack, meals, avgSleep, startKg, endKg, pf, water, best,
-    label: new Date(y, m - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) };
+    label: new Date(y, m - 1, 1).toLocaleDateString(S.uiLocale(), { month: 'long', year: 'numeric' }) };
 }
 
 export function recapHtml(r) {

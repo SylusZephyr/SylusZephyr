@@ -1,4 +1,5 @@
 import { stripEmoji } from './ui.js';
+import { translateTree } from './i18n.js';
 // Accessibility layer applied to everything the app renders: names for icon-only controls,
 // states for toggles/checkboxes/chips, label↔input links, dialog semantics and focus handling.
 // Runs on every DOM change, so new screens and sheets are covered automatically.
@@ -88,7 +89,7 @@ export function start() {
   const toasts = document.getElementById('toast-root');
   if (toasts) { toasts.setAttribute('role', 'status'); toasts.setAttribute('aria-live', 'polite'); }
   document.querySelector('nav.tabbar')?.setAttribute('aria-label', 'Main');
-  const run = () => { scheduled = false; stripEmoji(document.querySelector('#screen')); stripEmoji(document.querySelector('#overlay-root')); enhance(document); document.querySelector('nav.tabbar')?.setAttribute('aria-label', 'Main'); document.querySelectorAll('.tab.active').forEach((t) => t.setAttribute('aria-current', 'page')); };
+  const run = () => { scheduled = false; stripEmoji(document.querySelector('#screen')); stripEmoji(document.querySelector('#overlay-root')); ['#app', '#overlay-root', '#toast-root'].forEach((q) => translateTree(document.querySelector(q))); enhance(document); document.querySelector('nav.tabbar')?.setAttribute('aria-label', 'Main'); document.querySelectorAll('.tab.active').forEach((t) => t.setAttribute('aria-current', 'page')); };
   new MutationObserver((muts) => {
     // When a dialog closes, give focus back to whatever opened it.
     for (const m of muts) for (const n of m.removedNodes) if (n.nodeType === 1 && n.querySelector?.('[role="dialog"]') && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });

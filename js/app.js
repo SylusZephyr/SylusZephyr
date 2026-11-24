@@ -13,13 +13,14 @@ import * as Native from './native.js';
 import { reminderList } from './ics.js';
 import * as Cloud from './cloud.js';
 import * as A11y from './a11y.js';
-import { t, locale, dir } from './i18n.js';
+import { t, locale, dir, loadCatalog, translateTree } from './i18n.js';
 import { applyRemoteContent } from './content.js';
 import * as Theme from './theme.js';
 import * as Prayer from './prayer.js';
 import * as Progress from './progress.js';
 
 await Native.restoreStorage();
+await loadCatalog();
 document.documentElement.lang = locale; document.documentElement.dir = dir;
 S.load();
 Theme.apply();
@@ -47,7 +48,7 @@ let lastScroll = {};
 export function render({ keepScroll = false } = {}) {
   const app = UI.$('#app');
   const st = S.get();
-  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); UI.stripEmoji(app); return; }
+  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); UI.stripEmoji(app); translateTree(app); return; }
   const r = route();
   const tab = TABS.find((t) => t.id === r.tab);
   const y = window.scrollY;
@@ -64,6 +65,7 @@ export function render({ keepScroll = false } = {}) {
   UI.$('#screen [data-crash-reload]')?.addEventListener('click', () => location.reload());
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
   UI.stripEmoji(UI.$('#screen'));
+  translateTree(UI.$('#app'));
   countUp();
   try { Progress.evaluate(); Progress.checkMoments(); } catch (e) { logError(e, 'progress'); }
   document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
