@@ -1,5 +1,6 @@
 // Personal plan logic: sleep schedule shifting, nutrition targets, meal slots, wind-down.
 import * as S from './store.js';
+import * as Pr from './prayer.js';
 
 export function nutritionTargets() {
   const p = S.get().profile;
@@ -47,6 +48,12 @@ export function inWindDown(now = new Date()) {
 
 // Suggested meal slot for current time relative to wake anchor.
 export function currentSlot(now = new Date()) {
+  if (Pr.fasting(now)) {
+    const f = Pr.fastWindow(now); const m = now.getHours() * 60 + now.getMinutes();
+    if (f.state === 'suhoor') return 'breakfast';
+    if (f.state === 'fasting') return 'dinner';
+    return m < (f.isha ?? f.iftar + 90) + 30 ? 'dinner' : m < f.iftar + 240 ? 'lunch' : 'snack';
+  }
   const p = S.get().profile; const d = S.day();
   const wake = S.minutesOf(d.sleep.wake || p.wakeAnchor);
   const m = now.getHours() * 60 + now.getMinutes();
@@ -56,10 +63,14 @@ export function currentSlot(now = new Date()) {
   if (since < 780) return 'dinner';
   return 'snack';
 }
-export const SLOT_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack / shake' };
-export const SLOT_EMOJI = { breakfast: '🍳', lunch: '🌯', dinner: '🍛', snack: '🥤' };
+const BASE_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack / shake' };
+const BASE_EMOJI = { breakfast: '🍳', lunch: '🌯', dinner: '🍛', snack: '🥤' };
+// Labels follow fasting mode (Suhoor / Iftar) without every caller needing to know.
+export const SLOT_LABEL = new Proxy(BASE_LABEL, { get: (o, k) => (Pr.fasting() ? Pr.FAST_LABEL : o)[k] });
+export const SLOT_EMOJI = new Proxy(BASE_EMOJI, { get: (o, k) => (Pr.fasting() ? Pr.FAST_EMOJI : o)[k] });
 
 export function mealTimes() {
+  if (Pr.fasting()) return Pr.fastingMealTimes();
   const p = S.get().profile; const w = S.minutesOf(p.wakeAnchor);
   return { breakfast: S.fmtMin(w + 60), lunch: S.fmtMin(w + 330), dinner: S.fmtMin(w + 600), snack: S.fmtMin(w + 450) };
 }
@@ -91,6 +102,11 @@ export const PROGRAM = [
 // previous day and are always "late".
 export function isAfterCutoff(hhmm) {
   const m = S.minutesOf(hhmm); if (m == null) return false;
+  if (Pr.fasting()) {
+    // While fasting, coffee only happens after iftar: the rule becomes "not in the 6 h before bed".
+    const dm = (x) => ((x - S.DAY_ROLLOVER_HOUR * 60) + 1440) % 1440;
+    return dm(m) > dm(S.minutesOf(sleepTargets().bed)) - 360;
+  }
   if (m < S.DAY_ROLLOVER_HOUR * 60) return true;
   return m >= S.minutesOf(S.get().profile.caffeineCutoff);
 }

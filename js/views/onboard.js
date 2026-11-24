@@ -41,7 +41,7 @@ const STEPS = [
 export function render() {
   const last = step === STEPS.length - 1;
   return `<div class="ob-ambient"></div><main class="screen onboard" style="padding-bottom:120px">
-    <div class="row mb12" style="gap:6px">${STEPS.map((_, i) => `<i style="flex:1;height:4px;border-radius:2px;background:${i <= step ? 'var(--amber)' : 'var(--surface3)'}"></i>`).join('')}</div>
+    <div class="row mb12" style="gap:6px">${STEPS.map((_, i) => `<i style="flex:1;height:4px;border-radius:2px;background:${i <= step ? 'var(--text)' : 'var(--surface3)'}"></i>`).join('')}</div>
     ${STEPS[step]()}
     ${last ? '' : `<div style="position:fixed;left:0;right:0;bottom:0;padding:16px 16px calc(var(--safe-bottom) + 18px);background:linear-gradient(transparent, var(--bg) 30%)">
       <div style="max-width:560px;margin:0 auto" class="row">
@@ -51,7 +51,7 @@ export function render() {
 }
 
 export function bind(root, done) {
-  const rer = () => { root.innerHTML = render(); bind(root, done); window.scrollTo(0, 0); };
+  const rer = () => { root.innerHTML = render(); bind(root, done); UI.stripEmoji(root); window.scrollTo(0, 0); };
   const collect = () => {
     const n = root.querySelector('#ob-name'); if (n) draft.name = n.value.trim();
     const kg = root.querySelector('#ob-kg'); if (kg) draft.kg = parseFloat(kg.value) || 62;
@@ -75,7 +75,7 @@ export function bind(root, done) {
     st.weights = [{ date: S.dayKey(), kg: draft.kg }];
     st.programStart = S.dayKey(); st.createdAt = Date.now();
     st.onboarded = true; S.saveNow();
-    UI.confetti(120); UI.toast('Welcome to Revive! +50 XP', '🔥'); st.game.xp += 50; S.saveNow();
+    UI.toast('Welcome to Revive'); st.game.xp += 50; S.saveNow();
     done();
   };
   root.querySelector('#ob-lock')?.addEventListener('click', () => Lock.setupSheet(finish));

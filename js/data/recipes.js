@@ -474,6 +474,8 @@ export const DELIVERY = [
 
 import { MORE_RECIPES } from './recipes-more.js';
 RECIPES.push(...MORE_RECIPES);
+import { RAMADAN_RECIPES } from './recipes-ramadan.js';
+RECIPES.push(...RAMADAN_RECIPES);
 
 export const RECIPE = Object.fromEntries(RECIPES.map((r) => [r.id, r]));
 

@@ -5,6 +5,7 @@ import * as P from '../plan.js';
 import * as Sh from './shared.js';
 import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
 import { INGREDIENTS, ING, ING_CATS } from '../data/ingredients.js';
+import * as Pr from '../prayer.js';
 import { PHOTOS } from '../data/photos.js';
 
 const filt = { feel: null, mins: null, budget: null, slot: null, q: '', cat: 'all' };
@@ -19,7 +20,7 @@ const TIMES = [{ v: 5, l: '≤5 min' }, { v: 15, l: '≤15 min' }, { v: 30, l: '
 const BUDGETS = [{ v: 8, l: '≤¥8' }, { v: 15, l: '≤¥15' }, { v: 99, l: 'Any' }];
 
 export function suggest({ slot, feel, mins, budget } = {}) {
-  const pantry = new Set(S.get().pantry); const st = S.get();
+  const pantry = new Set(S.get().pantry); const st = S.get(); const fastingNow = Pr.fasting();
   return RECIPES.map((r) => {
     const req = r.ing.filter((i) => !i.opt);
     const have = req.filter((i) => pantry.has(i.id)).length;
@@ -32,6 +33,8 @@ export function suggest({ slot, feel, mins, budget } = {}) {
     if (feel === 'lowappetite' && r.tags.some((t) => ['creamy', 'drinkable', 'sweet'].includes(t))) score += 8;
     if (mins && r.mins > mins) score -= 40;
     if (budget && r.cost > budget) score -= 30;
+    if (fastingNow) { if ((slot === 'breakfast' && r.tags.includes('suhoor')) || (slot !== 'breakfast' && r.tags.includes('iftar'))) score += 22; }
+    else if (r.tags.includes('suhoor') || r.tags.includes('iftar')) score -= 4; // keep Ramadan dishes from crowding normal days
     if (st.favorites.includes(r.id)) score += 6;
     score += Math.min(6, (st.cooked[r.id] || 0) * 2); // familiar meals with small variations
     const rating = st.recipeNotes?.[r.id]?.rating; if (rating) score += (rating - 3) * 6; // your own ratings steer suggestions
@@ -45,13 +48,17 @@ const methodPill = (m) => m === 'airfryer' ? '<span class="pill amber method">�
 // Photos are real <img> elements so the browser can lazy-load and decode them off the main thread.
 export function art(r, { eager = false } = {}) {
   const p = PHOTOS[r.id];
-  if (!p) return { cls: '', style: UI.grad(r.bg), emoji: r.emoji };
+  if (!p) {
+    // No photo yet: a quiet monogram tile tinted with the dish's colour, not a giant emoji.
+    const mono = r.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter((w) => w.length > 2 && !/^(the|and|with|air|fryer|quick|cheat|big|easy)$/i.test(w)).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+    return { cls: 'mono-tile', style: `--tint:${r.bg[0]}`, emoji: `<span class="mono">${mono}</span>` };
+  }
   return { cls: 'has-photo', style: `background:${r.bg[1]}`, emoji: `<img class="ph" src="${p.src}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="720" height="540">` };
 }
 
 function recipeCard(r) {
   const fav = S.get().favorites.includes(r.id); const a = art(r);
-  return `<a class="rcard" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? '<span class="fav">❤️</span>' : ''}${methodPill(r.method)}</div>
+  return `<a class="rcard" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? `<span class="fav" style="color:var(--coral)">${UI.ICON.heartFill}</span>` : ''}${methodPill(r.method)}</div>
     <div class="body"><div class="name">${UI.esc(r.name)}</div><div class="meta">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div></div></a>`;
 }
 
@@ -71,6 +78,7 @@ function main() {
   const sug = suggest({ slot, feel: filt.feel, mins: filt.mins, budget: filt.budget }).slice(0, 4);
   let list = RECIPES;
   if (filt.cat === 'fav') list = list.filter((r) => st.favorites.includes(r.id));
+  else if (filt.cat === 'ramadan') list = list.filter((r) => r.tags.includes('suhoor') || r.tags.includes('iftar'));
   else if (filt.cat === 'nocook') list = list.filter((r) => r.method === 'nocook');
   else if (['breakfast', 'lunch', 'dinner', 'snack'].includes(filt.cat)) list = list.filter((r) => r.meals.includes(filt.cat));
   else if (filt.cat === 'protein') list = [...list].sort((a, b) => b.protein - a.protein).slice(0, 12);
@@ -78,7 +86,7 @@ function main() {
   const shopN = (st.shopping || []).filter((x) => !x.done).length;
   return `
   <div class="topbar"><div><div class="sub">Air fryer · no-cook · halal</div><h1>Cook</h1></div>
-    <div class="row"><button class="icon-btn" data-search aria-label="Search">🔍</button><a class="icon-btn" href="#cook/shop" aria-label="Shopping list" style="position:relative">🛒${shopN ? `<span class="pill coral" style="position:absolute;top:-6px;right:-8px">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">🧺</a></div></div>
+    <div class="row"><button class="icon-btn" data-search aria-label="Search">${UI.ICON.search}</button><a class="icon-btn" href="#cook/shop" aria-label="Shopping list" style="position:relative">${UI.ICON.cart}${shopN ? `<span class="pill coral" style="position:absolute;top:-6px;right:-8px">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">${UI.ICON.pantry}</a></div></div>
 
   <div class="card glow">
     <div class="kicker">What can I make right now?</div>
@@ -98,7 +106,7 @@ function main() {
 
   <div class="section-title">Cookbook <span class="muted small">${RECIPES.length} recipes</span></div>
   <div class="row mb12"><input id="rq" placeholder="Search recipes or ingredients" value="${UI.esc(filt.q)}"></div>
-  <div class="chips scroll mb12">${[['all', '✨ All'], ['fav', '❤️ Favourites'], ['breakfast', '🍳 Breakfast'], ['lunch', '🌯 Lunch'], ['dinner', '🍛 Dinner'], ['snack', '🥤 Snacks'], ['nocook', '🥄 No-cook'], ['protein', '💪 High protein']].map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
+  <div class="chips scroll mb12">${[['all', '✨ All'], ['fav', '❤️ Favourites'], ['breakfast', '🍳 Breakfast'], ['lunch', '🌯 Lunch'], ['dinner', '🍛 Dinner'], ['snack', '🥤 Snacks'], ['nocook', '🥄 No-cook'], ['protein', '💪 High protein'], ['ramadan', '🌙 Suhoor & iftar']].map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
   <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1"><span class="e">🔍</span>Nothing found</div>'}</div>
 
   <a class="card cool glow mt16" href="#cook/delivery" style="display:block;color:inherit;text-decoration:none"><div class="kicker">Too tired to cook?</div><h3>📦 Halal delivery picks</h3><p class="muted small">Meituan / Ele.me orders that still hit your protein. Still counts for XP.</p></a>`;
@@ -109,7 +117,7 @@ function detail(r) {
   const missing = r.ing.filter((i) => !i.opt && !pantry.has(i.id));
   const cookedN = st.cooked[r.id] || 0;
   return `
-  <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav>${fav ? '❤️' : '🤍'}</button>${art(r, { eager: true }).emoji}</div>
+  <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav aria-pressed="${fav}" aria-label="Favourite" style="${fav ? 'color:var(--coral)' : ''}">${fav ? UI.ICON.heartFill : UI.ICON.heart}</button>${art(r, { eager: true }).emoji}</div>
   ${PHOTOS[r.id] ? `<div class="photo-credit">Photo: ${UI.esc(PHOTOS[r.id].credit)}</div>` : ''}
   <div class="row wrap mb8" style="gap:6px">${methodPill(r.method)}${r.tags.map((t) => `<span class="pill">${t}</span>`).join('')}${cookedN ? `<span class="pill green">Cooked ${cookedN}×</span>` : ''}</div>
   <h1 style="font-size:28px">${UI.esc(r.name)}</h1>
@@ -197,7 +205,7 @@ function cookMode(r, rerender) {
       };
       const show = () => {
         stop(); const s = r.steps[i]; remaining = s.timer || 0;
-        w.querySelector('#cm-num').textContent = `STEP ${i + 1} OF ${r.steps.length}`;
+        w.querySelector('#cm-num').textContent = `Step ${i + 1} of ${r.steps.length}`;
         w.querySelector('#cm-txt').textContent = s.t;
         bars.forEach((b, j) => b.classList.toggle('on', j <= i));
         w.querySelector('[data-next]').textContent = i === r.steps.length - 1 ? 'Done 🎉' : 'Next';
@@ -210,8 +218,10 @@ function cookMode(r, rerender) {
         const st = S.get(); st.cooked[r.id] = (st.cooked[r.id] || 0) + 1;
         const d = S.day(); d.cookedCount = (d.cookedCount || 0) + 1; S.save();
         G.award(`cook_${r.id}`, 40, null); G.evaluateQuests(); G.checkBadges();
-        await UI.celebrate({ big: r.emoji, title: 'Chef mode complete!', body: `+40 XP. You’ve made this ${st.cooked[r.id]}×.<br>Log it as a meal?`, rarity: 'COOKED', btn: 'Log as meal' });
-        Sh.logMeal({ slot: P.currentSlot(), name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein });
+        const times = st.cooked[r.id];
+        if (await UI.confirmSheet('Done', `${times > 1 ? `That’s ${times} times you’ve made this. ` : ''}Log it as ${P.SLOT_LABEL[P.currentSlot()].toLowerCase()}? ${r.kcal} kcal · ${r.protein} g protein.`, 'Log meal')) {
+          Sh.logMeal({ slot: P.currentSlot(), name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein });
+        }
         rerender();
       };
       w.querySelector('[data-x]').onclick = () => { stop(); try { wake && wake.release(); } catch (e) {} close(); };

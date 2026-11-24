@@ -77,6 +77,23 @@ export async function scheduleReminders(items) {
   if (list.length) await N.schedule({ notifications: list });
   return list.length;
 }
+// One-off alerts at exact moments (prayer times shift a minute or two each day,
+// so they are scheduled a week ahead and refreshed daily). Kept in their own id range.
+const TIMED_BASE = BASE_ID + 100;
+export async function scheduleTimed(items) {
+  const N = plug('LocalNotifications'); if (!N) return 0;
+  try {
+    const { notifications } = await N.getPending();
+    const ours = (notifications || []).filter((n) => n.id >= TIMED_BASE && n.id < TIMED_BASE + 200).map((n) => ({ id: n.id }));
+    if (ours.length) await N.cancel({ notifications: ours });
+  } catch (e) {}
+  const now = Date.now();
+  const list = items.filter((i) => i.at instanceof Date && i.at.getTime() > now).slice(0, 200)
+    .map((i, idx) => ({ id: TIMED_BASE + idx, title: i.title, body: i.body, schedule: { at: i.at, allowWhileIdle: true }, extra: { route: i.route || 'today' } }));
+  if (list.length) await N.schedule({ notifications: list });
+  return list.length;
+}
+
 export function onNotificationTap(cb) {
   const N = plug('LocalNotifications'); if (!N) return;
   N.addListener('localNotificationActionPerformed', (e) => cb(e?.notification?.extra?.route || 'today')).catch?.(() => {});

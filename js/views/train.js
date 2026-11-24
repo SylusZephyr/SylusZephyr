@@ -32,7 +32,7 @@ export function render() {
   const cardio = CARDIO.find((c) => c.w === walkWeek);
   const control = (st.pf.control || []).length;
   return `
-  <div class="topbar"><div><div class="sub">12-week pelvic-floor program</div><h1>Train</h1></div><div class="hud"><div class="stat">💪 ${st.pf.sessions.length}</div></div></div>
+  <div class="topbar"><div><div class="sub">12-week pelvic-floor program</div><h1>Train</h1></div><div class="small muted" style="text-align:right">${st.pf.sessions.length}<br>sessions</div></div>
 
   <div class="card glow">
     <div class="row" style="gap:16px">

@@ -31,7 +31,47 @@ export const ICON = {
   chev: svg('<path d="M9 18l6-6-6-6"/>'),
   trash: svg('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>'),
   edit: svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
+  drop: svg('<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>'),
+  cup: svg('<path d="M4 8h13v5a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M12 3v2"/>'),
+  moon: svg('<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'),
+  meal: svg('<path d="M7 3v8a2 2 0 0 0 2 2v8"/><path d="M11 3v8a2 2 0 0 1-2 2"/><path d="M17 21V3c-2 1-3 3.5-3 7s1 4 3 4"/>'),
+  flame: svg('<path d="M12 21a6 6 0 0 0 6-6c0-4-3-6-4-10-2 2-3 4-3 6-1-1-1.5-2-1.5-3C7 10 6 12.5 6 15a6 6 0 0 0 6 6z"/>'),
+  mood: svg('<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01"/>'),
+  scale: svg('<rect x="3" y="4" width="18" height="16" rx="4"/><path d="M8.5 10a4.5 4.5 0 0 1 7 0"/><path d="M12 10l1.5-2"/>'),
+  clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
+  bed: svg('<path d="M3 18V7"/><path d="M3 14h18v4"/><path d="M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>'),
+  pulse: svg('<path d="M3 12h4l2-6 4 12 2-6h6"/>'),
+  crescent: svg('<path d="M15.5 4.5a8 8 0 1 0 4 10 6.5 6.5 0 1 1-4-10z"/>'),
+  list: svg('<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>'),
+  doctor: svg('<path d="M6 3v6a4 4 0 0 0 8 0V3"/><path d="M10 13v3a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="12" r="2"/>'),
+  cart: svg('<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l2.4 11h11.2L21 8H6.2"/>'),
+  pantry: svg('<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 12h16M10 7.5h4M10 16.5h4"/>'),
+  gear: svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
 };
+
+// ---------- emoji-free chrome ----------
+// Content still carries emoji in places (data files, older copy). Interface text should not:
+// this pass swaps known ones for line icons and drops the rest, so the look stays consistent.
+const EMOJI = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u20E3|\p{Emoji_Modifier}|\u200D(?:\p{Extended_Pictographic}))*\s?/gu;
+const ICON_FOR = { '🩺': 'doctor', '🖨️': 'list', '⏰': 'clock', '🕌': 'crescent', '🔖': 'bookmark', '📲': 'share', '⚙️': 'gear', '👤': 'me', '☁️': 'me', '🔒': 'lock', '📷': 'share', '💧': 'drop', '☕': 'cup', '🌙': 'moon', '🍽️': 'meal', '🍳': 'meal', '🌯': 'meal', '🍛': 'meal', '🥤': 'cup', '🧪': 'pulse', '⚖️': 'scale', '🔍': 'search', '🛒': 'cart', '🧺': 'pantry', '✏️': 'edit', '🗑️': 'trash', '📤': 'share', '❤️': 'heartFill', '🤍': 'heart' };
+const SKIP = '.thumb, .hero, .hero-lg, .rcard .hero, .dthumb, .tipcard .big, input, textarea, .emoji-scale, .sx-keep, .celebrate .big, .lock';
+export function stripEmoji(root) {
+  if (!root) return;
+  root.querySelectorAll('.li-ico, .q-ico, .icon-btn').forEach((el) => {
+    if (el.querySelector('svg') || el.style.background) return;
+    const t = el.textContent.trim(); if (!t) return;
+    const name = ICON_FOR[t] || ICON_FOR[t.replace('\uFE0F', '')];
+    if (name && ICON[name]) el.innerHTML = ICON[name]; else if (!el.classList.contains('icon-btn')) el.remove();
+  });
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (const n of nodes) {
+    if (!EMOJI.test(n.nodeValue)) continue; EMOJI.lastIndex = 0;
+    if (n.parentElement?.closest(SKIP)) continue;
+    n.nodeValue = n.nodeValue.replace(EMOJI, '').replace(/^\s+(?=\S)/, (m) => (n.previousSibling ? m : ''));
+  }
+}
 
 // ---------- feedback ----------
 export function haptic(ms = 12) {
@@ -59,7 +99,7 @@ export function ding(kind = 'tick') {
 
 const toastQueue = [];
 let toastActive = 0;
-export function toast(msg, icon = '✨') {
+export function toast(msg, icon) {
   toastQueue.push([msg, icon]); pumpToasts();
 }
 function pumpToasts() {
@@ -67,7 +107,7 @@ function pumpToasts() {
   while (toastActive < 2 && toastQueue.length) {
     const [msg, icon] = toastQueue.shift(); toastActive++;
     const el = document.createElement('div'); el.className = 'toast';
-    el.innerHTML = `<span style="font-size:18px">${icon}</span><span>${esc(msg)}</span>`;
+    el.innerHTML = `<span>${esc(msg)}</span>`;
     root.appendChild(el);
     setTimeout(() => { el.remove(); toastActive--; pumpToasts(); }, 2700);
   }
@@ -84,7 +124,8 @@ export function undoToast(msg, onUndo, ms = 5000) {
   setTimeout(finish, ms);
 }
 
-export function xpPop(amount, x, y) {
+export function xpPop() {}
+function legacyXpPop(amount, x, y) {
   const el = document.createElement('div'); el.className = 'xp-pop';
   el.textContent = `+${amount} XP`;
   el.style.left = `${Number.isFinite(x) ? x : window.innerWidth / 2}px`; el.style.top = `${(Number.isFinite(y) ? y : window.innerHeight / 2) - 20}px`;
@@ -94,7 +135,9 @@ export function xpPop(amount, x, y) {
 // ---------- confetti ----------
 let confettiParts = [];
 let confettiRunning = false;
-export function confetti(n = 90, originY = 0.35) {
+// Confetti is reserved; the app keeps feedback quiet. Kept as a no-op so callers stay simple.
+export function confetti() {}
+function legacyConfetti(n = 90, originY = 0.35) {
   const c = $('#confetti'); if (!c) return;
   const dpr = window.devicePixelRatio || 1;
   c.width = window.innerWidth * dpr; c.height = window.innerHeight * dpr;
@@ -137,6 +180,7 @@ export function openSheet(html, { onMount, onClose, cls = '' } = {}) {
   sh.addEventListener('touchend', (e) => { if (sy == null) return; const dy = (e.changedTouches[0].clientY - sy); sy = null; if (dy > 110) close(); else sh.style.transform = ''; });
   sheetStack.push(close);
   onMount && onMount(sh, close);
+  stripEmoji(sh);
   return close;
 }
 export function closeAllSheets() { [...sheetStack].forEach((c) => c()); }
@@ -150,12 +194,12 @@ export function fullscreen(html, { onMount, cls = '' } = {}) {
   return close;
 }
 
-export function celebrate({ big, title, body, rarity, color = 'var(--amber)', btn = 'Collect' }) {
-  ding('level'); haptic(30); confetti(140, 0.3);
+export function celebrate({ big, title, body, rarity, color = 'var(--muted)', btn = 'Continue' }) {
+  haptic(20);
   return new Promise((resolve) => {
     fullscreen(`<div class="celebrate"><div class="box">
       ${rarity ? `<div class="rarity" style="color:${color}">${esc(rarity)}</div>` : ''}
-      <div class="big">${big}</div><h2>${esc(title)}</h2><p class="muted">${body}</p>
+      ${big ? `<div class="big">${big}</div>` : ''}<h2>${esc(title)}</h2><p class="muted">${body}</p>
       <button class="btn primary block mt16" data-close>${esc(btn)}</button></div></div>`, {
       onMount: (w, close) => w.querySelector('[data-close]').addEventListener('click', () => { close(); resolve(); }),
     });
@@ -181,7 +225,7 @@ export function ring(pct, size = 120, stroke = 12, color = 'url(#gradWarm)', lab
   const r = (size - stroke) / 2; const c = 2 * Math.PI * r; const off = c * (1 - Math.max(0, Math.min(1, pct)));
   return `<div class="ring-wrap" style="width:${size}px;height:${size}px">
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
-      <defs><linearGradient id="gradWarm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff6b6b"/></linearGradient>
+      <defs><linearGradient id="gradWarm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient>
       <linearGradient id="gradCool" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5aa9ff"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
       <linearGradient id="gradGreen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#5aa9ff"/></linearGradient></defs>
       <circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke="var(--surface3)" stroke-width="${stroke}" fill="none"/>
@@ -192,7 +236,10 @@ export function ring(pct, size = 120, stroke = 12, color = 'url(#gradWarm)', lab
 
 export const grad = (bg) => `background:linear-gradient(135deg, ${bg[0]}, ${bg[1]})`;
 
+// Rating rows. Face-emoji scales became plain 1–5 buttons with words at each end.
+const SCALE_ENDS = { energy: ['Drained', 'Full of energy'], mood: ['Low', 'Great'], appetite: ['No appetite', 'Very hungry'], q: ['Poor', 'Great'], ctl: ['No control', 'Full control'] };
 export function scaleButtons(name, n, current, labels = null, emoji = false) {
-  return `<div class="scale ${emoji ? 'emoji-scale' : ''}" data-scale="${name}">${Array.from({ length: n }, (_, i) =>
-    `<button data-v="${i}" class="${current === i ? 'on' : ''}">${labels ? labels[i] : i + 1}</button>`).join('')}</div>`;
+  const ends = emoji ? SCALE_ENDS[name] : null;
+  return `<div class="scale" data-scale="${name}">${Array.from({ length: n }, (_, i) =>
+    `<button data-v="${i}" class="${current === i ? 'on' : ''}" aria-label="${i + 1} of ${n}${ends && i === 0 ? ', ' + ends[0] : ends && i === n - 1 ? ', ' + ends[1] : ''}">${labels && !emoji ? labels[i] : i + 1}</button>`).join('')}</div>${ends ? `<div class="row between tiny muted" style="margin-top:6px"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}`;
 }

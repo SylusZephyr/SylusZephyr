@@ -15,15 +15,18 @@ import * as Cloud from './cloud.js';
 import * as A11y from './a11y.js';
 import { t, locale, dir } from './i18n.js';
 import { applyRemoteContent } from './content.js';
+import * as Theme from './theme.js';
+import * as Prayer from './prayer.js';
 
 await Native.restoreStorage();
 document.documentElement.lang = locale; document.documentElement.dir = dir;
 S.load();
+Theme.apply();
 S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
 applyRemoteContent();
 window.addEventListener('revive:content', () => { if (applyRemoteContent()) render({ keepScroll: true }); });
-window.addEventListener('revive:remote-update', () => { if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
+window.addEventListener('revive:remote-update', () => { Theme.apply(); if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
 
 const TABS = [
   { id: 'today', label: t('tab.today'), icon: UI.ICON.home, view: Today },
@@ -43,7 +46,7 @@ let lastScroll = {};
 export function render({ keepScroll = false } = {}) {
   const app = UI.$('#app');
   const st = S.get();
-  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); return; }
+  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); UI.stripEmoji(app); return; }
   const r = route();
   const tab = TABS.find((t) => t.id === r.tab);
   const y = window.scrollY;
@@ -59,6 +62,7 @@ export function render({ keepScroll = false } = {}) {
   UI.$('#screen [data-crash-home]')?.addEventListener('click', () => { location.hash = 'today'; render(); });
   UI.$('#screen [data-crash-reload]')?.addEventListener('click', () => location.reload());
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
+  UI.stripEmoji(UI.$('#screen'));
   countUp();
   document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
 }
@@ -140,7 +144,11 @@ export async function syncReminders(force = false) {
   if (!force && st.remindersSyncedFor === S.dayKey()) return;
   st.reminderPrefs = st.reminderPrefs || {};
   const ROUTE = { breakfast: 'cook', lunch: 'cook', dinner: 'cook', snack: 'cook', prep: 'cook/r/overnight_oats', kegel1: 'train', kegel2: 'train', bed: 'today', winddown: 'today' };
-  const n = await Native.scheduleReminders(reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: st.reminderPrefs[r.id] ?? r.on })));
+  const fastingNow = Prayer.fasting();
+  // While fasting, daytime meal / water / coffee reminders would be wrong — the fasting alerts replace them.
+  const FAST_OFF = ['breakfast', 'lunch', 'snack', 'dinner', 'water1', 'water2', 'coffee'];
+  const n = await Native.scheduleReminders(reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: (st.reminderPrefs[r.id] ?? r.on) && !(fastingNow && FAST_OFF.includes(r.id)) })));
+  await Native.scheduleTimed(Prayer.upcomingAlerts(5)); // iOS keeps at most 64 pending alerts
   st.remindersSyncedFor = S.dayKey(); S.save();
   return n;
 }

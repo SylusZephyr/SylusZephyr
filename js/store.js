@@ -19,11 +19,11 @@ export function weekKey(k = dayKey()) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 export function hm(date = new Date()) { return `${pad(date.getHours())}:${pad(date.getMinutes())}`; }
-export function minutesOf(hhmm) { if (!hhmm) return null; const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; }
+export function minutesOf(hhmm) { if (!hhmm) return null; const [h, m] = String(hhmm).split('@')[0].split(':').map(Number); return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null; }
 export function fmtMin(mins) { mins = ((mins % 1440) + 1440) % 1440; return `${pad(Math.floor(mins / 60))}:${pad(Math.round(mins % 60))}`; }
 export function prettyTime(hhmm) {
   if (!hhmm) return '—';
-  let [h, m] = hhmm.split(':').map(Number); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
+  let [h, m] = String(hhmm).split('@')[0].split(':').map(Number); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
   return `${h}:${pad(m)}${ap}`;
 }
 export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'numeric' }) {
@@ -53,6 +53,7 @@ function defaults() {
       caffeineCutoff: '14:00',
       weighDay: 0,                // 0=Sunday
       waterGoalMl: 2000,
+      cupMg: 150,                 // caffeine in the usual cup (Luckin americano ≈ 150 mg)
     },
     medical: {
       clearance: 'brief',         // brief | cleared | notCleared
@@ -77,6 +78,7 @@ function defaults() {
     pf: { week: 1, sessions: [] }, // pelvic floor
     walks: [],
     lock: { enabled: false, pinHash: null, credId: null, faceId: false },
+    prayer: { enabled: false, city: 'beijing', method: 'MWL', asr: 'standard', ramadan: 'auto' },
     settings: { winddown: true, sounds: true, haptics: true },
   };
 }

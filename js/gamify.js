@@ -42,14 +42,13 @@ export function award(key, amount, ev, { once = true, k = S.dayKey(), silent = f
     const rect = ev?.target?.getBoundingClientRect?.();
     const x = ev?.clientX || (rect ? rect.left + 30 : undefined);
     const y = ev?.clientY || (rect ? rect.top : undefined);
-    UI.xpPop(amt, x, y); UI.ding('xp'); UI.haptic(15);
-    if (mult > 1) UI.toast(`${mult}× COMBO! Keep going`, '🔥');
+    UI.haptic(10);
   }
   const after = levelInfo(st.game.xp).level;
   if (after > before) {
     st.game.lastLevel = after; S.save();
     const info = levelInfo();
-    setTimeout(() => UI.celebrate({ big: '🆙', title: `Level ${after}!`, body: `You are now a <b>${info.title}</b>. +1 streak freeze`, rarity: 'LEVEL UP' }), 400);
+    setTimeout(() => UI.toast(`Level ${after} · ${info.title}`), 400);
     st.game.freezes = Math.min(3, st.game.freezes + 1);
   }
   checkBadges();
@@ -73,8 +72,8 @@ export function setEssential(id, on, ev, k = S.dayKey()) {
   const e = ESSENTIALS.find((x) => x.id === id);
   if (on) award(`ess_${id}`, e.xp, ev, { k }); else revoke(`ess_${id}`, k);
   const n = essentialsDone(k);
-  if (on && n === STREAK_THRESHOLD) { setTimeout(() => { UI.toast('Streak secured for today! 🔥', '✅'); UI.confetti(60); }, 300); award('streak_day', 30, null, { k, silent: true }); }
-  if (on && n === ESSENTIALS.length) { award('perfect_day', 50, null, { k, silent: true }); setTimeout(() => UI.celebrate({ big: '💯', title: 'Perfect day', body: 'All 7 essentials. +50 bonus XP.', rarity: 'FLAWLESS' }), 700); }
+  if (on && n === STREAK_THRESHOLD) { setTimeout(() => UI.toast('Streak secured for today'), 300); award('streak_day', 30, null, { k, silent: true }); }
+  if (on && n === ESSENTIALS.length) { award('perfect_day', 50, null, { k, silent: true }); setTimeout(() => UI.toast('All seven done today'), 700); }
   S.save();
 }
 
@@ -153,12 +152,11 @@ export function evaluateQuests(k = S.dayKey(), endOfDay = false, silent = false)
     if (!q.done && def && def.check(d, endOfDay || k !== S.dayKey())) {
       q.done = true; any = true;
       award(`quest_${q.id}`, def.xp, null, { k, silent });
-      if (!silent) UI.toast(`Quest complete: ${def.t}`, def.e);
+
     }
   });
   if (any && d.quests.every((q) => q.done)) {
     award('all_quests', 60, null, { k, silent: true });
-    if (!silent) setTimeout(() => UI.celebrate({ big: '🏆', title: 'All quests cleared!', body: '+60 bonus XP and +30 coins', rarity: 'QUEST MASTER' }), 900);
     S.get().game.coins += 30;
   }
   S.save();
@@ -248,8 +246,7 @@ export function dailyOpen() {
   if (d.xpLog.daily_open) return;
   const roll = Math.random(); const amt = roll < 0.05 ? 50 : roll < 0.25 ? 20 : 10;
   award('daily_open', amt, null, { k, silent: true });
-  setTimeout(() => UI.toast(amt >= 50 ? `JACKPOT check-in bonus +${amt} XP!` : `Daily check-in +${amt} XP`, amt >= 50 ? '🎰' : '👋'), 600);
-  if (amt >= 50) setTimeout(() => UI.confetti(80), 700);
+
 }
 
 // ---------- Weekly review (first open of a new week) ----------
@@ -272,12 +269,9 @@ export async function maybeWeeklyReview() {
   st.game.reviewed = thisWk; S.save();
   const r = weeklyReviewData(lastWk);
   if (r.logged < 2) return;
-  const bonus = { S: 150, A: 100, B: 60, C: 30, D: 15 }[r.grade];
-  st.game.coins += bonus; S.save();
   await UI.celebrate({
-    big: { S: '🏆', A: '🥇', B: '🥈', C: '🥉', D: '🌱' }[r.grade], rarity: `WEEKLY GRADE ${r.grade}`,
-    title: `Last week: ${r.secured}/7 streak days`,
-    body: `🍽️ ${r.meals} main meals · 💪 ${r.pf} pelvic-floor sessions<br>💧 ${r.water} days with 1.5 L+ · ⚡ ${r.xp} XP<br><br>+${bonus} coins. ${r.grade === 'S' || r.grade === 'A' ? 'Elite week. Do it again.' : 'New week, clean slate. Beat last-week you.'}`,
+    rarity: 'Last week', title: `${r.secured} of 7 days on track`,
+    body: `<div class="review-grid"><div><b>${r.meals}</b><span>main meals</span></div><div><b>${r.water}</b><span>days 1.5 L+</span></div><div><b>${r.pf}</b><span>pelvic-floor sessions</span></div></div>`,
     btn: 'Start this week',
   });
 }

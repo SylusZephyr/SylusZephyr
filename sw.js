@@ -1,8 +1,9 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-2eddb298ba8d';
+const VERSION = 'revive-6a8181eb5f3f';
 const ASSETS = [
   './',
   'css/app.css',
+  'css/v4.css',
   'icons/apple-touch-icon.png',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -69,6 +70,7 @@ const ASSETS = [
   'index.html',
   'js/a11y.js',
   'js/app.js',
+  'js/caffeine.js',
   'js/charts.js',
   'js/cloud.js',
   'js/config.js',
@@ -78,6 +80,7 @@ const ASSETS = [
   'js/data/ingredients.js',
   'js/data/photos.js',
   'js/data/recipes-more.js',
+  'js/data/recipes-ramadan.js',
   'js/data/recipes.js',
   'js/gamify.js',
   'js/i18n.js',
@@ -86,9 +89,11 @@ const ASSETS = [
   'js/native.js',
   'js/nutrition.js',
   'js/plan.js',
+  'js/prayer.js',
   'js/sharecard.js',
   'js/store.js',
   'js/sync.js',
+  'js/theme.js',
   'js/ui.js',
   'js/vendor/supabase.js',
   'js/views/cook.js',

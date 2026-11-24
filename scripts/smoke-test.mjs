@@ -75,6 +75,50 @@ await test('caffeine cutoff treats after-midnight as late', () => {
   assert.equal(P.isAfterCutoff('14:00'), true);
 });
 
+const Caf = await import('../js/caffeine.js');
+await test('caffeine halves every 5 hours and counts yesterday', () => {
+  const k = '2026-03-02'; const st = S.get(); st.profile.cupMg = 100;
+  st.days[S.addDays(k, -1)] = { coffee: ['23:00'], meals: [], checks: {} };
+  st.days[k] = { coffee: ['08:00', '09:00@75'], meals: [], checks: {} };
+  const t8 = Caf.clockToDayMin('08:00');
+  const lvl = Caf.levelAt(k, t8 + 45 + 300) ;
+  // 08:00 cup → 50 mg after absorb + 5 h; 09:00 espresso (75) a bit more; yesterday's 23:00 cup ≈ 7 mg
+  assert.ok(lvl > 100 && lvl < 125, 'level ' + lvl);
+  assert.equal(Caf.parse('09:00@75').mg, 75);
+  assert.equal(Caf.parse('09:00').mg, 100);
+  assert.equal(S.minutesOf('09:30@75'), 570);
+  assert.equal(P.isAfterCutoff('15:00@40'), true);
+});
+
+const Pr = await import('../js/prayer.js');
+await test('prayer times match published Beijing table (±3 min)', () => {
+  S.get().prayer = { enabled: true, city: 'beijing', method: 'MWL', asr: 'standard' };
+  const t = Pr.timesFor(new Date(2026, 10, 24));
+  const near = (got, hhmm) => assert.ok(Math.abs(got - S.minutesOf(hhmm)) <= 3, `${S.fmtMin(got)} vs ${hhmm}`);
+  near(t.sunrise, '07:10'); near(t.dhuhr, '12:01'); near(t.maghrib, '16:52');
+  assert.ok(t.fajr < t.sunrise && t.asr > t.dhuhr && t.isha > t.maghrib);
+});
+await test('Ramadan detection and fasting window', () => {
+  assert.equal(Pr.isRamadanDate(new Date(2027, 1, 20)), true);
+  assert.equal(Pr.isRamadanDate(new Date(2026, 10, 24)), false);
+  S.get().prayer = { enabled: true, city: 'beijing', ramadan: 'auto' };
+  assert.equal(Pr.fasting(new Date(2027, 1, 20, 12)), true);
+  const f = Pr.fastWindow(new Date(2027, 1, 20, 12));
+  assert.equal(f.state, 'fasting'); assert.ok(f.toIftar > 0 && f.lengthMin > 600);
+  S.get().prayer.ramadan = 'off';
+  assert.equal(Pr.fasting(new Date(2027, 1, 20, 12)), false);
+});
+
+const { weightTrend } = await import('../js/views/track.js').catch(() => ({}));
+await test('weight trend projects a goal date', () => {
+  if (!weightTrend) return; // view needs a DOM in some runtimes
+  const ws = [{ date: '2026-10-01', kg: 62 }, { date: '2026-10-08', kg: 62.3 }, { date: '2026-10-15', kg: 62.5 }, { date: '2026-10-22', kg: 62.8 }];
+  const tr = weightTrend(ws, 66);
+  assert.ok(tr.perWeek > 0.2 && tr.perWeek < 0.35, 'rate ' + tr.perWeek);
+  assert.ok(tr.eta instanceof Date && tr.eta.getFullYear() === 2027);
+  assert.equal(weightTrend([{ date: '2026-10-01', kg: 62 }], 66), null);
+});
+
 const { merge } = await import('../js/sync.js');
 await test('sync merge never drops entries', () => {
   const a = { days: { d1: { xpToday: 10, meals: [], checks: {} } }, weights: [{ date: '2026-01-01', kg: 62 }], pf: { sessions: [{ date: 'd1', at: 1 }] }, game: { xp: 100, badges: { a: 1 } }, editedAt: 1 };

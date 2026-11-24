@@ -1,4 +1,4 @@
-# Revive 🔥
+# Revive
 
 A private recovery companion: easy meals, steady sleep, guided pelvic-floor training and health tracking.
 Runs on **Android**, **Windows**, **iPhone** and the **web**, works offline, and optionally syncs between devices.
@@ -14,7 +14,16 @@ Runs on **Android**, **Windows**, **iPhone** and the **web**, works offline, and
 - **Publishing to stores:** [docs/STORES.md](docs/STORES.md)
 - **Privacy policy:** [privacy.html](privacy.html)
 
-## What's new in 2.0
+## What's new in 4.0
+- New design system: neutral surfaces, one accent for progress, line icons, no gradients or emoji in the interface
+- Today rebuilt around three rings (essentials, calories, water), quick logging and an up-next timeline
+- Quiet feedback: no coins, chests, combos or confetti; streak and level stay
+- Prayer times computed on the device, Ramadan fasting mode with suhoor/iftar meals and alerts, 10 Ramadan recipes
+- Caffeine estimate with a bedtime check, a 6-month consistency calendar, weight goal projection
+- A library of short reads replaces the feed; accent, background and text-size settings
+
+## 2.0
+
 - 62 air-fryer / no-cook halal recipes (24 new), ~50 real photos with credits, lazy-loaded
 - Search everything (recipes, foods, tips, screens) — Ctrl/Cmd+K on desktop
 - Infinite tips feed, recipe ratings and notes, undo for deletions, swipe between tabs
