@@ -31,22 +31,36 @@ export async function searchOnline(q, { timeoutMs = 7000 } = {}) {
     const res = await fetch(url, { signal: ctrl.signal });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    const items = (data.products || []).map((p) => {
-      const n = p.nutriments || {};
-      const kcal = n['energy-kcal_100g'] ?? (n.energy_100g ? n.energy_100g / 4.184 : null);
-      const name = p.product_name_en || p.product_name || p.product_name_zh;
-      if (!name || kcal == null || !isFinite(kcal)) return null;
-      const serving = parseFloat(p.serving_quantity);
-      return {
-        id: 'off_' + p.code, name: name.trim(), brand: (p.brands || '').split(',')[0].trim(),
-        kcal100: Math.round(kcal), protein100: Math.round((n.proteins_100g || 0) * 10) / 10,
-        portionG: serving > 0 && serving < 2000 ? serving : 100, portionLabel: p.serving_size || '100 g',
-        image: p.image_small_url || null, e: '🛒', source: 'Open Food Facts',
-      };
-    }).filter(Boolean);
+    const items = (data.products || []).map(normalize).filter(Boolean);
     cache.set(t, items);
     return items;
   } catch (e) { return []; } finally { clearTimeout(timer); }
+}
+
+function normalize(p) {
+  const n = p.nutriments || {};
+  const kcal = n['energy-kcal_100g'] ?? (n.energy_100g ? n.energy_100g / 4.184 : null);
+  const name = p.product_name_en || p.product_name || p.product_name_zh;
+  if (!name || kcal == null || !isFinite(kcal)) return null;
+  const serving = parseFloat(p.serving_quantity);
+  return {
+    id: 'off_' + p.code, name: name.trim(), brand: (p.brands || '').split(',')[0].trim(),
+    kcal100: Math.round(kcal), protein100: Math.round((n.proteins_100g || 0) * 10) / 10,
+    portionG: serving > 0 && serving < 2000 ? serving : 100, portionLabel: p.serving_size || '100 g',
+    image: p.image_small_url || null, e: '', source: 'Open Food Facts', code: p.code,
+  };
+}
+
+// Packaged food by barcode (EAN/UPC). Returns null when unknown or offline.
+export async function lookupBarcode(code, { timeoutMs = 8000 } = {}) {
+  const c = String(code).replace(/\D/g, ''); if (c.length < 8 || !navigator.onLine) return null;
+  const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${c}.json?fields=code,product_name,product_name_en,product_name_zh,brands,nutriments,serving_quantity,serving_size,image_small_url`, { signal: ctrl.signal });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.status === 1 && data.product ? normalize({ ...data.product, code: c }) : null;
+  } catch (e) { return null; } finally { clearTimeout(timer); }
 }
 
 export function forPortion(food, grams) {

@@ -256,3 +256,25 @@ input, select, textarea { background: var(--surface2); border-radius: 10px; }
 .recap h2 { font-size: 26px; margin-top: 2px; }
 .recap-hero { display: flex; align-items: baseline; gap: 10px; margin-top: 16px; }
 .recap-hero .score-big { font-size: 64px; font-weight: 700; letter-spacing: -0.04em; }
+
+/* ---- Meal sheet ---- */
+.add-dot { width: 28px; height: 28px; border-radius: 14px; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); flex: 0 0 auto; }
+.add-dot svg { width: 16px; height: 16px; }
+.carousel.mini { margin: 0 -18px; padding: 0 18px 4px; scroll-padding-inline: 18px; }
+.carousel.mini .ccard { flex: 0 0 140px; text-align: left; }
+.carousel.mini .ph-wrap { border-radius: 12px; }
+.carousel.mini .cc-name { font-size: 14px; }
+.carousel.mini .cc-meta { font-size: 12px; }
+.carousel.mini .mono { font-size: 26px !important; }
+.sheet .searchbar { height: 44px; }
+
+/* ---- Scanner ---- */
+.scanner { position: fixed; inset: 0; z-index: 330; background: #000; }
+.scanner video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.scan-frame { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.scan-frame i { width: 74%; max-width: 340px; aspect-ratio: 16 / 9; border-radius: 16px; box-shadow: 0 0 0 100vmax rgba(0,0,0,.55); border: 2px solid rgba(255,255,255,.9); }
+.scan-top { position: absolute; top: calc(var(--safe-top) + 12px); left: 16px; right: 16px; display: flex; align-items: center; justify-content: space-between; color: #fff; font-weight: 600; }
+.scan-bottom { position: absolute; bottom: calc(var(--safe-bottom) + 24px); left: 16px; right: 16px; display: flex; justify-content: center; }
+.carousel { align-items: flex-start; }
+.carousel .ccard { min-width: 0; display: block; overflow: hidden; }
+.carousel.mini .ccard { width: 140px; max-width: 140px; }

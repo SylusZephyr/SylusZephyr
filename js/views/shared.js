@@ -5,7 +5,8 @@ import * as G from '../gamify.js';
 import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
 import { CHECKINS, scoreCheckin, CRISIS } from '../data/content.js';
 import { currentSlot, SLOT_LABEL, SLOT_EMOJI } from '../plan.js';
-import { searchLocal, searchOnline, forPortion } from '../nutrition.js';
+import { searchLocal, searchOnline, forPortion, lookupBarcode } from '../nutrition.js';
+import { scanBarcode } from '../scanner.js';
 import { art } from './cook.js';
 
 const QUICK = [
@@ -23,32 +24,60 @@ export function logMeal(entry, ev) {
   S.save(); G.evaluateQuests();
 }
 
+// Distinct recent entries across all days, newest first — the fastest way to log a repeat meal.
+function recentEntries(limit = 8) {
+  const st = S.get(); const seen = new Set(); const out = [];
+  const keys = Object.keys(st.days).sort().reverse().slice(0, 30);
+  for (const k of keys) for (const m of [...(st.days[k].meals || [])].reverse()) {
+    const key = (m.name || '').toLowerCase(); if (!key || seen.has(key)) continue;
+    seen.add(key); out.push({ name: m.name, kcal: m.kcal, protein: m.protein, recipeId: m.recipeId, grams: m.grams });
+    if (out.length >= limit) return out;
+  }
+  return out;
+}
+
 export function mealSheet(onDone, preset = {}) {
   let slot = preset.slot || currentSlot();
-  const st = S.get();
+  const st = S.get(); st.myMeals = st.myMeals || [];
+  const recents = recentEntries();
   const recent = [...new Set(Object.values(st.days).flatMap((d) => d.meals.map((m) => m.recipeId)).filter(Boolean))].slice(-6).reverse();
   const favs = st.favorites;
   const picks = [...new Set([...favs, ...recent, 'egg_paratha', 'chicken_cheese_wrap', 'airfryer_chicken_curry', 'shaker_smoothie'])].slice(0, 10).map((id) => RECIPE[id]).filter(Boolean);
+  const entryRow = (m, attr) => `<button class="list-item" ${attr}><div class="grow" style="min-width:0"><b class="ellipsis" style="display:block">${UI.esc(m.name)}</b><div class="muted small">${m.kcal} kcal · ${m.protein} g protein</div></div><span class="add-dot" aria-hidden="true">${UI.ICON.plus}</span></button>`;
   const html = () => `<h2>Log a meal</h2>
-    <div class="seg mt8" id="slotseg">${Object.keys(SLOT_LABEL).map((s) => `<button data-slot="${s}" class="${s === slot ? 'on' : ''}">${SLOT_EMOJI[s]} ${SLOT_LABEL[s].split(' ')[0]}</button>`).join('')}</div>
-    <div class="field"><input id="food-q" type="search" placeholder="Search any food — naan, 鸡蛋, Snickers…" autocomplete="off"></div>
+    <div class="seg mt12" id="slotseg">${Object.keys(SLOT_LABEL).map((s) => `<button data-slot="${s}" class="${s === slot ? 'on' : ''}">${SLOT_LABEL[s].split(' ')[0]}</button>`).join('')}</div>
+    <div class="row mt12" style="gap:8px"><label class="searchbar grow">${UI.ICON.search}<input id="food-q" type="search" placeholder="Search food — naan, 鸡蛋, Snickers…" autocomplete="off"></label>
+      <button class="icon-btn" style="width:44px;height:44px;border-radius:12px" id="scan-btn" aria-label="Scan a barcode">${UI.ICON.barcode}</button></div>
     <div id="food-res"></div>
     <div id="meal-rest">
-    <div class="kicker mt16">Quick size</div>
-    <div class="grid2">${QUICK.map((q, i) => `<button class="btn" data-quick="${i}" style="justify-content:flex-start">${q.e} ${q.name}<span class="muted small" style="margin-left:auto">${q.kcal}</span></button>`).join('')}</div>
-    <div class="kicker mt16">Your go-tos</div>
-    ${picks.map((r) => `<button class="rwide" data-rec="${r.id}"><div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div><div class="grow"><div style="font-weight:700">${UI.esc(r.name)}</div><div class="muted small">${r.kcal} kcal · ${r.protein} g protein</div></div></button>`).join('')}
+    ${st.myMeals.length ? `<div class="kicker mt16">My meals</div><div class="card tight" style="margin:0">${st.myMeals.map((m, i) => entryRow(m, `data-my="${i}"`)).join('')}</div>` : ''}
+    ${recents.length ? `<div class="kicker mt16">Recent</div><div class="card tight" style="margin:0">${recents.map((m, i) => entryRow(m, `data-recent="${i}"`)).join('')}</div>` : ''}
+    <div class="kicker mt16">Your recipes</div>
+    <div class="carousel mini">${picks.map((r) => `<button class="ccard" data-rec="${r.id}"><div class="ph-wrap ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div><div class="cc-body"><div class="cc-name">${UI.esc(r.name)}</div><div class="cc-meta">${r.kcal} kcal · ${r.protein} g</div></div></button>`).join('')}</div>
+    <div class="kicker mt16">Quick estimate</div>
+    <div class="grid2">${QUICK.map((q, i) => `<button class="btn" data-quick="${i}" style="justify-content:space-between">${q.name}<span class="muted small">${q.kcal}</span></button>`).join('')}</div>
     <div class="kicker mt16">Delivery (Meituan 清真)</div>
-    <div class="chips">${DELIVERY.map((d) => `<button class="chip" data-del="${d.id}">${d.emoji} ${UI.esc(d.name)}</button>`).join('')}</div>
+    <div class="chips">${DELIVERY.map((d) => `<button class="chip" data-del="${d.id}">${UI.esc(d.name)}</button>`).join('')}</div>
     <div class="kicker mt16">Something else</div>
-    <div class="row"><input id="cust-name" placeholder="e.g. Lamb samsa ×2" class="grow"><input id="cust-kcal" type="number" inputmode="numeric" placeholder="kcal" style="width:90px"></div>
-    <button class="btn block mt8" id="cust-add">Add custom</button></div>`;
+    <div class="field" style="margin-top:0"><input id="cust-name" placeholder="e.g. Lamb samsa ×2"></div>
+    <div class="grid2 mt8"><input id="cust-kcal" type="number" inputmode="numeric" placeholder="kcal"><input id="cust-p" type="number" inputmode="numeric" placeholder="protein g (optional)"></div>
+    <label class="row mt12" style="gap:10px"><input type="checkbox" id="cust-save" style="width:20px;height:20px"><span class="small">Save to My meals</span></label>
+    <button class="btn block mt12" id="cust-add">Add</button></div>`;
   UI.openSheet(html(), {
     onMount: (sh, close) => {
       const wire = () => {
         sh.querySelectorAll('[data-slot]').forEach((b) => b.onclick = () => { slot = b.dataset.slot; sh.querySelectorAll('[data-slot]').forEach((x) => x.classList.toggle('on', x === b)); });
         const finish = (entry, ev) => { logMeal({ slot, ...entry }, ev); close(); UI.toast(`${SLOT_LABEL[slot]} logged`, SLOT_EMOJI[slot]); onDone && onDone(); };
         sh.querySelectorAll('[data-quick]').forEach((b) => b.onclick = (ev) => { const q = QUICK[b.dataset.quick]; finish({ name: q.name, kcal: q.kcal, protein: q.protein }, ev); });
+        sh.querySelectorAll('[data-recent]').forEach((b) => b.onclick = (ev) => finish({ ...recents[+b.dataset.recent] }, ev));
+        sh.querySelectorAll('[data-my]').forEach((b) => b.onclick = (ev) => { const m = st.myMeals[+b.dataset.my]; finish({ name: m.name, kcal: m.kcal, protein: m.protein }, ev); });
+        sh.querySelector('#scan-btn').onclick = async () => {
+          const code = await scanBarcode(); if (!code) return;
+          res.innerHTML = '<p class="small muted mt12">Looking up ' + UI.esc(code) + '…</p>'; rest.style.display = 'none';
+          const f = await lookupBarcode(code);
+          if (f) portion(f);
+          else { res.innerHTML = `<div class="card tight mt12"><b>Not found</b><p class="small muted mt8">${navigator.onLine ? 'This product isn’t in Open Food Facts yet.' : 'You’re offline.'} Enter it below as “Something else”.</p></div>`; rest.style.display = ''; }
+        };
         sh.querySelectorAll('[data-rec]').forEach((b) => b.onclick = (ev) => { const r = RECIPE[b.dataset.rec]; finish({ name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein }, ev); });
         sh.querySelectorAll('[data-del]').forEach((b) => b.onclick = (ev) => { const r = DELIVERY.find((x) => x.id === b.dataset.del); finish({ name: r.name, delivery: true, kcal: r.kcal, protein: r.protein }, ev); });
         // Food search
@@ -70,22 +99,29 @@ export function mealSheet(onDone, preset = {}) {
         });
         const portion = (f) => {
           let grams = f.portionG;
-          const draw = () => { const n = forPortion(f, grams); return `<div class="card tight"><div class="row"><span style="font-size:28px">${f.e}</span><div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g</div></div></div>
+          const draw = () => { const n = forPortion(f, grams); return `<div class="card tight mt12"><div class="row">${f.image ? `<img src="${UI.esc(f.image)}" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover" referrerpolicy="no-referrer">` : ''}<div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g</div></div></div>
             <div class="chips mt12">${[0.5, 1, 1.5, 2].map((m) => `<button class="chip ${Math.abs(grams - f.portionG * m) < 0.5 ? 'on' : ''}" data-mult="${m}">${m === 1 ? '' : m + ' × '}${UI.esc(f.portionLabel)}</button>`).join('')}</div>
             <div class="row mt12"><input id="food-g" type="number" inputmode="decimal" value="${Math.round(grams)}" style="width:110px"><span class="muted">grams</span><div class="grow" style="text-align:right"><b style="font-size:20px">${n.kcal}</b> kcal · <b>${n.protein}</b> g</div></div>
+            <label class="row mt12" style="gap:10px"><input type="checkbox" id="food-save" style="width:20px;height:20px"><span class="small">Save to My meals</span></label>
             <div class="grid2 mt12"><button class="btn" data-back>Back</button><button class="btn primary" data-logfood>Log it</button></div></div>`; };
           const mount = () => {
             res.innerHTML = draw();
             res.querySelectorAll('[data-mult]').forEach((b) => b.onclick = () => { grams = f.portionG * +b.dataset.mult; mount(); });
             res.querySelector('#food-g').onchange = (e) => { grams = Math.max(1, +e.target.value || f.portionG); mount(); };
             res.querySelector('[data-back]').onclick = () => paint(false);
-            res.querySelector('[data-logfood]').onclick = (ev) => { const n = forPortion(f, grams); finish({ name: f.name, kcal: n.kcal, protein: n.protein, grams: Math.round(grams), food: f.source }, ev); };
+            res.querySelector('[data-logfood]').onclick = (ev) => {
+              const n = forPortion(f, grams);
+              if (res.querySelector('#food-save').checked) { const nm = `${f.name} (${Math.round(grams)} g)`; if (!st.myMeals.some((m) => m.name === nm)) { st.myMeals.unshift({ id: S.uid(), name: nm, kcal: n.kcal, protein: n.protein }); st.myMeals = st.myMeals.slice(0, 12); } }
+              finish({ name: f.name, kcal: n.kcal, protein: n.protein, grams: Math.round(grams), food: f.source }, ev);
+            };
           };
           mount();
         };
         sh.querySelector('#cust-add').onclick = (ev) => {
           const name = sh.querySelector('#cust-name').value.trim() || 'Meal'; const kcal = parseInt(sh.querySelector('#cust-kcal').value, 10) || 500;
-          finish({ name, kcal, protein: Math.round(kcal * 0.04) }, ev);
+          const pv = parseInt(sh.querySelector('#cust-p').value, 10); const protein = Number.isFinite(pv) ? pv : Math.round(kcal * 0.04);
+          if (sh.querySelector('#cust-save').checked && !st.myMeals.some((m) => m.name.toLowerCase() === name.toLowerCase())) { st.myMeals.unshift({ id: S.uid(), name, kcal, protein }); st.myMeals = st.myMeals.slice(0, 12); }
+          finish({ name, kcal, protein }, ev);
         };
       };
       wire();
