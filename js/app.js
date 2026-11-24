@@ -140,6 +140,19 @@ function onForeground() {
 }
 
 // Native: keep daily notifications in step with the (shifting) sleep plan — once a day.
+// Reminders. Wake, wind-down and bedtime repeat daily. Everything else is scheduled as one-off
+// alerts for the next three days, so anything already done today is simply left out.
+// iOS keeps at most 64 pending alerts: 3 repeating + ~30 day alerts + ~24 prayer/fasting alerts.
+const REPEATING = ['wake', 'winddown', 'bed'];
+function doneAlready(id, d, st) {
+  if (['breakfast', 'lunch', 'dinner'].includes(id)) return !!d.checks[id];
+  if (id === 'snack') return (d.meals || []).some((m) => m.slot === 'snack');
+  if (id === 'water1') return (d.waterMl || 0) >= st.profile.waterGoalMl * 0.4;
+  if (id === 'water2') return (d.waterMl || 0) >= st.profile.waterGoalMl * 0.8;
+  if (id === 'kegel1') return (d.pf || 0) >= 1;
+  if (id === 'kegel2') return (d.pf || 0) >= 2;
+  return false;
+}
 export async function syncReminders(force = false) {
   const st = S.get();
   if (!Native.isNative || !st.onboarded || !st.nativeReminders) return;
@@ -149,14 +162,25 @@ export async function syncReminders(force = false) {
   const fastingNow = Prayer.fasting();
   // While fasting, daytime meal / water / coffee reminders would be wrong — the fasting alerts replace them.
   const FAST_OFF = ['breakfast', 'lunch', 'snack', 'dinner', 'water1', 'water2', 'coffee'];
-  const n = await Native.scheduleReminders(reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: (st.reminderPrefs[r.id] ?? r.on) && !(fastingNow && FAST_OFF.includes(r.id)) })));
-  await Native.scheduleTimed(Prayer.upcomingAlerts(5)); // iOS keeps at most 64 pending alerts
+  const list = reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: (st.reminderPrefs[r.id] ?? r.on) && !(fastingNow && FAST_OFF.includes(r.id)) }));
+  const n = await Native.scheduleReminders(list.filter((r) => REPEATING.includes(r.id)));
+  const today = S.dayKey(); const timed = [];
+  for (let i = 0; i < 3; i++) {
+    const k = S.addDays(today, i); const d = st.days[k] || { checks: {}, meals: [] };
+    for (const r of list) {
+      if (!r.on || REPEATING.includes(r.id) || (i === 0 && doneAlready(r.id, d, st))) continue;
+      const at = S.keyToDate(k); const m = S.minutesOf(r.time);
+      at.setMinutes(m + (m < S.DAY_ROLLOVER_HOUR * 60 ? 1440 : 0));
+      timed.push({ at, title: r.title, body: r.desc, route: r.route });
+    }
+  }
+  await Native.scheduleTimed([...timed, ...Prayer.upcomingAlerts(3)]);
   st.remindersSyncedFor = S.dayKey(); S.save();
-  return n;
+  return n + timed.length;
 }
 window.__syncReminders = syncReminders;
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') { S.saveNow(); hiddenAt = Date.now(); }
+  if (document.visibilityState === 'hidden') { S.saveNow(); hiddenAt = Date.now(); syncReminders(true); }
   else {
     // Re-lock after 60s in the background
     if (S.get().lock.enabled && Date.now() - hiddenAt > 60_000) { Lock.lockNow(); Lock.showLock(onForeground); }

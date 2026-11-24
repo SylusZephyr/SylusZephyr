@@ -132,6 +132,14 @@ await test('weight trend projects a goal date', () => {
   assert.equal(weightTrend([{ date: '2026-10-01', kg: 62 }], 66), null);
 });
 
+await test('pending alerts stay under the iOS limit of 64', async () => {
+  const { reminderList } = await import('../js/ics.js');
+  S.get().prayer = { enabled: true, notify: true, city: 'beijing', ramadan: 'on' };
+  const repeating = 3; const timed = (reminderList().length - repeating) * 3; const prayer = Pr.upcomingAlerts(3, new Date()).length;
+  assert.ok(repeating + timed + prayer <= 64, `${repeating} + ${timed} + ${prayer}`);
+  assert.ok(reminderList().every((r) => !/\p{Extended_Pictographic}/u.test(r.title)), 'no emoji in titles');
+});
+
 const { merge } = await import('../js/sync.js');
 await test('sync merge never drops entries', () => {
   const a = { days: { d1: { xpToday: 10, meals: [], checks: {} } }, weights: [{ date: '2026-01-01', kg: 62 }], pf: { sessions: [{ date: 'd1', at: 1 }] }, game: { xp: 100, badges: { a: 1 } }, editedAt: 1 };
