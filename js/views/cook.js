@@ -5,6 +5,7 @@ import * as P from '../plan.js';
 import * as Sh from './shared.js';
 import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
 import { INGREDIENTS, ING, ING_CATS } from '../data/ingredients.js';
+import * as Pr from '../prayer.js';
 import { PHOTOS } from '../data/photos.js';
 
 const filt = { feel: null, mins: null, budget: null, slot: null, q: '', cat: 'all' };
@@ -19,7 +20,7 @@ const TIMES = [{ v: 5, l: '≤5 min' }, { v: 15, l: '≤15 min' }, { v: 30, l: '
 const BUDGETS = [{ v: 8, l: '≤¥8' }, { v: 15, l: '≤¥15' }, { v: 99, l: 'Any' }];
 
 export function suggest({ slot, feel, mins, budget } = {}) {
-  const pantry = new Set(S.get().pantry); const st = S.get();
+  const pantry = new Set(S.get().pantry); const st = S.get(); const fastingNow = Pr.fasting();
   return RECIPES.map((r) => {
     const req = r.ing.filter((i) => !i.opt);
     const have = req.filter((i) => pantry.has(i.id)).length;
@@ -32,6 +33,8 @@ export function suggest({ slot, feel, mins, budget } = {}) {
     if (feel === 'lowappetite' && r.tags.some((t) => ['creamy', 'drinkable', 'sweet'].includes(t))) score += 8;
     if (mins && r.mins > mins) score -= 40;
     if (budget && r.cost > budget) score -= 30;
+    if (fastingNow) { if ((slot === 'breakfast' && r.tags.includes('suhoor')) || (slot !== 'breakfast' && r.tags.includes('iftar'))) score += 22; }
+    else if (r.tags.includes('suhoor') || r.tags.includes('iftar')) score -= 4; // keep Ramadan dishes from crowding normal days
     if (st.favorites.includes(r.id)) score += 6;
     score += Math.min(6, (st.cooked[r.id] || 0) * 2); // familiar meals with small variations
     const rating = st.recipeNotes?.[r.id]?.rating; if (rating) score += (rating - 3) * 6; // your own ratings steer suggestions
@@ -71,6 +74,7 @@ function main() {
   const sug = suggest({ slot, feel: filt.feel, mins: filt.mins, budget: filt.budget }).slice(0, 4);
   let list = RECIPES;
   if (filt.cat === 'fav') list = list.filter((r) => st.favorites.includes(r.id));
+  else if (filt.cat === 'ramadan') list = list.filter((r) => r.tags.includes('suhoor') || r.tags.includes('iftar'));
   else if (filt.cat === 'nocook') list = list.filter((r) => r.method === 'nocook');
   else if (['breakfast', 'lunch', 'dinner', 'snack'].includes(filt.cat)) list = list.filter((r) => r.meals.includes(filt.cat));
   else if (filt.cat === 'protein') list = [...list].sort((a, b) => b.protein - a.protein).slice(0, 12);
@@ -98,7 +102,7 @@ function main() {
 
   <div class="section-title">Cookbook <span class="muted small">${RECIPES.length} recipes</span></div>
   <div class="row mb12"><input id="rq" placeholder="Search recipes or ingredients" value="${UI.esc(filt.q)}"></div>
-  <div class="chips scroll mb12">${[['all', '✨ All'], ['fav', '❤️ Favourites'], ['breakfast', '🍳 Breakfast'], ['lunch', '🌯 Lunch'], ['dinner', '🍛 Dinner'], ['snack', '🥤 Snacks'], ['nocook', '🥄 No-cook'], ['protein', '💪 High protein']].map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
+  <div class="chips scroll mb12">${[['all', '✨ All'], ['fav', '❤️ Favourites'], ['breakfast', '🍳 Breakfast'], ['lunch', '🌯 Lunch'], ['dinner', '🍛 Dinner'], ['snack', '🥤 Snacks'], ['nocook', '🥄 No-cook'], ['protein', '💪 High protein'], ['ramadan', '🌙 Suhoor & iftar']].map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
   <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1"><span class="e">🔍</span>Nothing found</div>'}</div>
 
   <a class="card cool glow mt16" href="#cook/delivery" style="display:block;color:inherit;text-decoration:none"><div class="kicker">Too tired to cook?</div><h3>📦 Halal delivery picks</h3><p class="muted small">Meituan / Ele.me orders that still hit your protein. Still counts for XP.</p></a>`;

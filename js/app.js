@@ -16,6 +16,7 @@ import * as A11y from './a11y.js';
 import { t, locale, dir } from './i18n.js';
 import { applyRemoteContent } from './content.js';
 import * as Theme from './theme.js';
+import * as Prayer from './prayer.js';
 
 await Native.restoreStorage();
 document.documentElement.lang = locale; document.documentElement.dir = dir;
@@ -142,7 +143,11 @@ export async function syncReminders(force = false) {
   if (!force && st.remindersSyncedFor === S.dayKey()) return;
   st.reminderPrefs = st.reminderPrefs || {};
   const ROUTE = { breakfast: 'cook', lunch: 'cook', dinner: 'cook', snack: 'cook', prep: 'cook/r/overnight_oats', kegel1: 'train', kegel2: 'train', bed: 'today', winddown: 'today' };
-  const n = await Native.scheduleReminders(reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: st.reminderPrefs[r.id] ?? r.on })));
+  const fastingNow = Prayer.fasting();
+  // While fasting, daytime meal / water / coffee reminders would be wrong — the fasting alerts replace them.
+  const FAST_OFF = ['breakfast', 'lunch', 'snack', 'dinner', 'water1', 'water2', 'coffee'];
+  const n = await Native.scheduleReminders(reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: (st.reminderPrefs[r.id] ?? r.on) && !(fastingNow && FAST_OFF.includes(r.id)) })));
+  await Native.scheduleTimed(Prayer.upcomingAlerts(5)); // iOS keeps at most 64 pending alerts
   st.remindersSyncedFor = S.dayKey(); S.save();
   return n;
 }

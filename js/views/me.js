@@ -219,10 +219,14 @@ function saved() {
 }
 
 function prayer() {
-  const cfg = Pr.settings(); const p = S.get().prayer || {};
+  const st = S.get(); const cfg = Pr.settings(); const p = st.prayer || {};
   const list = Pr.todayList(); const nx = Pr.next(); const dtr = Pr.daysToRamadan(); const hj = Pr.hijri();
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Prayer & Ramadan</h1></div></div>
   <div class="card tight"><div class="list-item"><div class="grow"><b>Show prayer times on Today</b><div class="muted small">Worked out on this device from the sun’s position. No location permission, no internet.</div></div><button class="toggle ${cfg.enabled ? 'on' : ''}" data-prayeron aria-label="Show prayer times"></button></div></div>
+  <div class="card tight">
+    <div class="list-item"><div class="grow"><b>Notify me at each prayer</b><div class="muted small">${Native.isNative ? (st.nativeReminders ? 'Refreshed daily, works offline' : 'Turn on notifications in Me → Reminders first') : 'Available in the phone app'}</div></div><button class="toggle ${p.notify ? 'on' : ''}" data-prnotify aria-label="Prayer notifications" ${Native.isNative ? '' : 'disabled'}></button></div>
+    <div class="list-item"><div class="grow"><b>Suhoor & iftar alerts</b><div class="muted small">45 min before dawn, 15 min before iftar, and a late-meal nudge — only on fasting days</div></div><button class="toggle ${p.fastAlerts !== false ? 'on' : ''}" data-prfast aria-label="Suhoor and iftar alerts" ${Native.isNative ? '' : 'disabled'}></button></div>
+  </div>
   <div class="card">
     <div class="field" style="margin:0"><label>City</label><select id="pr-city">${Pr.CITIES.map((c) => `<option value="${c.id}" ${cfg.city === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}<option value="custom" ${cfg.city === 'custom' ? 'selected' : ''}>Other (enter coordinates)…</option></select></div>
     <div class="grid3 ${cfg.city === 'custom' ? '' : 'hidden'}" id="pr-custom"><div class="field"><label>Latitude</label><input id="pr-lat" type="number" step="0.001" value="${p.lat ?? cfg.lat}"></div><div class="field"><label>Longitude</label><input id="pr-lng" type="number" step="0.001" value="${p.lng ?? cfg.lng}"></div><div class="field"><label>UTC offset</label><input id="pr-tz" type="number" step="0.5" value="${cfg.tz}"></div></div>
@@ -429,7 +433,9 @@ export function bind(root, parts, { rerender }) {
   }
   if (sub === 'prayer') {
     const pr = () => (st.prayer = st.prayer || {});
-    const set = (patch) => { Object.assign(pr(), patch); S.save(); rerender(); };
+    const set = (patch) => { Object.assign(pr(), patch); S.save(); window.__syncReminders?.(true); rerender(); };
+    root.querySelector('[data-prnotify]').onclick = () => set({ notify: !pr().notify });
+    root.querySelector('[data-prfast]').onclick = () => set({ fastAlerts: pr().fastAlerts === false });
     root.querySelector('[data-prayeron]').onclick = () => { set({ enabled: !Pr.settings().enabled }); if (Pr.settings().enabled) G.award('prayer_setup', 15, null); };
     root.querySelector('#pr-city').onchange = (e) => set({ city: e.target.value });
     root.querySelector('#pr-method').onchange = (e) => set({ method: e.target.value });

@@ -575,3 +575,4 @@ a.link { text-decoration: none; }
 .yheat-legend { display: flex; align-items: center; gap: 3px; justify-content: flex-end; }
 .yheat-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
 @media (max-width: 380px) { .prayer-row .pr b { font-size: 12px; } }
+.toggle[disabled] { opacity: .4; cursor: not-allowed; }

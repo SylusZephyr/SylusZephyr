@@ -195,3 +195,25 @@ export function countdown(min) {
   const h = Math.floor(min / 60), m = min % 60;
   return h ? `${h}h ${m}m` : `${m}m`;
 }
+
+// Upcoming alerts for the next `days` days: each prayer (if wanted) plus suhoor/iftar while fasting.
+export function upcomingAlerts(days = 7, from = new Date()) {
+  const p = S.get().prayer || {}; const cfg = settings(); const out = [];
+  const at = (base, min) => { const d = new Date(base); d.setHours(0, 0, 0, 0); d.setMinutes(min); return d; };
+  for (let i = 0; i < days; i++) {
+    const day = new Date(from); day.setDate(day.getDate() + i);
+    const t = timesFor(day, cfg);
+    if (cfg.enabled && p.notify) {
+      for (const pr of PRAYERS) {
+        if (pr.id === 'sunrise' || t[pr.id] == null) continue;
+        out.push({ at: at(day, t[pr.id]), title: `🕌 ${pr.label} · ${S.fmtMin(t[pr.id])}`, body: `${cfg.cityName.split(' ')[0]} — time for ${pr.label}.`, route: 'today' });
+      }
+    }
+    if (fasting(day) && p.fastAlerts !== false) {
+      out.push({ at: at(day, t.fajr - 45), title: '🌌 Suhoor — 45 minutes left', body: 'Oats, eggs or yogurt with dates, and two big glasses of water.', route: 'cook' });
+      out.push({ at: at(day, t.maghrib - 15), title: '🌙 Iftar in 15 minutes', body: 'Dates and water first, then a proper plate. Log it for XP.', route: 'today' });
+      out.push({ at: at(day, t.maghrib + 150), title: '🍛 Late meal / shake', body: 'You need a second real meal before suhoor to keep gaining.', route: 'cook' });
+    }
+  }
+  return out.sort((a, b) => a.at - b.at);
+}
