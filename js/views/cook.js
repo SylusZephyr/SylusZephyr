@@ -205,7 +205,7 @@ function cookMode(r, rerender) {
       };
       const show = () => {
         stop(); const s = r.steps[i]; remaining = s.timer || 0;
-        w.querySelector('#cm-num').textContent = `STEP ${i + 1} OF ${r.steps.length}`;
+        w.querySelector('#cm-num').textContent = `Step ${i + 1} of ${r.steps.length}`;
         w.querySelector('#cm-txt').textContent = s.t;
         bars.forEach((b, j) => b.classList.toggle('on', j <= i));
         w.querySelector('[data-next]').textContent = i === r.steps.length - 1 ? 'Done 🎉' : 'Next';
@@ -218,8 +218,10 @@ function cookMode(r, rerender) {
         const st = S.get(); st.cooked[r.id] = (st.cooked[r.id] || 0) + 1;
         const d = S.day(); d.cookedCount = (d.cookedCount || 0) + 1; S.save();
         G.award(`cook_${r.id}`, 40, null); G.evaluateQuests(); G.checkBadges();
-        await UI.celebrate({ big: r.emoji, title: 'Chef mode complete!', body: `+40 XP. You’ve made this ${st.cooked[r.id]}×.<br>Log it as a meal?`, rarity: 'COOKED', btn: 'Log as meal' });
-        Sh.logMeal({ slot: P.currentSlot(), name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein });
+        const times = st.cooked[r.id];
+        if (await UI.confirmSheet('Done', `${times > 1 ? `That’s ${times} times you’ve made this. ` : ''}Log it as ${P.SLOT_LABEL[P.currentSlot()].toLowerCase()}? ${r.kcal} kcal · ${r.protein} g protein.`, 'Log meal')) {
+          Sh.logMeal({ slot: P.currentSlot(), name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein });
+        }
         rerender();
       };
       w.querySelector('[data-x]').onclick = () => { stop(); try { wake && wake.release(); } catch (e) {} close(); };

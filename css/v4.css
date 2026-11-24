@@ -190,3 +190,6 @@ input, select, textarea { background: var(--surface2); border-radius: 10px; }
 .ess-list .check { min-height: 0; padding: 9px 2px; font-size: 15px; }
 .ess-list .check .box { width: 24px; height: 24px; }
 .ess-list .check .box svg { width: 14px; height: 14px; }
+.cookmode .stepbig .num { color: var(--muted); letter-spacing: 0; font-weight: 600; font-size: 14px; }
+.cookmode .progress i.on { background: var(--text); }
+.scale button.on { background: var(--text); color: #0b0c0e; }

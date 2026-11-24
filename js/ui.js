@@ -236,7 +236,10 @@ export function ring(pct, size = 120, stroke = 12, color = 'url(#gradWarm)', lab
 
 export const grad = (bg) => `background:linear-gradient(135deg, ${bg[0]}, ${bg[1]})`;
 
+// Rating rows. Face-emoji scales became plain 1–5 buttons with words at each end.
+const SCALE_ENDS = { energy: ['Drained', 'Full of energy'], mood: ['Low', 'Great'], appetite: ['No appetite', 'Very hungry'], q: ['Poor', 'Great'], ctl: ['No control', 'Full control'] };
 export function scaleButtons(name, n, current, labels = null, emoji = false) {
-  return `<div class="scale ${emoji ? 'emoji-scale' : ''}" data-scale="${name}">${Array.from({ length: n }, (_, i) =>
-    `<button data-v="${i}" class="${current === i ? 'on' : ''}">${labels ? labels[i] : i + 1}</button>`).join('')}</div>`;
+  const ends = emoji ? SCALE_ENDS[name] : null;
+  return `<div class="scale" data-scale="${name}">${Array.from({ length: n }, (_, i) =>
+    `<button data-v="${i}" class="${current === i ? 'on' : ''}" aria-label="${i + 1} of ${n}${ends && i === 0 ? ', ' + ends[0] : ends && i === n - 1 ? ', ' + ends[1] : ''}">${labels && !emoji ? labels[i] : i + 1}</button>`).join('')}</div>${ends ? `<div class="row between tiny muted" style="margin-top:6px"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}`;
 }

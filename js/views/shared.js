@@ -31,13 +31,13 @@ export function mealSheet(onDone, preset = {}) {
   const picks = [...new Set([...favs, ...recent, 'egg_paratha', 'chicken_cheese_wrap', 'airfryer_chicken_curry', 'shaker_smoothie'])].slice(0, 10).map((id) => RECIPE[id]).filter(Boolean);
   const html = () => `<h2>Log a meal</h2>
     <div class="seg mt8" id="slotseg">${Object.keys(SLOT_LABEL).map((s) => `<button data-slot="${s}" class="${s === slot ? 'on' : ''}">${SLOT_EMOJI[s]} ${SLOT_LABEL[s].split(' ')[0]}</button>`).join('')}</div>
-    <div class="field"><input id="food-q" type="search" placeholder="🔍 Search any food — naan, 鸡蛋, Snickers…" autocomplete="off"></div>
+    <div class="field"><input id="food-q" type="search" placeholder="Search any food — naan, 鸡蛋, Snickers…" autocomplete="off"></div>
     <div id="food-res"></div>
     <div id="meal-rest">
     <div class="kicker mt16">Quick size</div>
     <div class="grid2">${QUICK.map((q, i) => `<button class="btn" data-quick="${i}" style="justify-content:flex-start">${q.e} ${q.name}<span class="muted small" style="margin-left:auto">${q.kcal}</span></button>`).join('')}</div>
     <div class="kicker mt16">Your go-tos</div>
-    ${picks.map((r) => `<button class="rwide" data-rec="${r.id}"><div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div><div class="grow"><div style="font-weight:700">${UI.esc(r.name)}</div><div class="muted small">${r.kcal} kcal · ${r.protein} g protein</div></div><span class="pill amber">+XP</span></button>`).join('')}
+    ${picks.map((r) => `<button class="rwide" data-rec="${r.id}"><div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div><div class="grow"><div style="font-weight:700">${UI.esc(r.name)}</div><div class="muted small">${r.kcal} kcal · ${r.protein} g protein</div></div></button>`).join('')}
     <div class="kicker mt16">Delivery (Meituan 清真)</div>
     <div class="chips">${DELIVERY.map((d) => `<button class="chip" data-del="${d.id}">${d.emoji} ${UI.esc(d.name)}</button>`).join('')}</div>
     <div class="kicker mt16">Something else</div>
