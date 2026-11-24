@@ -12,6 +12,19 @@ const test = async (name, fn) => {
   try { await fn(); results.push(['ok', name]); } catch (e) { results.push(['FAIL', name, e.message]); }
 };
 
+// Every module must parse — the views are not imported below, so check them directly.
+{
+  const { readdirSync, readFileSync } = await import('node:fs');
+  const { execFileSync } = await import('node:child_process');
+  const walk = (d) => readdirSync(new URL(d, import.meta.url), { withFileTypes: true }).flatMap((e) => e.isDirectory() ? (e.name === 'vendor' ? [] : walk(`${d}${e.name}/`)) : e.name.endsWith('.js') ? [`${d}${e.name}`] : []);
+  await test('all modules parse', () => {
+    for (const f of walk('../js/')) {
+      try { execFileSync(process.execPath, ['--input-type=module', '--check'], { input: readFileSync(new URL(f, import.meta.url)), stdio: ['pipe', 'pipe', 'pipe'] }); }
+      catch (e) { throw new Error(`${f}: ${String(e.stderr).split('\n').find((l) => l.includes('Error')) || 'syntax error'}`); }
+    }
+  });
+}
+
 const { RECIPES } = await import('../js/data/recipes.js');
 const { ING } = await import('../js/data/ingredients.js');
 const { TIPS, STORIES, CHECKINS, scoreCheckin } = await import('../js/data/content.js');

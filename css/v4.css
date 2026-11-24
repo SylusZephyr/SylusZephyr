@@ -193,3 +193,41 @@ input, select, textarea { background: var(--surface2); border-radius: 10px; }
 .cookmode .stepbig .num { color: var(--muted); letter-spacing: 0; font-weight: 600; font-size: 14px; }
 .cookmode .progress i.on { background: var(--text); }
 .scale button.on { background: var(--text); color: #0b0c0e; }
+
+/* ---- Search field ---- */
+.searchbar { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); color: var(--muted); }
+.searchbar svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.searchbar input { border: 0; background: transparent; padding: 0; height: 100%; }
+.searchbar:focus-within { border-color: var(--line2); }
+.badge-dot { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--coral); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* ---- Recipe carousel ---- */
+.carousel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; margin: 0 -16px; padding: 0 16px 4px; scrollbar-width: none; overscroll-behavior-x: contain; }
+.carousel::-webkit-scrollbar { display: none; }
+.ccard { flex: 0 0 74%; max-width: 300px; scroll-snap-align: start; color: inherit; text-decoration: none; }
+.ccard .ph-wrap { position: relative; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; background: var(--surface2); }
+.ccard .ph-wrap img.ph { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ccard .ph-wrap .mono { font-size: 44px; }
+.ccard .ready { position: absolute; left: 10px; bottom: 10px; padding: 4px 9px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(11,12,14,.72); color: var(--text); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.ccard .ready.yes { background: rgba(74,222,128,.92); color: #04140b; }
+.cc-body { padding: 10px 2px 0; }
+.cc-name { font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+@media (min-width: 900px) { .carousel { margin: 0; padding: 0 0 4px; } .ccard { flex-basis: 260px; } }
+
+/* ---- Row links ---- */
+.list-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); color: inherit; text-decoration: none; margin-bottom: 12px; }
+.list-row .ico { width: 36px; height: 36px; border-radius: 10px; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); flex: 0 0 auto; }
+.list-row .ico svg { width: 18px; height: 18px; }
+.list-row b { display: block; font-weight: 600; }
+.list-row .grow > span { display: block; }
+.btn svg { width: 16px; height: 16px; }
+
+/* ---- Recipe grid cards ---- */
+.rcard { background: transparent; border: 0; border-radius: 0; }
+.rcard .hero { border-radius: 14px; overflow: hidden; }
+.rcard .body { padding: 8px 2px 4px; }
+.rcard .name { font-weight: 600; }
+.rcard .meta { color: var(--muted); }
+.rcard .method { display: none; }
+.rcard .hero.has-photo::after { display: none; }

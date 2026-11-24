@@ -23,7 +23,8 @@ const BG_KEYS = ['--bg', '--bg2', '--surface', '--surface2', '--surface3'];
 export function current() {
   const t = S.get()?.settings?.theme || {};
   return {
-    accent: ACCENTS.some((a) => a.id === t.accent) ? t.accent : 'ember',
+    accent: t.accent === 'custom' && /^#[0-9a-f]{6}$/i.test(t.custom || '') ? 'custom' : ACCENTS.some((a) => a.id === t.accent) ? t.accent : 'ember',
+    custom: /^#[0-9a-f]{6}$/i.test(t.custom || '') ? t.custom : '#ff7a45',
     bg: BACKGROUNDS.some((b) => b.id === t.bg) ? t.bg : 'midnight',
     size: SIZES.some((z) => z.id === t.size) ? t.size : 'normal',
   };
@@ -31,7 +32,7 @@ export function current() {
 
 export function apply() {
   const c = current(); const root = document.documentElement.style;
-  const a = ACCENTS.find((x) => x.id === c.accent);
+  const a = c.accent === 'custom' ? { c1: c.custom, c2: c.custom, ink: '#0b0c0e', glow: 'transparent' } : ACCENTS.find((x) => x.id === c.accent);
   root.setProperty('--a1', a.c1); root.setProperty('--a2', a.c2); root.setProperty('--a-ink', a.ink); root.setProperty('--a-glow', a.glow);
   root.setProperty('--grad-warm', a.c1);
   root.setProperty('--accent', a.c1);

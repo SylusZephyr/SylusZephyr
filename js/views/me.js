@@ -103,7 +103,7 @@ function main() {
   </div>
   <a class="card" href="#me/badges" style="display:flex;align-items:center;justify-content:space-between;color:inherit;text-decoration:none"><span><b>Milestones</b><div class="small muted">${nb} of ${G.BADGES.length} reached</div></span><span class="chev">${UI.ICON.chev}</span></a>
   <div class="card tight">
-    ${item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
+    ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
     ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
     ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
@@ -267,7 +267,8 @@ function settings() {
   </div>
   <div class="section-title" style="font-size:16px">Look</div>
   <div class="card">
-    <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}</div></div>
+    <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
+      <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''}" style="cursor:pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" style="position:absolute;opacity:0;width:1px;height:1px" aria-label="Pick a custom accent colour"></label></div></div>
     <div class="field"><label>Background</label><div class="seg" id="bgseg">${Theme.BACKGROUNDS.map((b) => `<button data-bg="${b.id}" class="${Theme.current().bg === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
     <div class="field"><label>Text size</label><div class="seg" id="fsseg">${Theme.SIZES.map((b) => `<button data-fs="${b.id}" class="${Theme.current().size === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
   </div>
@@ -288,7 +289,8 @@ function settings() {
   <div class="notice">${Cloud.status.user ? 'Your data lives on this device and syncs to your own private Supabase project while you’re signed in.' : 'Your data lives only on this device. Nothing is uploaded unless you sign in to sync. If you uninstall the app or clear site data, it’s gone — export a file now and then to be safe.'}</div>
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
-  <a class="list-item mt12" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
+  <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">☁️</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
+  <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
   <p class="tiny faint mt16" style="text-align:center">Revive 4.0 · not medical advice</p>`;
 }
@@ -468,6 +470,8 @@ export function bind(root, parts, { rerender }) {
     cup.onchange = () => { const v = Math.round(+cup.value); if (v >= 5 && v <= 400) { st.profile.cupMg = v; S.save(); UI.toast('Cup size saved', '☕'); } else cup.value = Caf.cupMg(); };
     cut.onchange = () => { if (/^\d{2}:\d{2}$/.test(cut.value)) { st.profile.caffeineCutoff = cut.value; S.save(); UI.toast('Cutoff saved', '☕'); } };
     root.querySelectorAll('[data-accent]').forEach((b) => b.onclick = () => { Theme.set({ accent: b.dataset.accent }); rerender(); });
+    const ca = root.querySelector('[data-customaccent]');
+    if (ca) { ca.oninput = () => Theme.set({ accent: 'custom', custom: ca.value }); ca.onchange = () => rerender(); }
     root.querySelectorAll('[data-bg]').forEach((b) => b.onclick = () => { Theme.set({ bg: b.dataset.bg }); rerender(); });
     root.querySelectorAll('[data-fs]').forEach((b) => b.onclick = () => { Theme.set({ size: b.dataset.fs }); rerender(); });
     root.querySelector('[data-export]').onclick = async () => {
