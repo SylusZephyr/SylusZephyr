@@ -181,7 +181,7 @@ export function ring(pct, size = 120, stroke = 12, color = 'url(#gradWarm)', lab
   const r = (size - stroke) / 2; const c = 2 * Math.PI * r; const off = c * (1 - Math.max(0, Math.min(1, pct)));
   return `<div class="ring-wrap" style="width:${size}px;height:${size}px">
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
-      <defs><linearGradient id="gradWarm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff6b6b"/></linearGradient>
+      <defs><linearGradient id="gradWarm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient>
       <linearGradient id="gradCool" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5aa9ff"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
       <linearGradient id="gradGreen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#5aa9ff"/></linearGradient></defs>
       <circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke="var(--surface3)" stroke-width="${stroke}" fill="none"/>

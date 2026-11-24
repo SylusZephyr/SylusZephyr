@@ -8,6 +8,8 @@ import { RECIPES, RECIPE } from '../data/recipes.js';
 import { suggest, planToday, art } from './cook.js';
 import * as Search from './search.js';
 import { t } from '../i18n.js';
+import * as Caf from '../caffeine.js';
+import * as Pr from '../prayer.js';
 
 function dayPhase() {
   const h = new Date().getHours();
@@ -47,7 +49,22 @@ function installHint() {
   return /iPhone|iPad|iPod/.test(ua) && !standalone;
 }
 
+function fastingNudges(now) {
+  const d = S.day(); const f = Pr.fastWindow(now); const out = [];
+  if (f.state === 'suhoor' && f.toSuhoorEnd <= 75 && !d.checks.breakfast) out.push({ e: '🌌', t: `Suhoor closes in ${Pr.countdown(f.toSuhoorEnd)}`, s: 'Slow energy: oats, eggs, yogurt, dates, plus 2 big glasses of water.', act: 'meal' });
+  if (f.state === 'fasting' && f.toIftar <= 45) out.push({ e: '🌙', t: `Iftar in ${Pr.countdown(f.toIftar)}`, s: 'Open with dates and water, pray, then eat a proper plate.', act: 'none' });
+  if (f.state === 'open') {
+    const since = now.getHours() * 60 + now.getMinutes() - f.iftar;
+    if (since > 20 && !d.checks.dinner) out.push({ e: '🌙', t: 'Logged your iftar?', s: 'Breaking the fast properly is today’s most important meal.', act: 'meal' });
+    const goal = S.get().profile.waterGoalMl; const window = Math.max(1, f.suhoorEnd + 1440 - f.iftar);
+    const expected = Math.min(1, Math.max(0, since) / window) * goal;
+    if (since > 60 && d.waterMl < expected - 400) out.push({ e: '💧', t: 'Water between iftar and suhoor', s: `${(d.waterMl / 1000).toFixed(1)} L so far. Sip a glass every hour, not all at once.`, act: 'water', cls: 'blue' });
+  }
+  return out.slice(0, 2);
+}
+
 export function nudges(now = new Date()) {
+  if (Pr.fasting(now)) return fastingNudges(now);
   const st = S.get(); const d = S.day(); const out = [];
   const m = now.getHours() * 60 + now.getMinutes();
   const wake = S.minutesOf(st.profile.wakeAnchor);
@@ -104,6 +121,8 @@ export function render(_, { night }) {
   ${installHint() ? `<a class="nudge blue" href="#me/install"><span class="n-e">📲</span><div class="grow"><b>Install Revive on your Home Screen</b><span>Safari → Share → Add to Home Screen. Works offline and keeps your data in one place.</span></div></a>` : ''}
   ${night ? '' : nudges().map((n) => `<button class="nudge ${n.cls || ''}" data-nudge="${n.act}"><span class="n-e">${n.e}</span><div class="grow"><b>${n.t}</b><span>${n.s}</span></div><span class="pill amber">+XP</span></button>`).join('')}
 
+  ${prayerCard()}
+
   <div class="stories">${STORIES.map((s) => `<button class="story ${seen[s.id] === k ? 'seen' : ''}" data-story="${s.id}"><div class="ring"><div class="inner">${s.e}</div></div><span>${s.label}</span></button>`).join('')}</div>
 
   ${night ? `<div class="card winddown-banner">
@@ -127,7 +146,7 @@ export function render(_, { night }) {
         <p class="muted small">5 out of 7 is a full win. Don’t chase perfect.</p></div>
     </div>
     <div class="mt12">${G.ESSENTIALS.map((e) => `<button class="check ${d.checks[e.id] ? 'done' : ''}" data-ess="${e.id}" style="width:100%;text-align:left">
-      <span class="box">${UI.ICON.check}</span><span class="emoji">${e.e}</span><span class="label">${e.label}${e.id === 'caffeine' ? ` <span class="muted small">(${S.prettyTime(st.profile.caffeineCutoff)})</span>` : ''}</span><span class="xp">+${e.xp}</span></button>`).join('')}</div>
+      <span class="box">${UI.ICON.check}</span><span class="emoji">${e.e}</span><span class="label">${essLabel(e)}${e.id === 'caffeine' && !Pr.fasting() ? ` <span class="muted small">(${S.prettyTime(st.profile.caffeineCutoff)})</span>` : ''}</span><span class="xp">+${e.xp}</span></button>`).join('')}</div>
   </div>
 
   <div class="card loot ${loot.unlocked ? '' : 'locked'}">
@@ -165,9 +184,10 @@ export function render(_, { night }) {
       <div class="kicker">☕ Coffee</div>
       <div class="counter"><div class="val">${d.coffee.length}<span class="unit"> cups</span></div></div>
       <div class="small ${lateCoffee ? '' : 'muted'} mt8" style="${lateCoffee ? 'color:var(--coral)' : ''};min-height:36px">${lateCoffee ? `Past cutoff — coffee now will push sleep later` : `Cutoff ${S.prettyTime(st.profile.caffeineCutoff)}${d.coffee.length ? ` · last ${S.prettyTime(d.coffee.at(-1))}` : ''}`}</div>
-      <div class="row mt12"><button class="btn sm grow" data-coffee="-1">−</button><button class="btn sm grow" data-coffee="1">+1</button></div>
+      <div class="row mt12"><button class="btn sm grow" data-coffee="-1" aria-label="Remove last drink">−</button><button class="btn sm grow" data-coffee="1" aria-label="Add a cup">+1</button><button class="btn sm" data-drinks aria-label="Pick a drink">▾</button></div>
     </div>
   </div>
+  ${cafCard(k)}
 
   <div class="grid2 mt12">
     <button class="card" style="margin:0;text-align:left" data-sleep>
@@ -201,6 +221,48 @@ export function render(_, { night }) {
   <div class="section-title">For you</div>
   ${night ? `<div class="empty"><span class="e">😴</span>Your feed is sleeping until morning.<br><span class="small">Revive protects your bedtime — see you tomorrow.</span></div>` : feedHtml(k)}
   `;
+}
+
+const FAST_ESS = { breakfast: 'Eat suhoor before dawn', lunch: 'A proper late meal', dinner: 'Break the fast at iftar', caffeine: 'No coffee in the 6 h before bed' };
+function essLabel(e) { return (Pr.fasting() && FAST_ESS[e.id]) || e.label; }
+
+function prayerCard() {
+  const cfg = Pr.settings(); if (!cfg.enabled && !Pr.fasting()) return '';
+  const now = new Date(); const nx = Pr.next(now); const list = Pr.todayList(now);
+  const fast = Pr.fasting(now) ? Pr.fastWindow(now) : null;
+  return `<div class="card prayer-card ${fast ? 'fasting' : ''}">
+    ${fast ? `<div class="row between"><div><div class="kicker">🌙 ${Pr.isRamadanDate(now) ? `Ramadan${Pr.hijri(now) ? ` · day ${Pr.hijri(now).day}` : ''}` : 'Fasting today'}</div>
+        <h3>${fast.state === 'fasting' ? `Iftar in ${Pr.countdown(fast.toIftar)}` : fast.state === 'suhoor' ? `Suhoor ends in ${Pr.countdown(fast.toSuhoorEnd)}` : `Fast opened · suhoor ends ${S.prettyTime(Pr.fastWindow(new Date(now.getTime() + 864e5)).suhoorClock)}`}</h3></div>
+        <span class="pill purple">${Pr.countdown(fast.lengthMin)} fast</span></div>
+      <div class="lvlbar mt8 fastbar"><i style="width:${Math.round(fast.pct * 100)}%"></i></div>
+      <div class="row between tiny mt8 muted"><span>Suhoor ${S.prettyTime(fast.suhoorClock)}</span><span>Iftar ${S.prettyTime(fast.iftarClock)}</span></div>` : ''}
+    ${cfg.enabled ? `<div class="row between ${fast ? 'mt12' : ''}"><div class="kicker">🕌 ${UI.esc(cfg.cityName)}</div><span class="small" style="font-weight:700">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
+    <div class="prayer-row mt8">${list.map((p) => `<div class="pr ${p.id === nx.id && !nx.tomorrow ? 'next' : ''} ${p.id === 'sunrise' ? 'faint' : ''}"><span>${p.label}</span><b>${p.clock ? S.prettyTime(p.clock).replace(/(am|pm)$/, '<small>$1</small>') : '—'}</b></div>`).join('')}</div>` : ''}
+  </div>`;
+}
+
+function cafCard(k) {
+  const d = S.get().days[k]; const sum = Caf.summary(k);
+  if (!d?.coffee?.length && sum.now < 10) return '';
+  const tone = sum.safeAtBed ? 'var(--green)' : 'var(--coral)';
+  return `<div class="card mt12 caf-card">
+    <div class="row between"><div class="kicker">☕ Caffeine in your body</div><span class="pill ${sum.overLimit ? 'coral' : ''}">${sum.total} mg today</span></div>
+    <div class="grid2 mt8"><div class="macro"><b>≈${sum.now} mg</b><span>right now</span></div>
+      <div class="macro"><b style="color:${tone}">≈${sum.atBed} mg ${sum.safeAtBed ? '✓' : '⚠️'}</b><span>at bed (${S.prettyTime(sum.bedClock)})</span></div></div>
+    ${Caf.curveSvg(k)}
+    <p class="small muted mt8">${sum.safeAtBed
+      ? (sum.ifOneMore >= Caf.SLEEP_SAFE_MG ? `Another cup now would leave ≈${sum.ifOneMore} mg at your ${S.prettyTime(sum.bedClock)} bedtime — enough to delay sleep.` : `You have room: one more cup still clears before ${S.prettyTime(sum.bedClock)}.`)
+      : `Still ≈${sum.atBed} mg at bedtime. Expect it to take longer to fall asleep${sum.clearClock ? `; it drops below ${Caf.SLEEP_SAFE_MG} mg around ${S.prettyTime(sum.clearClock)}` : ''}. Dim lights and skip screens to help.`}
+      ${sum.overLimit ? ` Over ${Caf.DAILY_LIMIT_MG} mg today — that can raise heart rate and anxiety.` : ''}</p>
+    <p class="tiny muted">Estimate using a 5-hour half-life. Real clearance varies from person to person.</p>
+  </div>`;
+}
+
+function drinkSheet(onDone) {
+  UI.openSheet(`<h2>☕ What are you drinking?</h2><p class="muted small">Sets the caffeine estimate. Your usual cup is ${Caf.cupMg()} mg — change it in Me → Settings.</p>
+    <div class="mt12">${Caf.DRINKS.map((x) => `<button class="list-item" data-mg="${x.mg}"><div class="li-ico">${x.e}</div><div class="grow"><b>${x.label}</b></div><span class="muted small">${x.mg} mg</span></button>`).join('')}</div>`, {
+    onMount: (sh, close) => sh.querySelectorAll('[data-mg]').forEach((b) => b.onclick = () => { close(); onDone(+b.dataset.mg); }),
+  });
 }
 
 const FEED_PAGE = 6;
@@ -247,16 +309,19 @@ export function bind(root, _, { rerender }) {
     if (d.waterMl >= 2000 && v > 0 && d.waterMl - v < 2000) { UI.confetti(50); UI.toast('2 L reached — hydration hero!', '💧'); }
     G.evaluateQuests(); G.checkBadges(); rerender();
   }));
+  const addCoffee = (mg) => {
+    d.coffee.push(mg == null || mg === Caf.cupMg() ? S.hm() : `${S.hm()}@${mg}`);
+    if (P.isAfterCutoff(S.hm()) && mg !== 5) {
+      if (d.checks.caffeine) G.setEssential('caffeine', false);
+      UI.toast('Logged. After cutoff — try decaf or water next time', '☕');
+    }
+    UI.haptic(8); S.save(); rerender();
+  };
+  root.querySelector('[data-drinks]')?.addEventListener('click', () => drinkSheet(addCoffee));
   root.querySelectorAll('[data-coffee]').forEach((b) => b.addEventListener('click', () => {
     const v = +b.dataset.coffee;
-    if (v > 0) {
-      d.coffee.push(S.hm());
-      if (P.isAfterCutoff(S.hm())) {
-        if (d.checks.caffeine) G.setEssential('caffeine', false);
-        UI.toast('Logged. After cutoff — try decaf or water next time', '☕');
-      }
-    } else d.coffee.pop();
-    S.save(); rerender();
+    if (v > 0) { addCoffee(); return; }
+    d.coffee.pop(); S.save(); rerender();
   }));
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
   root.querySelectorAll('[data-nudge]').forEach((b) => b.addEventListener('click', (ev) => {

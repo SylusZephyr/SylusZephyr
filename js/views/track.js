@@ -36,9 +36,51 @@ function overview() {
   </div>
   <div class="card cool glow"><div class="kicker">4-week plan · week ${Math.min(wk, 4)}${wk > 4 ? ' (maintenance)' : ''}</div><h3>${UI.esc(prog.t)}</h3>
     ${prog.goals.map((g) => `<div class="small" style="padding:4px 0">• ${UI.esc(g)}</div>`).join('')}</div>
+  ${yearCard()}
   ${insightsCard()}
   ${journalCard()}
   <div class="card"><div class="kicker">Daily XP · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: st.days[k]?.xpToday || 0, label: S.prettyDate(k, { day: 'numeric' }), color: k === S.dayKey() ? '#ffb547' : '#5aa9ff' })), { h: 120 })}</div>`;
+}
+
+// Half a year of consistency, one square per day (columns are weeks).
+function yearCard() {
+  const st = S.get(); const today = S.dayKey(); const weeks = 26;
+  const start = S.addDays(S.weekKey(today), -7 * (weeks - 1));
+  const cells = []; let active = 0, perfect = 0, secured = 0, counted = 0;
+  const created = S.dayKey(new Date(st.createdAt || Date.now()));
+  for (let i = 0; i < weeks * 7; i++) {
+    const k = S.addDays(start, i);
+    if (k > today) { cells.push('<i class="future"></i>'); continue; }
+    const n = G.essentialsDone(k);
+    if (k >= created) { counted++; if (n) active++; if (n >= 5) secured++; if (n >= 7) perfect++; }
+    cells.push(`<i class="${n >= 7 ? 'l4' : n >= 5 ? 'l3' : n >= 3 ? 'l2' : n >= 1 ? 'l1' : ''} ${k === today ? 'today' : ''}" title="${S.prettyDate(k)}: ${n}/7"></i>`);
+  }
+  const months = []; let lastM = -1;
+  for (let w = 0; w < weeks; w++) { const d = S.keyToDate(S.addDays(start, w * 7)); if (d.getMonth() !== lastM) { months.push({ w, l: d.toLocaleDateString('en-GB', { month: 'short' }) }); lastM = d.getMonth(); } }
+  return `<div class="card"><div class="row between"><div class="kicker">6 months of showing up</div><span class="small muted">${secured} streak days</span></div>
+    <div style="position:relative;height:14px;margin-top:6px">${months.map((m) => `<span class="tiny muted" style="position:absolute;left:${m.w * 15}px">${m.l}</span>`).join('')}</div>
+    <div class="yheat" role="img" aria-label="${secured} days with 5 or more essentials in the last 6 months">${cells.join('')}</div>
+    <div class="row between mt8"><span class="tiny muted">${counted ? Math.round(active / counted * 100) : 0}% of days active · ${perfect} perfect</span>
+    <span class="yheat-legend tiny muted">less <i style="background:var(--surface3)"></i><i style="background:rgba(52,211,153,.25)"></i><i style="background:rgba(52,211,153,.45)"></i><i style="background:rgba(52,211,153,.7)"></i><i style="background:#34d399"></i> more</span></div></div>`;
+}
+
+// Least-squares trend over the last 6 weeks of weigh-ins → kg/week and goal date.
+export function weightTrend(ws = S.get().weights, goal = S.get().profile.goalKgMin) {
+  const sorted = [...ws].sort((a, b) => a.date.localeCompare(b.date));
+  if (sorted.length < 2) return null;
+  const lastDate = S.keyToDate(sorted.at(-1).date);
+  const recent = sorted.filter((w) => (lastDate - S.keyToDate(w.date)) / 864e5 <= 42);
+  const pts = (recent.length >= 2 ? recent : sorted.slice(-2)).map((w) => ({ x: (S.keyToDate(w.date) - lastDate) / 864e5, y: w.kg }));
+  const n = pts.length; const mx = pts.reduce((a, p) => a + p.x, 0) / n; const my = pts.reduce((a, p) => a + p.y, 0) / n;
+  const sxx = pts.reduce((a, p) => a + (p.x - mx) ** 2, 0);
+  if (!sxx) return null;
+  const slope = pts.reduce((a, p) => a + (p.x - mx) * (p.y - my), 0) / sxx; // kg per day
+  const now = my + slope * (0 - mx);
+  const perWeek = slope * 7;
+  let eta = null;
+  if (now >= goal) eta = 'reached';
+  else if (slope > 0.002) { const days = Math.ceil((goal - now) / slope); if (days < 730) { const d = new Date(lastDate); d.setDate(d.getDate() + days); eta = d; } }
+  return { perWeek, smoothed: now, eta, points: n };
 }
 
 // Personal insights: compare average energy/mood on days with vs without a habit.
@@ -130,11 +172,20 @@ function body() {
   const toGoal = last ? Math.max(0, st.profile.goalKgMin - last.kg) : null;
   const bmi = last ? last.kg / ((st.profile.heightCm / 100) ** 2) : null;
   return `
-  <div class="grid3"><div class="macro"><b>${last ? last.kg.toFixed(1) : '—'}</b><span>kg now</span></div><div class="macro"><b>${bmi ? bmi.toFixed(1) : '—'}</b><span>BMI</span></div><div class="macro"><b>${toGoal != null ? toGoal.toFixed(1) : '—'}</b><span>kg to 66</span></div></div>
-  <div class="card mt12"><div class="kicker">Weight · goal zone 66–68 kg</div>${C.lineChart(pts, { band: [st.profile.goalKgMin, st.profile.goalKgMax], unit: '' })}
+  <div class="grid3"><div class="macro"><b>${last ? last.kg.toFixed(1) : '—'}</b><span>kg now</span></div><div class="macro"><b>${bmi ? bmi.toFixed(1) : '—'}</b><span>BMI</span></div><div class="macro"><b>${toGoal != null ? toGoal.toFixed(1) : '—'}</b><span>kg to ${st.profile.goalKgMin}</span></div></div>
+  <div class="card mt12"><div class="kicker">Weight · goal zone ${st.profile.goalKgMin}–${st.profile.goalKgMax} kg</div>${C.lineChart(pts, { band: [st.profile.goalKgMin, st.profile.goalKgMax], unit: '' })}
+    ${etaLine()}
     <p class="small mt8" style="color:${rate == null ? 'var(--muted)' : rate > 0.4 ? 'var(--amber)' : rate >= 0.05 ? 'var(--green)' : 'var(--muted)'}">${rate == null ? 'Weigh in weekly to see your trend.' : `${rate >= 0 ? '+' : ''}${rate.toFixed(2)} kg/week · ${rate > 0.4 ? 'faster than planned — fine, but no need to push' : rate >= 0.05 ? 'right on track (0.1–0.25 target)' : 'flat — add a daily shake'}`}</p></div>
   <button class="btn primary block" data-weigh>⚖️ Weigh in</button>
   <div class="card mt12"><div class="kicker">History</div>${ws.length ? [...ws].reverse().map((w) => `<div class="list-item"><div class="grow"><b>${w.kg.toFixed(1)} kg</b><div class="muted small">${S.prettyDate(w.date)}</div></div><button class="icon-btn" data-delw="${w.date}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty">No weigh-ins</div>'}</div>`;
+}
+
+function etaLine() {
+  const tr = weightTrend(); const goal = S.get().profile.goalKgMin;
+  if (!tr) return '';
+  if (tr.eta === 'reached') return `<p class="small mt8" style="color:var(--green);font-weight:700">🎯 Trend is in your goal zone. Now hold it.</p>`;
+  if (!tr.eta) return `<p class="small mt8 muted">Trend ${tr.perWeek >= 0 ? '+' : ''}${tr.perWeek.toFixed(2)} kg/week — not climbing yet, so no goal date. One extra shake a day (≈+300 kcal) usually starts it moving.</p>`;
+  return `<p class="small mt8">📈 At ${tr.perWeek.toFixed(2)} kg/week you reach <b>${goal} kg around ${tr.eta.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: tr.eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b>.</p>`;
 }
 
 function sxCard() {

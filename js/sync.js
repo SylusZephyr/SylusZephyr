@@ -53,6 +53,7 @@ export function merge(local, remote) {
   for (const [id, n] of Object.entries(local.cooked || {})) out.cooked[id] = Math.max(n, out.cooked[id] || 0);
   out.storiesSeen = { ...remote.storiesSeen, ...local.storiesSeen };
   out.weekPlan = newer.weekPlan || local.weekPlan;
+  out.prayer = newer.prayer || local.prayer;
   out.reminderPrefs = { ...remote.reminderPrefs, ...local.reminderPrefs };
   out.recipeNotes = { ...remote.recipeNotes, ...local.recipeNotes };
 

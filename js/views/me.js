@@ -11,6 +11,9 @@ import * as ShareCard from '../sharecard.js';
 import { RECIPE, DELIVERY } from '../data/recipes.js';
 import { TIPS, RED_FLAGS, CRISIS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
 import { pfWeek } from './train.js';
+import * as Pr from '../prayer.js';
+import * as Caf from '../caffeine.js';
+import * as Theme from '../theme.js';
 
 const LABS = [
   { name: 'Testosterone (morning, total)', unit: 'nmol/L', ref: '~8.6–29' },
@@ -33,6 +36,7 @@ export function render(parts) {
   if (sub === 'install') return install();
   if (sub === 'account') return account();
   if (sub === 'credits') return credits();
+  if (sub === 'prayer') return prayer();
   return main();
 }
 
@@ -103,6 +107,7 @@ function main() {
     ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
     ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
+    ${item('me/prayer', '🕌', 'Prayer times & Ramadan', Pr.settings().enabled ? `${UI.esc(Pr.settings().cityName)} · ${Pr.fasting() ? 'fasting mode on' : 'next: ' + Pr.next().label}` : 'Off · offline, no location needed')}
     ${item('me/saved', '🔖', 'Saved cards', `${st.savedTips.length} saved`)}
     ${Native.isNative || window.reviveDesktop ? '' : item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
     ${item('me/settings', '⚙️', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
@@ -213,6 +218,34 @@ function saved() {
   ${tips.length ? tips.map((t) => `<div class="tipcard" style="${UI.grad(t.bg)}"><div class="big">${t.e}</div><h3>${UI.esc(t.title)}</h3><p>${UI.esc(t.body)}</p></div>`).join('') : '<div class="empty"><span class="e">🔖</span>Save cards from your feed to read later</div>'}`;
 }
 
+function prayer() {
+  const cfg = Pr.settings(); const p = S.get().prayer || {};
+  const list = Pr.todayList(); const nx = Pr.next(); const dtr = Pr.daysToRamadan(); const hj = Pr.hijri();
+  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Prayer & Ramadan</h1></div></div>
+  <div class="card tight"><div class="list-item"><div class="grow"><b>Show prayer times on Today</b><div class="muted small">Worked out on this device from the sun’s position. No location permission, no internet.</div></div><button class="toggle ${cfg.enabled ? 'on' : ''}" data-prayeron aria-label="Show prayer times"></button></div></div>
+  <div class="card">
+    <div class="field" style="margin:0"><label>City</label><select id="pr-city">${Pr.CITIES.map((c) => `<option value="${c.id}" ${cfg.city === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}<option value="custom" ${cfg.city === 'custom' ? 'selected' : ''}>Other (enter coordinates)…</option></select></div>
+    <div class="grid3 ${cfg.city === 'custom' ? '' : 'hidden'}" id="pr-custom"><div class="field"><label>Latitude</label><input id="pr-lat" type="number" step="0.001" value="${p.lat ?? cfg.lat}"></div><div class="field"><label>Longitude</label><input id="pr-lng" type="number" step="0.001" value="${p.lng ?? cfg.lng}"></div><div class="field"><label>UTC offset</label><input id="pr-tz" type="number" step="0.5" value="${cfg.tz}"></div></div>
+    <div class="field"><label>Calculation method</label><select id="pr-method">${Object.entries(Pr.METHODS).map(([id, m]) => `<option value="${id}" ${cfg.method === id ? 'selected' : ''}>${m.name}</option>`).join('')}</select></div>
+    <div class="field"><label>Asr</label><div class="seg" id="pr-asr"><button data-asr="standard" class="${cfg.asr === 'standard' ? 'on' : ''}">Standard</button><button data-asr="hanafi" class="${cfg.asr === 'hanafi' ? 'on' : ''}">Hanafi</button></div></div>
+  </div>
+  <div class="card"><div class="row between"><div class="kicker">Today · ${UI.esc(cfg.cityName)}</div><span class="small" style="font-weight:700">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
+    ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span style="font-weight:800">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
+    <p class="tiny muted mt8">If your local mosque’s timetable differs, follow the mosque.</p></div>
+  <div class="section-title" style="font-size:16px">Ramadan fasting mode</div>
+  <div class="card">
+    <p class="small muted">${dtr === 0 ? `It’s Ramadan${hj ? ` (day ${hj.day})` : ''}. Ramadan Mubarak 🌙` : dtr ? `Ramadan starts in about <b>${dtr} days</b> (dates depend on the moon sighting).` : ''} Fasting mode moves your meals to suhoor and iftar, spreads water between iftar and dawn, and swaps the coffee rule for “none in the 6 h before bed”.</p>
+    <div class="seg mt12" id="pr-ram">${[['auto', 'Auto in Ramadan'], ['on', 'On now'], ['off', 'Off']].map(([v, l]) => `<button data-ram="${v}" class="${cfg.ramadan === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div class="notice mt12">You’re still regaining weight and energy. Islam exempts people who are unwell from fasting. Ask your doctor first, and stop the fast if you feel faint, chest pain, a racing heart or confusion.</div>
+  </div>
+  <div class="card"><div class="kicker">Suhoor & iftar that work for you</div>
+    <ul class="small" style="line-height:1.7;padding-left:18px;margin:8px 0 0">
+      <li><b>Suhoor:</b> slow energy and protein — overnight oats, eggs on paratha, yogurt + dates + nuts. Two big glasses of water.</li>
+      <li><b>Iftar:</b> 3 dates and water, pray, then a full plate. Don’t skip the late meal: you need the calories.</li>
+      <li><b>Weight goal:</b> aim for at least two real meals plus a shake between iftar and suhoor.</li>
+    </ul></div>`;
+}
+
 function settings() {
   const st = S.get(); const s = st.settings;
   const tg = (key, label, sub, on) => `<div class="list-item"><div class="grow"><b>${label}</b>${sub ? `<div class="muted small">${sub}</div>` : ''}</div><button class="toggle ${on ? 'on' : ''}" data-set="${key}"></button></div>`;
@@ -223,6 +256,18 @@ function settings() {
     ${tg('sounds', 'Sounds', 'Reward chimes', s.sounds)}
     ${tg('haptics', 'Vibration', 'Where supported', s.haptics)}
   </div>
+  <div class="section-title" style="font-size:16px">Look</div>
+  <div class="card">
+    <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}</div></div>
+    <div class="field"><label>Background</label><div class="seg" id="bgseg">${Theme.BACKGROUNDS.map((b) => `<button data-bg="${b.id}" class="${Theme.current().bg === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
+    <div class="field"><label>Text size</label><div class="seg" id="fsseg">${Theme.SIZES.map((b) => `<button data-fs="${b.id}" class="${Theme.current().size === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
+  </div>
+  <div class="section-title" style="font-size:16px">Coffee</div>
+  <div class="card">
+    <div class="grid2"><div class="field" style="margin:0"><label>Your usual cup (mg caffeine)</label><input id="p-cup" type="number" min="5" max="400" step="5" value="${Caf.cupMg()}"></div>
+    <div class="field" style="margin:0"><label>Coffee cutoff</label><input id="p-cut" type="time" value="${st.profile.caffeineCutoff}"></div></div>
+    <p class="tiny muted mt8">Luckin / Starbucks Americano ≈ 150 mg (medium). Single espresso ≈ 75 mg. Used for the “caffeine in your body” estimate.</p>
+  </div>
   <div class="section-title" style="font-size:16px">Profile</div>
   <div class="card">
     <div class="grid2"><div class="field" style="margin:0"><label>Name</label><input id="p-name" value="${UI.esc(st.profile.name)}"></div><div class="field" style="margin:0"><label>Age</label><input id="p-age" type="number" value="${st.profile.age}"></div></div>
@@ -231,12 +276,12 @@ function settings() {
     <button class="btn block mt12" data-saveprofile>Save profile</button>
   </div>
   <div class="section-title" style="font-size:16px">Privacy</div>
-  <div class="notice">All data is stored only in this browser on this iPhone. Nothing is uploaded. If you delete Safari website data or the Home Screen app, your data is gone. You chose no backups; a manual export is here just in case.</div>
+  <div class="notice">${Cloud.status.user ? 'Your data lives on this device and syncs to your own private Supabase project while you’re signed in.' : 'Your data lives only on this device. Nothing is uploaded unless you sign in to sync. If you uninstall the app or clear site data, it’s gone — export a file now and then to be safe.'}</div>
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
   <a class="list-item mt12" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
-  <p class="tiny faint mt16" style="text-align:center">Revive 2.0 · not medical advice</p>`;
+  <p class="tiny faint mt16" style="text-align:center">Revive 3.0 · not medical advice</p>`;
 }
 
 function install() {
@@ -382,6 +427,16 @@ export function bind(root, parts, { rerender }) {
       try { if (!(await ICS.shareICS(list))) UI.toast('Sharing not supported — open Revive in Safari and try again', '⚠️'); else G.award('reminders_setup', 30, null); } catch (e) {}
     };
   }
+  if (sub === 'prayer') {
+    const pr = () => (st.prayer = st.prayer || {});
+    const set = (patch) => { Object.assign(pr(), patch); S.save(); rerender(); };
+    root.querySelector('[data-prayeron]').onclick = () => { set({ enabled: !Pr.settings().enabled }); if (Pr.settings().enabled) G.award('prayer_setup', 15, null); };
+    root.querySelector('#pr-city').onchange = (e) => set({ city: e.target.value });
+    root.querySelector('#pr-method').onchange = (e) => set({ method: e.target.value });
+    root.querySelectorAll('[data-asr]').forEach((b) => b.onclick = () => set({ asr: b.dataset.asr }));
+    root.querySelectorAll('[data-ram]').forEach((b) => b.onclick = () => set({ ramadan: b.dataset.ram }));
+    ['lat', 'lng', 'tz'].forEach((k) => { const el = root.querySelector('#pr-' + k); if (el) el.onchange = () => { const v = +el.value; const ok = k === 'lat' ? Math.abs(v) <= 66 : k === 'lng' ? Math.abs(v) <= 180 : Math.abs(v) <= 14; if (Number.isFinite(v) && ok) set({ [k]: v }); else { UI.toast('That value looks off', '⚠️'); el.value = Pr.settings()[k]; } }; });
+  }
   if (sub === 'settings') {
     root.querySelectorAll('[data-set]').forEach((b) => b.onclick = () => { const k = b.dataset.set; st.settings[k] = !st.settings[k]; S.save(); b.classList.toggle('on'); });
     root.querySelector('[data-lock]').onclick = async () => {
@@ -394,6 +449,12 @@ export function bind(root, parts, { rerender }) {
       p.weeklyBudget = +root.querySelector('#p-b').value || p.weeklyBudget; p.startKg = +root.querySelector('#p-s').value || p.startKg;
       S.save(); UI.toast('Profile saved', '✅'); rerender();
     };
+    const cup = root.querySelector('#p-cup'); const cut = root.querySelector('#p-cut');
+    cup.onchange = () => { const v = Math.round(+cup.value); if (v >= 5 && v <= 400) { st.profile.cupMg = v; S.save(); UI.toast('Cup size saved', '☕'); } else cup.value = Caf.cupMg(); };
+    cut.onchange = () => { if (/^\d{2}:\d{2}$/.test(cut.value)) { st.profile.caffeineCutoff = cut.value; S.save(); UI.toast('Cutoff saved', '☕'); } };
+    root.querySelectorAll('[data-accent]').forEach((b) => b.onclick = () => { Theme.set({ accent: b.dataset.accent }); rerender(); });
+    root.querySelectorAll('[data-bg]').forEach((b) => b.onclick = () => { Theme.set({ bg: b.dataset.bg }); rerender(); });
+    root.querySelectorAll('[data-fs]').forEach((b) => b.onclick = () => { Theme.set({ size: b.dataset.fs }); rerender(); });
     root.querySelector('[data-export]').onclick = async () => {
       if (await Native.shareFile(`revive-${S.dayKey()}.json`, S.exportJSON(), 'Revive data')) return;
       const blob = new Blob([S.exportJSON()], { type: 'application/json' }); const a = document.createElement('a');

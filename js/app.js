@@ -15,15 +15,17 @@ import * as Cloud from './cloud.js';
 import * as A11y from './a11y.js';
 import { t, locale, dir } from './i18n.js';
 import { applyRemoteContent } from './content.js';
+import * as Theme from './theme.js';
 
 await Native.restoreStorage();
 document.documentElement.lang = locale; document.documentElement.dir = dir;
 S.load();
+Theme.apply();
 S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
 applyRemoteContent();
 window.addEventListener('revive:content', () => { if (applyRemoteContent()) render({ keepScroll: true }); });
-window.addEventListener('revive:remote-update', () => { if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
+window.addEventListener('revive:remote-update', () => { Theme.apply(); if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
 
 const TABS = [
   { id: 'today', label: t('tab.today'), icon: UI.ICON.home, view: Today },
