@@ -1,3 +1,6 @@
+// Kept in step with package.json by the unit tests.
+export const APP_VERSION = '6.1.0';
+
 // Cloud settings. Fill these in once your Supabase project exists (see docs/SETUP.md),
 // or paste them in the app under Me → Account → Connect project.
 // The anon key is safe to ship: row-level security keeps every user's rows private.

@@ -96,7 +96,7 @@ await test('Chinese translates every main screen', async (p) => {
   for (const h of ['today', 'cook', 'train', 'track', 'me']) {
     await go(p, h);
     const left = await p.evaluate(() => { const out = []; const w = document.createTreeWalker(document.querySelector('#screen'), NodeFilter.SHOW_TEXT); while (w.nextNode()) { const t = w.currentNode.nodeValue.trim(); if (/[A-Za-z]{4}/.test(t) && !/Revive|Wajid|Supabase|iPhone|Windows|OLED|ISNA|UTC|PHQ|XP/.test(t)) out.push(t); } return out; });
-    assert.deepEqual(left, [], `${h} still has English`);
+    assert.deepEqual(left, [], `${h} still has English: ${left.join(" / ")}`);
   }
 });
 

@@ -150,8 +150,4 @@ export const RED_FLAGS = [
   'Thoughts of harming yourself',
 ];
 
-export const CRISIS = [
-  { name: 'Emergency ambulance (China)', num: '120' },
-  { name: 'National mental health hotline (China)', num: '12356' },
-  { name: 'Beijing Psychological Crisis Center (24h)', num: '010-82951332' },
-];
+// Crisis and emergency numbers live in js/region.js so they follow the user's country.

@@ -9,12 +9,14 @@ import * as Cloud from '../cloud.js';
 import { PHOTOS } from '../data/photos.js';
 import * as ShareCard from '../sharecard.js';
 import { RECIPE, DELIVERY } from '../data/recipes.js';
-import { TIPS, RED_FLAGS, CRISIS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
+import { TIPS, RED_FLAGS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
 import { pfWeek } from './train.js';
 import * as Pr from '../prayer.js';
 import * as Caf from '../caffeine.js';
 import * as Theme from '../theme.js';
 import * as Progress from '../progress.js';
+import * as Region from '../region.js';
+import { APP_VERSION } from '../config.js';
 import { LANGUAGES, locale, setLocale } from '../i18n.js';
 
 const LABS = [
@@ -117,8 +119,9 @@ function main() {
     ${Native.isNative || window.reviveDesktop ? '' : item('me/install', UI.ICON.share, 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
     ${item('me/settings', UI.ICON.gear, 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
   </div>
-  <div class="card danger"><div class="kicker">Emergency (China)</div>
-    <p class="small">Call <b>120</b> for chest pain or pressure, fainting, severe breathlessness, an erection lasting more than 4 hours, or thoughts of self-harm. Mental health hotline <b>12356</b>.</p></div>`;
+  <div class="card danger"><div class="kicker">Emergency (${Region.region().label})</div>
+    <p class="small"><span>Call</span> <b>${Region.region().ambulance}</b> <span>for chest pain or pressure, fainting, severe breathlessness, an erection lasting more than 4 hours, or thoughts of self-harm.</span></p>
+    ${Region.region().crisis.slice(1).map((c) => `<a class="list-item" href="tel:${c.num.replace(/[^0-9]/g, '')}"><div class="li-ico">${UI.ICON.phone}</div><div class="grow"><b>${c.num}</b><div class="muted small">${UI.esc(c.name)}</div></div></a>`).join('')}</div>`;
 }
 
 function medical() {
@@ -140,7 +143,7 @@ function medical() {
 
   <div class="card"><div class="kicker">Supplements — what’s worth it</div>
     <div class="small" style="line-height:1.6">Vitamin D / B12 — if a test or diet suggests a need<br>Iron — only if deficiency is confirmed<br>Zinc — from food (meat, eggs, nuts); avoid high doses<br>Protein powder — optional convenience<br>“Testosterone boosters” — avoid unverified products<br>Sildenafil/tadalafil — not without a doctor, especially with your exertion symptoms</div></div>
-  <div class="card danger"><div class="kicker">Get urgent help (120) for</div>${RED_FLAGS.map((r) => `<div class="small">• ${UI.esc(r)}</div>`).join('')}</div>`;
+  <div class="card danger"><div class="kicker">Get urgent help (${Region.region().ambulance}) for</div>${RED_FLAGS.map((r) => `<div class="small">• ${UI.esc(r)}</div>`).join('')}</div>`;
 }
 
 function summary() {
@@ -297,9 +300,10 @@ function settings() {
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
   <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.me}</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
+  <button class="list-item" data-diag><div class="li-ico">${UI.ICON.list}</div><div class="grow"><b>Copy diagnostics</b><div class="muted small">Version, language and recent errors for support. No health data.</div></div></button>
   <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.share}</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.lock}</div><div class="grow"><b>Privacy policy</b></div></a>
-  <p class="tiny faint mt16" style="text-align:center">Revive 6.0 · not medical advice</p>`;
+  <p class="tiny faint mt16" style="text-align:center">Revive ${APP_VERSION.split('.').slice(0, 2).join('.')} · not medical advice</p>`;
 }
 
 function install() {
@@ -473,6 +477,14 @@ export function bind(root, parts, { rerender }) {
       p.weeklyBudget = +root.querySelector('#p-b').value || p.weeklyBudget; p.startKg = +root.querySelector('#p-s').value || p.startKg;
       S.save(); UI.toast('Profile saved', ''); rerender();
     };
+    root.querySelector('[data-diag]')?.addEventListener('click', async () => {
+      let errors = []; try { errors = JSON.parse(localStorage.getItem('revive.errors') || '[]').slice(-10); } catch (e) {}
+      const info = { app: 'Revive', version: APP_VERSION, schema: S.SCHEMA_VERSION, locale: document.documentElement.lang, region: Region.regionCode(),
+        platform: Native.isNative ? 'native' : window.reviveDesktop ? 'desktop' : 'web', userAgent: navigator.userAgent,
+        storageKB: Math.round((localStorage.getItem('revive.v1') || '').length / 1024), daysLogged: Object.keys(st.days).length, errors };
+      const text = JSON.stringify(info, null, 2);
+      try { await navigator.clipboard.writeText(text); UI.toast('Diagnostics copied'); } catch (e) { UI.openSheet(`<h2>Diagnostics</h2><textarea rows="12" readonly>${UI.esc(text)}</textarea>`); }
+    });
     root.querySelectorAll('[data-lang]').forEach((b) => b.onclick = () => { if (b.dataset.lang === locale) return; S.get().settings.locale = b.dataset.lang; S.saveNow(); setLocale(b.dataset.lang); location.reload(); });
     const cup = root.querySelector('#p-cup'); const cut = root.querySelector('#p-cut');
     cup.onchange = () => { const v = Math.round(+cup.value); if (v >= 5 && v <= 400) { st.profile.cupMg = v; S.save(); UI.toast('Cup size saved', ''); } else cup.value = Caf.cupMg(); };

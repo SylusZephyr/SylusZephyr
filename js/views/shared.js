@@ -3,7 +3,8 @@ import * as S from '../store.js';
 import * as UI from '../ui.js';
 import * as G from '../gamify.js';
 import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
-import { CHECKINS, scoreCheckin, CRISIS } from '../data/content.js';
+import { CHECKINS, scoreCheckin } from '../data/content.js';
+import * as Region from '../region.js';
 import { currentSlot, SLOT_LABEL, SLOT_EMOJI } from '../plan.js';
 import { searchLocal, searchOnline, forPortion, lookupBarcode } from '../nutrition.js';
 import { scanBarcode } from '../scanner.js';
@@ -211,10 +212,10 @@ export function checkinSheet(type, onDone) {
         S.save(); G.award(`checkin_${type}_${wk}`, 40, ev, { once: true }); G.checkBadges(); close();
         if (type === 'mood' && score.flag) {
           UI.openSheet(`<h2>Thanks for being honest </h2><p class="muted mt8">Your answers suggest worry or low mood has been bothering you a fair amount. That is common, and it is treatable — please mention it at your next doctor visit (it is already on your question list).</p>
-            <div class="card mt12"><div class="kicker">If you ever feel unsafe or in crisis</div>${CRISIS.map((c) => `<a class="list-item" href="tel:${c.num.replace(/[^0-9]/g, '')}"><div class="li-ico">${UI.ICON.phone}</div><div class="grow"><b>${c.num}</b><div class="muted small">${UI.esc(c.name)}</div></div></a>`).join('')}</div>
+            <div class="card mt12"><div class="kicker">If you ever feel unsafe or in crisis</div>${Region.region().crisis.map((c) => `<a class="list-item" href="tel:${c.num.replace(/[^0-9]/g, '')}"><div class="li-ico">${UI.ICON.phone}</div><div class="grow"><b>${c.num}</b><div class="muted small">${UI.esc(c.name)}</div></div></a>`).join('')}</div>
             <button class="btn block mt8" data-ok>OK</button>`, { onMount: (s2, c2) => s2.querySelector('[data-ok]').onclick = c2 });
         } else if (type === 'energy' && score.redFlag) {
-          UI.openSheet(`<h2>Exertion symptoms noted </h2><p class="muted mt8">You reported dizziness, breathlessness or chest discomfort during effort this week. Please get this checked soon and avoid strenuous activity until you have. If you have chest pain or pressure now, fainting or severe breathlessness, call <b>120</b>.</p><button class="btn block mt16" data-ok>I understand</button>`, { onMount: (s2, c2) => s2.querySelector('[data-ok]').onclick = c2 });
+          UI.openSheet(`<h2>Exertion symptoms noted </h2><p class="muted mt8">You reported dizziness, breathlessness or chest discomfort during effort this week. Please get this checked soon and avoid strenuous activity until you have. If you have chest pain or pressure now, fainting or severe breathlessness, call <b>${Region.region().ambulance}</b>.</p><button class="btn block mt16" data-ok>I understand</button>`, { onMount: (s2, c2) => s2.querySelector('[data-ok]').onclick = c2 });
         } else UI.toast('Check-in saved', def.e);
         onDone && onDone();
       };

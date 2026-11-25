@@ -148,6 +148,24 @@ await test('migration 2 → 3 drops retired coins, chests and quests', () => {
   assert.ok(!('quests' in out.days['2026-01-01']) && out.days['2026-01-01'].checks.breakfast);
 });
 
+await test('emergency numbers follow the region', async () => {
+  const R = await import('../js/region.js');
+  const st = S.get(); const keep = st.prayer;
+  st.prayer = { city: 'lahore' }; assert.equal(R.region().ambulance, '1122');
+  st.prayer = { city: 'hongkong' }; assert.equal(R.region().ambulance, '999');
+  st.prayer = { city: 'beijing' }; assert.equal(R.region().ambulance, '120');
+  st.prayer = { city: 'custom', tz: 5 }; assert.equal(R.regionCode(), 'PK');
+  st.prayer = keep;
+});
+
+await test('app version matches package.json everywhere', async () => {
+  const { readFileSync } = await import('node:fs');
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
+  const desk = JSON.parse(readFileSync(new URL('../desktop/package.json', import.meta.url)));
+  const { APP_VERSION } = await import('../js/config.js');
+  assert.equal(APP_VERSION, pkg.version); assert.equal(desk.version, pkg.version);
+});
+
 const { merge } = await import('../js/sync.js');
 await test('same day from two windows merges field by field', async () => {
   const { mergeDay } = await import('../js/sync.js');
