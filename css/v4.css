@@ -377,3 +377,6 @@ html[lang="ur"] h1, html[lang="ur"] h2, html[lang="ur"] h3 { line-height: 1.6; l
 .meal-dots { display: flex; flex-direction: column-reverse; gap: 4px; align-items: center; margin-bottom: 6px; }
 .meal-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface3); display: block; }
 .meal-dots i.on { background: var(--green); }
+
+/* Long lists: let the browser skip layout and paint for cards that are off screen. */
+.recipe-grid .rcard, .card.deliv, .library-list .card { content-visibility: auto; contain-intrinsic-size: auto 210px; }

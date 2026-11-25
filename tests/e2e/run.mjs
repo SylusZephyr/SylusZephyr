@@ -159,6 +159,20 @@ await test('Two windows open at once never lose each other’s entries', async (
   await q.close();
 });
 
+await test('Stays fast with three years of history', async (p) => {
+  await ready(p);
+  const kb = await p.evaluate(() => { const S = window.__revive.S; const st = S.get(); st.createdAt = Date.now() - 1100 * 864e5;
+    for (let i = 0; i < 1095; i++) { const d = S.day(S.addDays(S.dayKey(), -i)); d.meals = Array.from({ length: 5 }, (_, j) => ({ id: `${i}-${j}`, slot: 'lunch', name: 'Chicken wrap', kcal: 500, protein: 30, time: '13:00' })); d.checks = { breakfast: true, lunch: true, dinner: true }; d.energy = 3; d.mood = 3; d.sleep = { bed: '00:30', wake: '08:30' }; d.coffee = ['09:00']; d.waterMl = 2000; }
+    S.saveNow(); return Math.round(localStorage.getItem('revive.v1').length / 1024); });
+  assert.ok(kb < 2500, `stored ${kb} KB`);
+  await p.reload(); await p.waitForSelector('.t-head');
+  const cdp = await p.context().newCDPSession(p); await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  for (const h of ['today', 'cook', 'train', 'track', 'me']) {
+    const ms = await p.evaluate(async (h) => { const t = performance.now(); location.hash = h; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return performance.now() - t; }, h);
+    assert.ok(ms < 500, `${h} took ${Math.round(ms)} ms on a slow phone`);
+  }
+});
+
 await test('A screen error shows recovery instead of a blank app', async (p) => {
   await ready(p);
   await p.evaluate(() => { window.__revive.S.day().meals = null; window.__revive.render(); });

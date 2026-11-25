@@ -139,9 +139,11 @@ export function next(now = new Date()) {
 }
 
 // Hijri month from the browser's Umm al-Qura calendar (no network needed).
+let hijriFmt = null;
 export function hijri(date = new Date()) {
   try {
-    const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(date);
+    hijriFmt = hijriFmt || new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' });
+    const parts = hijriFmt.formatToParts(date);
     const g = (type) => +parts.find((p) => p.type === type)?.value;
     const day = g('day'), month = g('month'), year = g('year');
     if (!month) return null;

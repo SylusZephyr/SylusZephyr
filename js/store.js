@@ -30,9 +30,12 @@ export function prettyTime(hhmm) {
   return `${h}:${pad(m)}${ap}`;
 }
 export const uiLocale = () => { const l = (typeof document !== 'undefined' && document.documentElement.lang) || 'en'; return l === 'en' ? 'en-GB' : l === 'zh' ? 'zh-CN' : l === 'ur' ? 'ur-PK' : l; };
+// Creating a date formatter is expensive; screens format hundreds of dates, so reuse them.
+const fmtCache = new Map();
 export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'numeric' }) {
-  const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'en';
-  return keyToDate(k).toLocaleDateString(lang === 'en' ? 'en-GB' : lang === 'zh' ? 'zh-CN' : lang === 'ur' ? 'ur-PK' : lang, opts);
+  const loc = uiLocale(); const key = loc + JSON.stringify(opts);
+  let f = fmtCache.get(key); if (!f) { f = new Intl.DateTimeFormat(loc, opts); fmtCache.set(key, f); }
+  return f.format(keyToDate(k));
 }
 
 export const SCHEMA_VERSION = 3;
