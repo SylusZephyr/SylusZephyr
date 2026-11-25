@@ -42,7 +42,8 @@ textarea {
 }
 input:focus,
 select:focus,
-textarea:focus { border-color: var(--a1); }
+textarea:focus { border-color: color-mix(in srgb, var(--a1) 55%, var(--line2)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--a1) 16%, transparent); }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
 h1,
 h2,
 h3 { margin: 0; }
@@ -186,7 +187,7 @@ a { color: var(--blue); }
 .cookmode .timer { font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; }
 
 /* ---------- Sheet / modal ---------- */
-.sheet-backdrop { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,0.55); animation: fadeIn2 .2s; }
+.sheet-backdrop { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,0.72); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: fadeIn2 .2s; }
 @keyframes fadeIn2 { from { opacity: 0; } to { opacity: 1; } }
 .sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 121; max-height: 92vh; overflow-y: auto;
@@ -660,7 +661,8 @@ textarea { background: var(--surface2); border-radius: 10px; }
 .searchbar { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); color: var(--muted); }
 .searchbar svg { width: 18px; height: 18px; flex: 0 0 auto; }
 .searchbar input { border: 0; background: transparent; padding: 0; height: 100%; }
-.searchbar:focus-within { border-color: var(--line2); }
+.searchbar:focus-within { border-color: color-mix(in srgb, var(--a1) 55%, var(--line2)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--a1) 16%, transparent); }
+.searchbar input:focus { box-shadow: none; }
 .badge-dot { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--coral); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 
 /* ---- Recipe carousel ---- */
@@ -896,3 +898,6 @@ button.list-item:last-child { border-bottom: 0; }
 .goals { list-style: none; margin: 10px 0 0; padding: 0; }
 .goals li { position: relative; padding-block: 6px; padding-inline: 18px 0; font-size: 15px; line-height: 1.4; }
 .goals li::before { content: ""; position: absolute; inset-inline-start: 2px; top: 14px; width: 6px; height: 6px; border-radius: 50%; background: var(--a1); }
+
+.quick-est { justify-content: space-between; gap: 8px; padding-inline: 14px; white-space: nowrap; text-align: start; }
+.quick-est span:first-child { overflow: hidden; text-overflow: ellipsis; }
