@@ -18,6 +18,7 @@ import { applyRemoteContent } from './content.js';
 import * as Theme from './theme.js';
 import * as Prayer from './prayer.js';
 import * as Progress from './progress.js';
+import { merge } from './sync.js';
 
 await Native.restoreStorage();
 await loadCatalog();
@@ -28,6 +29,15 @@ S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
 applyRemoteContent();
 window.addEventListener('revive:content', () => { if (applyRemoteContent()) render({ keepScroll: true }); });
+// Another window or tab of Revive saved. Merge instead of letting the last writer win,
+// so a meal logged in one window is never wiped out by a save from the other.
+window.addEventListener('storage', (e) => {
+  if (e.key !== S.STORAGE_KEY || !e.newValue) return;
+  let other; try { other = JSON.parse(e.newValue); } catch (err) { return; }
+  const merged = merge(S.get(), other);
+  S.replace(merged, { write: JSON.stringify(merged) !== e.newValue });
+  if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true });
+});
 window.addEventListener('revive:remote-update', () => { Theme.apply(); if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', ''); });
 
 const TABS = [

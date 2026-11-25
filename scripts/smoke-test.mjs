@@ -149,6 +149,16 @@ await test('migration 2 → 3 drops retired coins, chests and quests', () => {
 });
 
 const { merge } = await import('../js/sync.js');
+await test('same day from two windows merges field by field', async () => {
+  const { mergeDay } = await import('../js/sync.js');
+  const a = { meals: [{ id: 'm1', name: 'Oats', kcal: 500 }], waterMl: 750, checks: { breakfast: true }, coffee: ['09:00'], removedMeals: [] };
+  const b = { meals: [{ id: 'm1', name: 'Oats', kcal: 500 }, { id: 'm2', name: 'Wrap', kcal: 600 }, { id: 'm3', name: 'Gone', kcal: 1 }], waterMl: 500, checks: { lunch: true }, coffee: [], removedMeals: ['m3'], energy: 3 };
+  const m = mergeDay(a, b);
+  assert.deepEqual(m.meals.map((x) => x.id).sort(), ['m1', 'm2']);
+  assert.equal(m.waterMl, 750); assert.deepEqual(m.checks, { lunch: true, breakfast: true });
+  assert.equal(m.coffee.length, 1); assert.equal(m.energy, 3);
+});
+
 await test('sync merge never drops entries', () => {
   const a = { days: { d1: { xpToday: 10, meals: [], checks: {} } }, weights: [{ date: '2026-01-01', kg: 62 }], pf: { sessions: [{ date: 'd1', at: 1 }] }, game: { xp: 100, badges: { a: 1 } }, editedAt: 1 };
   const b = { days: { d2: { xpToday: 5, meals: [], checks: {} } }, weights: [{ date: '2026-01-08', kg: 62.3 }], pf: { sessions: [{ date: 'd2', at: 2 }] }, game: { xp: 80, badges: { b: 1 } }, editedAt: 2 };

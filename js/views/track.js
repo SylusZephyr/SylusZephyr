@@ -228,8 +228,8 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
   root.querySelectorAll('[data-delmeal]').forEach((b) => b.onclick = () => {
     const d = S.day(); const idx = d.meals.findIndex((m) => m.id === b.dataset.delmeal); if (idx < 0) return;
-    const [removed] = d.meals.splice(idx, 1); S.save(); rerender();
-    UI.undoToast(`Removed ${removed.name}`, () => { d.meals.splice(idx, 0, removed); S.save(); rerender(); });
+    const [removed] = d.meals.splice(idx, 1); d.removedMeals = [...(d.removedMeals || []), removed.id]; S.save(); rerender();
+    UI.undoToast(`Removed ${removed.name}`, () => { d.meals.splice(idx, 0, removed); d.removedMeals = (d.removedMeals || []).filter((x) => x !== removed.id); S.save(); rerender(); });
   });
   root.querySelector('[data-sleepset]')?.addEventListener('click', () => sleepSettings(rerender));
   root.querySelector('[data-earlier]')?.addEventListener('click', (ev) => {
