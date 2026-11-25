@@ -299,7 +299,7 @@ function settings() {
   <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">☁️</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
   <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
-  <p class="tiny faint mt16" style="text-align:center">Revive 4.0 · not medical advice</p>`;
+  <p class="tiny faint mt16" style="text-align:center">Revive 5.0 · not medical advice</p>`;
 }
 
 function install() {

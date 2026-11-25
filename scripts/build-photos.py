@@ -1,7 +1,7 @@
 """Turns the chosen candidate photos into small WebP files bundled with the app,
 and writes js/data/photos.js with the credits each licence requires.
 
-usage: python3 scripts/build-photos.py CANDIDATE_DIR
+usage: python3 scripts/build-photos.py CANDIDATE_DIR [MORE_DIRS ...]   (later folders win)
 picks are read from scripts/photo-picks.json  ->  { "recipe_id": candidate_index, ... }
 """
 import json, os, sys
@@ -11,16 +11,20 @@ ROOT = os.path.join(os.path.dirname(__file__), '..')
 OUT_DIR = os.path.join(ROOT, 'img', 'food')
 W, H = 720, 540  # 4:3, sharp on 3x phones at card size
 
-def main(cand_dir):
+def main(dirs):
     picks = json.load(open(os.path.join(ROOT, 'scripts', 'photo-picks.json')))
-    meta = json.load(open(os.path.join(cand_dir, 'candidates.json')))
+    meta, home = {}, {}
+    for d in dirs:
+        for rid, cands in json.load(open(os.path.join(d, 'candidates.json'))).items():
+            if cands:
+                meta[rid], home[rid] = cands, d
     os.makedirs(OUT_DIR, exist_ok=True)
     photos = {}
     for rid, n in picks.items():
         if n is None:
             continue
         info = next((c for c in meta.get(rid, []) if c['n'] == n), None)
-        src = os.path.join(cand_dir, f'{rid}__{n}.jpg')
+        src = os.path.join(home.get(rid, dirs[0]), f'{rid}__{n}.jpg')
         if not info or not os.path.exists(src):
             print('missing', rid, n); continue
         img = ImageOps.exif_transpose(Image.open(src)).convert('RGB')
@@ -40,4 +44,4 @@ def main(cand_dir):
     print(len(photos), 'photos written')
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1:])

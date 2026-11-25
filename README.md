@@ -14,7 +14,32 @@ Runs on **Android**, **Windows**, **iPhone** and the **web**, works offline, and
 - **Publishing to stores:** [docs/STORES.md](docs/STORES.md)
 - **Privacy policy:** [privacy.html](privacy.html)
 
-## What's new in 4.0
+## What's new in 5.0
+- **Three languages:** English, 简体中文 and اردو on every screen, recipe and article, with right-to-left layout for Urdu and a 24-hour clock outside English.
+- **Food logging:**
+  - barcode scan with Open Food Facts lookup
+  - My meals
+  - one-tap re-log of recent entries
+  - protein entry for custom foods
+- **Train:**
+  - position guides and an animated hold timeline
+  - a calmer session screen
+  - a weekly walking plan that levels up
+- **Progress:**
+  - weekly challenges
+  - full-screen milestone moments
+  - a monthly recap
+  - level titles that describe the stage of recovery
+- **Reminders:** they skip what is already done today, use your planned meals, and add prayer, suhoor and iftar alerts, all within the iOS limit of 64 pending notifications.
+- **Cook:**
+  - search first
+  - a swipeable ideas carousel
+  - filters in a sheet
+  - Ramadan recipes
+  - more real photos
+- **Brand and setup:** a new app icon, a custom accent colour, and a prayer-time step in setup. Sign-in stays hidden until a sync project is connected.
+
+## 4.0
 - New design system: neutral surfaces, one accent for progress, line icons, no gradients or emoji in the interface
 - Today rebuilt around three rings (essentials, calories, water), quick logging and an up-next timeline
 - Quiet feedback: no coins, chests, combos or confetti; streak and level stay

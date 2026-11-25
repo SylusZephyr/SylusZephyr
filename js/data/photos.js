@@ -78,6 +78,12 @@ export const PHOTOS = {
   "page": "https://commons.wikimedia.org/wiki/File:2020-07-17_20_00_13_A_7-Eleven_Simply_Egg_Salad_Sandwich_(lightly_seasoned_hard_boiled_eggs,_mixed_with_reduced_fat_mayonnaise_and_Dijon_mustard)_at_the_Delaware_House_Service_Area_along_Interstate_95_(Delaware_Turnpike)_in_New_Castle_County,_Delaware.jpg",
   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
  },
+ "chicken_pizza_naan": {
+  "src": "img/food/chicken_pizza_naan.webp",
+  "credit": "jeffreyw · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Qickie_pizza_on_naan_loaves_(9384449347).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
  "airfryer_chicken_curry": {
   "src": "img/food/airfryer_chicken_curry.webp",
   "credit": "Kskhh · CC BY-SA 4.0",
@@ -300,6 +306,12 @@ export const PHOTOS = {
   "page": "https://commons.wikimedia.org/wiki/File:Kachumber_Salad.JPG",
   "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
  },
+ "date_shake": {
+  "src": "img/food/date_shake.webp",
+  "credit": "Eshma P · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Milkshake_2.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
  "stuffed_peppers": {
   "src": "img/food/stuffed_peppers.webp",
   "credit": "Mark Bonica · CC BY 2.0",
@@ -359,5 +371,65 @@ export const PHOTOS = {
   "credit": "Joegoaukfishcurry2 · CC BY-SA 2.0",
   "page": "https://commons.wikimedia.org/wiki/File:Chicken_Hariyali_Kabab_(7843205634).jpg",
   "licence_url": "https://creativecommons.org/licenses/by-sa/2.0"
+ },
+ "suhoor_egg_paratha_roll": {
+  "src": "img/food/suhoor_egg_paratha_roll.webp",
+  "credit": "Vsigamany · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Mughlai_Kheema_Paratha.JPG",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "suhoor_banana_shake": {
+  "src": "img/food/suhoor_banana_shake.webp",
+  "credit": "Deepak Official Id · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Banana_Milkshake.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "iftar_date_plate": {
+  "src": "img/food/iftar_date_plate.webp",
+  "credit": "NAWARAH ALI FARAJ · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Dates_Libya_2025.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "iftar_chana_chaat": {
+  "src": "img/food/iftar_chana_chaat.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Punjabi_Chana_Chaat.JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "iftar_chicken_rolls": {
+  "src": "img/food/iftar_chicken_rolls.webp",
+  "credit": "Miansari66 · CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Spring_Rolls_(Keema_Rolls).JPG",
+  "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+ },
+ "late_kebab_rice": {
+  "src": "img/food/late_kebab_rice.webp",
+  "credit": "Boby Ortain · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chelow_Kabab,_Peter_Cat,_Park_Street,_Kolkata,_West_Bengal,_IMG_20210410_131018800.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "suhoor_oats_dates": {
+  "src": "img/food/suhoor_oats_dates.webp",
+  "credit": "Personal Creations · CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Oatmeal_dates_seeds_nuts_in_bowls_with_a_measuring_scoop_and_a_pitcher_on_a_wood_table_(16271536081).jpg",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0"
+ },
+ "iftar_pakora": {
+  "src": "img/food/iftar_pakora.webp",
+  "credit": "Kay 2015 · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Onion_Pakora_or_peaji.JPG",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "iftar_haleem_cheat": {
+  "src": "img/food/iftar_haleem_cheat.webp",
+  "credit": "Chandu7299 · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Haleem_hyderabadi.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "rooh_afza_milk": {
+  "src": "img/food/rooh_afza_milk.webp",
+  "credit": "Shumayla Zafri · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Sweet_lassi_with_roohafza.JPG",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
  }
 };
