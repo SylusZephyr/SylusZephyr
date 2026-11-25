@@ -7,6 +7,7 @@ import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
 import { INGREDIENTS, ING, ING_CATS } from '../data/ingredients.js';
 import * as Pr from '../prayer.js';
 import { PHOTOS } from '../data/photos.js';
+import { morph } from '../morph.js';
 
 const filt = { feel: null, mins: null, budget: null, slot: null, q: '', cat: 'all' };
 
@@ -58,7 +59,7 @@ export function art(r, { eager = false } = {}) {
 
 function recipeCard(r) {
   const fav = S.get().favorites.includes(r.id); const a = art(r);
-  return `<a class="rcard" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? `<span class="fav" style="color:var(--coral)">${UI.ICON.heartFill}</span>` : ''}${methodPill(r.method)}</div>
+  return `<a class="rcard" data-key="r-${r.id}" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? `<span class="fav" style="color:var(--coral)">${UI.ICON.heartFill}</span>` : ''}${methodPill(r.method)}</div>
     <div class="body"><div class="name">${UI.esc(r.name)}</div><div class="meta">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div></div></a>`;
 }
 
@@ -125,7 +126,7 @@ function filterSheet(rerender) {
         sh.querySelector('[data-reset-f]').onclick = () => { Object.assign(filt, { slot: null, feel: null, mins: null, budget: null }); redraw(); };
         sh.querySelector('[data-apply]').onclick = () => { close(); rerender(); };
       };
-      const redraw = () => { const keep = sh.querySelector('.grabber'); sh.innerHTML = ''; sh.appendChild(keep); sh.insertAdjacentHTML('beforeend', draw()); wire(); UI.haptic(6); };
+      const redraw = () => { morph(sh, sh.querySelector('.grabber').outerHTML + draw()); wire(); UI.haptic(6); };
       wire();
     },
     onClose: rerender,
@@ -217,7 +218,7 @@ function cookMode(r, rerender) {
       const paintTimer = () => {
         const s = r.steps[i]; const el = w.querySelector('#cm-timer');
         if (!s.timer) { el.innerHTML = ''; return; }
-        el.innerHTML = `<div class="timer">${fmtT(remaining)}</div><div class="row" style="justify-content:center;gap:10px"><button class="btn ${running ? '' : 'primary'}" data-tt>${running ? 'Pause' : '▶ Start timer'}</button><button class="btn" data-tr>↺</button></div>`;
+        morph(el, `<div class="timer">${fmtT(remaining)}</div><div class="row" style="justify-content:center;gap:10px"><button class="btn ${running ? '' : 'primary'}" data-tt>${running ? 'Pause' : 'Start timer'}</button><button class="btn" data-tr>${UI.ICON.refresh}</button></div>`);
         el.querySelector('[data-tt]').onclick = () => { if (running) stop(); else start(); paintTimer(); };
         el.querySelector('[data-tr]').onclick = () => { stop(); remaining = s.timer; paintTimer(); };
       };
@@ -266,7 +267,7 @@ export function bind(root, parts, { rerender }) {
     q.addEventListener('input', () => {
       filt.q = q.value; const grid = root.querySelector('#rgrid'); const ql = filt.q.toLowerCase();
       const list = RECIPES.filter((r) => !ql || r.name.toLowerCase().includes(ql) || r.ing.some((i) => ING[i.id]?.name.toLowerCase().includes(ql)) || r.tags.join(' ').includes(ql));
-      grid.innerHTML = list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1"><span class="e"></span>Nothing found</div>';
+      morph(grid, list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1">Nothing found</div>');
     });
   }
   if (sub === 'r') {

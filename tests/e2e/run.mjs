@@ -69,6 +69,20 @@ await test('Today: water with undo, essentials, meal and drink logging', async (
   assert.ok(await p.$('.caf-card'), 'caffeine card shows after a drink');
 });
 
+await test('Re-rendering updates in place: nodes, focus and handlers survive', async (p) => {
+  await ready(p);
+  const before = await p.evaluate(() => { window.__keep = document.querySelector('#screen .card'); return !!window.__keep; });
+  assert.ok(before);
+  for (let i = 0; i < 5; i++) await p.evaluate(() => window.__revive.render({ keepScroll: true }));
+  assert.equal(await p.evaluate(() => window.__keep.isConnected), true, 'unchanged cards are kept, not rebuilt');
+  await p.click('[data-water]'); await clear(p);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().waterMl), 250, 'one tap logs once after repeated renders');
+  await go(p, 'cook/pantry');
+  await p.click('#pan-q'); await p.keyboard.type('chick', { delay: 30 });
+  assert.equal(await p.evaluate(() => document.activeElement?.id), 'pan-q', 'search keeps focus while results update');
+  assert.equal(await p.inputValue('#pan-q'), 'chick');
+});
+
 await test('Cook: filters, categories, recipe and cook mode', async (p) => {
   await ready(p); await go(p, 'cook');
   await p.click('[data-filters]'); await p.click('[data-feel="tired"]'); await p.click('[data-apply]'); await p.waitForTimeout(250);
