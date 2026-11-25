@@ -108,14 +108,14 @@ function main() {
   <button class="card" data-recap style="display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left"><span><b>Monthly recap</b><div class="small muted">${Progress.monthData(Progress.lastMonthKey()).label}</div></span><span class="chev">${UI.ICON.chev}</span></button>
   <a class="card" href="#me/badges" style="display:flex;align-items:center;justify-content:space-between;color:inherit;text-decoration:none"><span><b>Milestones</b><div class="small muted">${nb} of ${G.BADGES.length} reached</div></span><span class="chev">${UI.ICON.chev}</span></a>
   <div class="card tight">
-    ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', Cloud.status.user ? '' : '', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
-    ${item('me/medical', '', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
-    ${item('me/summary', '', 'Doctor summary', 'One-page report of your last 4 weeks')}
-    ${item('me/reminders', '', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
-    ${item('me/prayer', '', 'Prayer times & Ramadan', Pr.settings().enabled ? `<span>${UI.esc(Pr.settings().cityName)}</span> · <span>${Pr.fasting() ? 'Fasting mode on' : Pr.next().label}</span> <span>${S.prettyTime(Pr.next().clock)}</span>` : 'Off · offline, no location needed')}
-    ${item('me/saved', '', 'Library', `${TIPS.length} short reads · ${st.savedTips.length} saved`)}
-    ${Native.isNative || window.reviveDesktop ? '' : item('me/install', '', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
-    ${item('me/settings', '', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
+    ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', UI.ICON.me, Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
+    ${item('me/medical', UI.ICON.doctor, 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
+    ${item('me/summary', UI.ICON.list, 'Doctor summary', 'One-page report of your last 4 weeks')}
+    ${item('me/reminders', UI.ICON.clock, 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
+    ${item('me/prayer', UI.ICON.crescent, 'Prayer times & Ramadan', Pr.settings().enabled ? `<span>${UI.esc(Pr.settings().cityName)}</span> · <span>${Pr.fasting() ? 'Fasting mode on' : Pr.next().label}</span> <span>${S.prettyTime(Pr.next().clock)}</span>` : 'Off · offline, no location needed')}
+    ${item('me/saved', UI.ICON.bookmark, 'Library', `${TIPS.length} short reads · ${st.savedTips.length} saved`)}
+    ${Native.isNative || window.reviveDesktop ? '' : item('me/install', UI.ICON.share, 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
+    ${item('me/settings', UI.ICON.gear, 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
   </div>
   <div class="card danger"><div class="kicker">Emergency (China)</div>
     <p class="small">Call <b>120</b> for chest pain or pressure, fainting, severe breathlessness, an erection lasting more than 4 hours, or thoughts of self-harm. Mental health hotline <b>12356</b>.</p></div>`;
@@ -133,10 +133,10 @@ function medical() {
   <div class="card tight">${m.questions.map((q) => `<div class="check ${q.done ? 'done' : ''}"><button class="box" data-q="${q.id}" aria-label="Asked">${UI.ICON.check}</button><span class="label small" style="font-weight:500">${UI.esc(q.q)}</span><button class="faint" data-delq="${q.id}" aria-label="Delete" style="padding:6px">${UI.ICON.trash.replace('<svg', '<svg width="16" height="16"')}</button></div>`).join('')}</div>
 
   <div class="section-title">Visits <button class="link" data-addvisit>+ Add</button></div>
-  <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico"></div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small" style="white-space:pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">No visits logged</div>'}</div>
+  <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico">${UI.ICON.doctor}</div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small" style="white-space:pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">No visits logged</div>'}</div>
 
   <div class="section-title">Lab results <button class="link" data-addlab>+ Add</button></div>
-  <div class="card tight">${m.labs.length ? [...m.labs].sort((a, b) => b.date.localeCompare(a.date)).map((l) => `<div class="list-item"><div class="li-ico"></div><div class="grow"><b>${UI.esc(l.name)}: ${UI.esc(l.value)} ${UI.esc(l.unit)}</b><div class="muted small">${S.prettyDate(l.date)}${l.ref ? ` · typical ${UI.esc(l.ref)}` : ''}</div></div><button class="icon-btn" data-dellab="${l.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">Add results when you get them. Ranges are typical guides — labs differ, your doctor interprets them.</div>'}</div>
+  <div class="card tight">${m.labs.length ? [...m.labs].sort((a, b) => b.date.localeCompare(a.date)).map((l) => `<div class="list-item"><div class="li-ico">${UI.ICON.pulse}</div><div class="grow"><b>${UI.esc(l.name)}: ${UI.esc(l.value)} ${UI.esc(l.unit)}</b><div class="muted small">${S.prettyDate(l.date)}${l.ref ? ` · typical ${UI.esc(l.ref)}` : ''}</div></div><button class="icon-btn" data-dellab="${l.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">Add results when you get them. Ranges are typical guides — labs differ, your doctor interprets them.</div>'}</div>
 
   <div class="card"><div class="kicker">Supplements — what’s worth it</div>
     <div class="small" style="line-height:1.6">Vitamin D / B12 — if a test or diet suggests a need<br>Iron — only if deficiency is confirmed<br>Zinc — from food (meat, eggs, nuts); avoid high doses<br>Protein powder — optional convenience<br>“Testosterone boosters” — avoid unverified products<br>Sildenafil/tadalafil — not without a doctor, especially with your exertion symptoms</div></div>
@@ -246,7 +246,7 @@ function prayer() {
   <div class="card"><div class="row between"><div class="kicker"><span>Today</span> · <span>${UI.esc(cfg.cityName)}</span></div><span class="small" style="font-weight:700"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
     ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span style="font-weight:800">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
     <p class="tiny muted mt8">If your local mosque’s timetable differs, follow the mosque.</p></div>
-  <div class="section-title" style="font-size:16px">Ramadan fasting mode</div>
+  <div class="section-title">Ramadan fasting mode</div>
   <div class="card">
     <p class="small muted">${dtr === 0 ? `It’s Ramadan${hj ? ` (day ${hj.day})` : ''}. Ramadan Mubarak ` : dtr ? `Ramadan starts in about <b>${dtr} days</b> (dates depend on the moon sighting).` : ''} Fasting mode moves your meals to suhoor and iftar, spreads water between iftar and dawn, and swaps the coffee rule for “none in the 6 h before bed”.</p>
     <div class="seg mt12" id="pr-ram">${[['auto', 'Auto in Ramadan'], ['on', 'On now'], ['off', 'Off']].map(([v, l]) => `<button data-ram="${v}" class="${cfg.ramadan === v ? 'on' : ''}">${l}</button>`).join('')}</div>
@@ -270,35 +270,35 @@ function settings() {
     ${tg('sounds', 'Sounds', 'Reward chimes', s.sounds)}
     ${tg('haptics', 'Vibration', 'Where supported', s.haptics)}
   </div>
-  <div class="section-title" style="font-size:16px">Language</div>
+  <div class="section-title">Language</div>
   <div class="card"><div class="seg lang-pick" data-no-tr>${LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${locale === l.code ? 'on' : ''}" lang="${l.code}">${l.native}</button>`).join('')}</div></div>
-  <div class="section-title" style="font-size:16px">Look</div>
+  <div class="section-title">Look</div>
   <div class="card">
     <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
       <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''}" style="cursor:pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" style="position:absolute;opacity:0;width:1px;height:1px" aria-label="Pick a custom accent colour"></label></div></div>
     <div class="field"><label>Background</label><div class="seg" id="bgseg">${Theme.BACKGROUNDS.map((b) => `<button data-bg="${b.id}" class="${Theme.current().bg === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
     <div class="field"><label>Text size</label><div class="seg" id="fsseg">${Theme.SIZES.map((b) => `<button data-fs="${b.id}" class="${Theme.current().size === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
   </div>
-  <div class="section-title" style="font-size:16px">Coffee</div>
+  <div class="section-title">Coffee</div>
   <div class="card">
     <div class="grid2"><div class="field" style="margin:0"><label>Your usual cup (mg caffeine)</label><input id="p-cup" type="number" min="5" max="400" step="5" value="${Caf.cupMg()}"></div>
     <div class="field" style="margin:0"><label>Coffee cutoff</label><input id="p-cut" type="time" value="${st.profile.caffeineCutoff}"></div></div>
     <p class="tiny muted mt8">Luckin / Starbucks Americano ≈ 150 mg (medium). Single espresso ≈ 75 mg. Used for the “caffeine in your body” estimate.</p>
   </div>
-  <div class="section-title" style="font-size:16px">Profile</div>
+  <div class="section-title">Profile</div>
   <div class="card">
     <div class="grid2"><div class="field" style="margin:0"><label>Name</label><input id="p-name" value="${UI.esc(st.profile.name)}"></div><div class="field" style="margin:0"><label>Age</label><input id="p-age" type="number" value="${st.profile.age}"></div></div>
     <div class="grid2"><div class="field"><label>Height (cm)</label><input id="p-h" type="number" value="${st.profile.heightCm}"></div><div class="field"><label>Water goal (ml)</label><input id="p-w" type="number" step="250" value="${st.profile.waterGoalMl}"></div></div>
     <div class="grid2"><div class="field"><label>Weekly food budget (¥)</label><input id="p-b" type="number" value="${st.profile.weeklyBudget}"></div><div class="field"><label>Start weight (kg)</label><input id="p-s" type="number" step="0.1" value="${st.profile.startKg}"></div></div>
     <button class="btn block mt12" data-saveprofile>Save profile</button>
   </div>
-  <div class="section-title" style="font-size:16px">Privacy</div>
+  <div class="section-title">Privacy</div>
   <div class="notice">${Cloud.status.user ? 'Your data lives on this device and syncs to your own private Supabase project while you’re signed in.' : 'Your data lives only on this device. Nothing is uploaded unless you sign in to sync. If you uninstall the app or clear site data, it’s gone — export a file now and then to be safe.'}</div>
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
-  <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico"></div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
-  <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico"></div><div class="grow"><b>Photo credits</b></div></a>
-  <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico"></div><div class="grow"><b>Privacy policy</b></div></a>
+  <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.me}</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
+  <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.share}</div><div class="grow"><b>Photo credits</b></div></a>
+  <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.lock}</div><div class="grow"><b>Privacy policy</b></div></a>
   <p class="tiny faint mt16" style="text-align:center">Revive 5.0 · not medical advice</p>`;
 }
 

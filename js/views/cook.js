@@ -150,50 +150,55 @@ function detail(r) {
 
   <div class="section-title">Ingredients ${missing.length ? `<button class="link" data-addmissing>+ Add ${missing.length} to list</button>` : '<span class="pill green">All in pantry</span>'}</div>
   <div class="card">${r.ing.map((i) => { const g = ING[i.id]; const have = pantry.has(i.id); return `<button class="ing ${have ? 'have' : ''}" data-toggle="${i.id}" style="width:100%;text-align:left">
-    <span class="e">${g.e}</span><div class="grow"><div class="name" style="font-weight:600">${UI.esc(g.name)} ${i.opt ? '<span class="muted small">(optional)</span>' : ''}</div><div class="zh">${UI.esc(g.zh)}</div></div><div class="muted small">${UI.esc(i.q)}</div></button>`; }).join('')}
-    <p class="tiny faint mt8">Tap an ingredient to mark it as in/out of your pantry. Chinese names help when shopping on Hema/Taobao.</p></div>
+    <span class="have-dot" aria-hidden="true">${have ? UI.ICON.check : ''}</span><div class="grow"><div class="name">${UI.esc(g.name)} ${i.opt ? '<span class="muted small">(optional)</span>' : ''}</div><div class="zh">${UI.esc(g.zh)}</div></div><div class="muted small">${UI.esc(i.q)}</div></button>`; }).join('')}
+    <p class="tiny muted mt8">Tap an ingredient to mark it as in/out of your pantry. Chinese names help when shopping on Hema/Taobao.</p></div>
 
   ${(() => { const n = (st.recipeNotes || {})[r.id] || {}; return `<div class="section-title">Your verdict</div><div class="card tight">
-    <div class="row" role="group" aria-label="Your rating">${[1, 2, 3, 4, 5].map((i) => `<button class="star ${i <= (n.rating || 0) ? 'on' : ''}" data-rate="${i}" aria-label="${i} star${i > 1 ? 's' : ''}" aria-pressed="${i === n.rating}"></button>`).join('')}<span class="muted small" style="margin-left:auto">${n.rating ? ['', 'Not for me', 'Meh', 'Good', 'Great', 'Favourite'][n.rating] : 'Rate it after cooking'}</span></div>
+    <div class="row" role="group" aria-label="Your rating">${[1, 2, 3, 4, 5].map((i) => `<button class="star ${i <= (n.rating || 0) ? 'on' : ''}" data-rate="${i}" aria-label="${i} star${i > 1 ? 's' : ''}" aria-pressed="${i === n.rating}">${UI.ICON.star}</button>`).join('')}<span class="muted small" style="margin-left:auto">${n.rating ? ['', 'Not for me', 'Meh', 'Good', 'Great', 'Favourite'][n.rating] : 'Rate it after cooking'}</span></div>
     <textarea id="r-note" rows="2" class="mt8" maxlength="300" placeholder="Your notes — less chili, extra 2 minutes, add cheese…">${UI.esc(n.note || '')}</textarea></div>`; })()}
 
   ${r.vars ? `<div class="section-title">Switch it up</div><div class="card tight">${r.vars.map((v) => `<div class="small" style="padding:7px 0;border-bottom:1px solid var(--line)">${UI.esc(v)}</div>`).join('')}<p class="tiny faint mt8">Same easy method, different taste — so you never get bored.</p></div>` : ''}
 
   <div class="section-title">Steps</div>
-  <div class="card">${r.steps.map((s, i) => `<div class="step"><div class="n">${i + 1}</div><div class="grow">${UI.esc(s.t)}${s.timer ? ` <span class="pill amber">${fmtT(s.timer)}</span>` : ''}</div></div>`).join('')}</div>
+  <div class="card">${r.steps.map((s, i) => `<div class="step"><div class="n">${i + 1}</div><div class="grow">${UI.esc(s.t)}${s.timer ? ` <span class="timer-pill">${UI.ICON.clock}${fmtT(s.timer)}</span>` : ''}</div></div>`).join('')}</div>
   <div class="notice">Air fryers vary — check chicken is cooked through (no pink, juices clear). Times are for a 4–6 L basket air fryer, preheated.</div>`;
 }
 const fmtT = (s) => s >= 60 ? `${Math.floor(s / 60)}:${S.pad(s % 60)}` : `${s}s`;
 
+let panQ = '';
 function pantryView() {
-  const pantry = new Set(S.get().pantry);
-  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">My pantry</h1><div class="sub">${pantry.size} items · tap to toggle</div></div></div>
-  ${ING_CATS.map((c) => `<div class="section-title" style="font-size:16px">${c}</div><div class="chips">${INGREDIENTS.filter((i) => i.cat === c).map((i) => `<button class="chip ${pantry.has(i.id) ? 'on' : ''}" data-pan="${i.id}">${i.e} ${UI.esc(i.name)}</button>`).join('')}</div>`).join('')}
+  const pantry = new Set(S.get().pantry); const q = panQ.trim().toLowerCase();
+  const match = (i) => !q || i.name.toLowerCase().includes(q) || (i.zh || '').includes(q);
+  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">My pantry</h1><div class="sub">${pantry.size} of ${INGREDIENTS.length} items · tap to toggle</div></div></div>
+  <label class="searchbar">${UI.ICON.search}<input id="pan-q" type="search" placeholder="Find an ingredient" value="${UI.esc(panQ)}" autocomplete="off"></label>
+  ${ING_CATS.map((c) => { const list = INGREDIENTS.filter((i) => i.cat === c && match(i)); if (!list.length) return ''; const have = INGREDIENTS.filter((i) => i.cat === c && pantry.has(i.id)).length; const all = INGREDIENTS.filter((i) => i.cat === c).length;
+    return `<div class="section-title">${c}<span class="small muted">${have} of ${all}</span></div><div class="chips">${list.map((i) => `<button class="chip ${pantry.has(i.id) ? 'on' : ''}" data-pan="${i.id}">${UI.esc(i.name)}</button>`).join('')}</div>`; }).join('') || '<div class="empty">No ingredient matches.</div>'}
   <div class="grid2 mt16"><button class="btn" data-clear>Clear all</button><a class="btn primary" href="#cook">Done</a></div>`;
 }
 
 function deliveryView() {
-  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Halal delivery</h1><div class="sub">Meituan 美团 · Ele.me 饿了么</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Halal delivery</h1><div class="sub">Meituan 美团 · Ele.me 饿了么</div></div></div>
   <div class="notice mb12">Search <b>清真</b> in the app and sort by rating. Ask for <b>少盐</b> (less salt) and <b>加蛋 / 加肉</b> (extra egg / meat) for protein. Ordering still counts — eating something is the win.</div>
-  ${DELIVERY.map((d) => `<div class="card tight"><div class="row" style="align-items:flex-start"><div class="dthumb ${PHOTOS[d.id] ? 'has-photo' : ''}">${PHOTOS[d.id] ? `<img class="ph" src="${PHOTOS[d.id].src}" alt="" loading="lazy" decoding="async">` : d.emoji}</div>
-    <div class="grow"><b>${UI.esc(d.name)}</b><div class="small" style="color:var(--amber)">${UI.esc(d.zh)}</div><div class="muted small">~¥${d.cost} · ${d.kcal} kcal · ${d.protein} g protein</div></div></div>
+  ${DELIVERY.map((d) => `<div class="card tight deliv"><div class="row" style="align-items:flex-start;gap:14px"><div class="dthumb ${PHOTOS[d.id] ? 'has-photo' : 'mono-tile'}" style="--tint:${d.bg?.[0] || '#555'}">${PHOTOS[d.id] ? `<img class="ph" src="${PHOTOS[d.id].src}" alt="" loading="lazy" decoding="async">` : `<span class="mono">${UI.esc(d.name.replace(/[^A-Za-z ]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase())}</span>`}</div>
+    <div class="grow"><b>${UI.esc(d.name)}</b><div class="small muted">${UI.esc(d.zh)}</div><div class="small mt8">~¥${d.cost} · ${d.kcal} kcal · ${d.protein} g protein</div></div></div>
     <p class="small muted mt8">${UI.esc(d.tip)}</p>
-    <div class="grid2 mt8"><button class="btn sm" data-copy="${UI.esc(d.zh)}">Copy search</button><button class="btn sm primary" data-ate-del="${d.id}">I ate this</button></div></div>`).join('')}`;
+    <div class="row mt12" style="gap:8px"><button class="btn sm grow" data-copy="${UI.esc(d.zh)}">Copy search</button><button class="btn sm grow" data-ate-del="${d.id}">${UI.ICON.check}<span>I ate this</span></button></div></div>`).join('')}`;
 }
 
 function shopView() {
   const st = S.get(); st.shopping = st.shopping || [];
   const items = st.shopping.map((x) => ({ ...x, g: ING[x.id] })).filter((x) => x.g);
-  const total = items.filter((x) => !x.done).reduce((s, x) => s + x.g.price, 0);
-  const weekly = st.profile.weeklyBudget;
-  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Shopping list</h1><div class="sub">~¥${total} remaining · budget ¥${weekly}/week</div></div></div>
-  ${total > weekly ? '<div class="notice mb12" style="color:var(--coral)">This list is over your weekly budget — some items (protein powder, spices) last for weeks.</div>' : ''}
-  <div class="card">${items.length ? items.map((x) => `<button class="check ${x.done ? 'done' : ''}" data-shop="${x.id}" style="width:100%;text-align:left"><span class="box">${UI.ICON.check}</span><span class="emoji">${x.g.e}</span><span class="label">${UI.esc(x.g.name)}<div class="zh muted small">${UI.esc(x.g.zh)} · ${x.g.unit}</div></span><span class="muted small">¥${x.g.price}</span></button>`).join('')
-    : '<div class="empty"><span class="e"></span>Empty. Add missing ingredients from any recipe.</div>'}</div>
-  <div class="section-title" style="font-size:16px">Always-stocked essentials</div>
-  <div class="chips">${['eggs', 'cooked_chicken', 'shouzhuabing', 'tortilla', 'yogurt', 'milk', 'banana', 'instant_rice', 'frozen_veg', 'chicken_thigh'].map((id) => `<button class="chip" data-addshop="${id}">${ING[id].e} ${UI.esc(ING[id].name)}</button>`).join('')}</div>
-  ${items.length ? '<div class="grid2 mt16"><button class="btn" data-shopclear>Clear bought</button><button class="btn primary" data-shopstock>Move bought → pantry</button></div>' : ''}
-  <div class="notice mt16">Tip: Hema 盒马 and Meituan Grocery 美团买菜 deliver in ~30 min. Search the Chinese names above.</div>`;
+  const left = items.filter((x) => !x.done); const total = left.reduce((a, x) => a + x.g.price, 0);
+  const weekly = st.profile.weeklyBudget; const bought = items.length - left.length;
+  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Shopping list</h1><div class="sub">~¥${total} remaining · budget ¥${weekly}/week</div></div></div>
+  ${items.length ? `<div class="card tight"><div class="row between small"><span class="muted">${bought} of ${items.length} bought</span><b>~¥${total}</b></div><div class="lvlbar mt8"><i style="width:${Math.round(bought / items.length * 100)}%;background:var(--green)"></i></div></div>` : ''}
+  ${total > weekly ? '<div class="notice mb12">This list is over your weekly budget. Spices and protein powder last for weeks, so it evens out.</div>' : ''}
+  ${items.length ? `<div class="card ess-list">${items.map((x) => `<button class="check ${x.done ? 'done' : ''}" data-shop="${x.id}" style="width:100%;text-align:left"><span class="box">${UI.ICON.check}</span><span class="label">${UI.esc(x.g.name)}<span class="zh muted small" style="display:block">${UI.esc(x.g.zh)} · ${x.g.unit}</span></span><span class="muted small">¥${x.g.price}</span></button>`).join('')}</div>`
+    : `<div class="card empty-state"><span class="es-ico">${UI.ICON.cart}</span><b>Your list is empty</b><p class="small muted">Open a recipe and tap “Add to list”, or plan your week to get one list for everything.</p><a class="btn sm mt12" href="#cook/plan">Plan your week</a></div>`}
+  <div class="section-title">Always-stocked essentials</div>
+  <div class="chips">${['eggs', 'cooked_chicken', 'shouzhuabing', 'tortilla', 'yogurt', 'milk', 'banana', 'instant_rice', 'frozen_veg', 'chicken_thigh'].map((id) => `<button class="chip" data-addshop="${id}">${UI.ICON.plus.replace('<svg', '<svg width="14" height="14"')}${UI.esc(ING[id].name)}</button>`).join('')}</div>
+  ${items.length ? '<div class="grid2 mt16"><button class="btn" data-shopclear>Clear bought</button><button class="btn primary" data-shopstock>Move bought to pantry</button></div>' : ''}
+  <div class="notice mt16">Hema 盒马 and Meituan Grocery 美团买菜 deliver in about 30 minutes. Search the Chinese names above.</div>`;
 }
 
 // ---------- Cook mode ----------
@@ -286,6 +291,8 @@ export function bind(root, parts, { rerender }) {
   }
   if (sub === 'pantry') {
     root.querySelectorAll('[data-pan]').forEach((b) => b.onclick = () => { const id = b.dataset.pan; const i = st.pantry.indexOf(id); if (i >= 0) st.pantry.splice(i, 1); else st.pantry.push(id); S.save(); b.classList.toggle('on'); UI.haptic(6); });
+    const pq = root.querySelector('#pan-q');
+    if (pq) pq.oninput = () => { panQ = pq.value; const pos = pq.selectionStart; rerender(); const n = document.querySelector('#pan-q'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } };
     root.querySelector('[data-clear]').onclick = async () => { if (await UI.confirmSheet('Clear pantry?', 'Remove all items from your pantry.', 'Clear', true)) { st.pantry = []; S.save(); rerender(); } };
   }
   if (sub === 'delivery') {
@@ -366,7 +373,7 @@ function planView() {
   ${has ? `<div class="grid3 mb12"><div class="macro"><b>¥${cost}</b><span>whole week</span></div><div class="macro"><b>${Math.round(kcal / 7)}</b><span>kcal/day</span></div><div class="macro"><b>${planIngredients().filter((id) => !st.pantry.includes(id)).length}</b><span>to buy</span></div></div>
     ${st.weekPlan.days.map((d, i) => { const k = S.addDays(wk, i); return `<div class="card tight" style="${i === todayIdx ? 'border-color:var(--line2)' : ''}">
       <div class="row between mb8"><b>${S.prettyDate(k, { weekday: 'long' })}${i === todayIdx ? ' · today' : ''}</b><span class="muted small">${PLAN_SLOTS.reduce((s, sl) => s + (RECIPE[d[sl]]?.kcal || 0), 0)} kcal</span></div>
-      ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row" style="padding:5px 0"><span style="width:22px">${P.SLOT_EMOJI[sl]}</span><a href="#cook/r/${r.id}" class="grow ellipsis" style="color:inherit;text-decoration:none">${r.emoji} ${UI.esc(r.name)}</a><button class="icon-btn" style="width:32px;height:32px" data-swap="${i}:${sl}" aria-label="Swap meal">${UI.ICON.refresh}</button></div>`; }).join('')}
+      ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row" style="padding:5px 0"><span class="slot-tag">${P.SLOT_LABEL[sl].split(' ')[0]}</span><a href="#cook/r/${r.id}" class="grow ellipsis" style="color:inherit;text-decoration:none">${r.emoji} ${UI.esc(r.name)}</a><button class="icon-btn" style="width:32px;height:32px" data-swap="${i}:${sl}" aria-label="Swap meal">${UI.ICON.refresh}</button></div>`; }).join('')}
     </div>`; }).join('')}
     <div class="grid2 mt8"><button class="btn" data-genplan>Regenerate</button><button class="btn primary" data-planshop>Shopping list</button></div>`
     : `<div class="empty"><span class="e"></span>No plan for this week yet.</div><button class="btn primary block" data-genplan>Generate my week</button>`}

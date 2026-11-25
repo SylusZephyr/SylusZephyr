@@ -337,3 +337,40 @@ html[lang="ur"] h1, html[lang="ur"] h2, html[lang="ur"] h3 { line-height: 1.6; l
 [dir="rtl"] .qk b, [dir="rtl"] .macro b, [dir="rtl"] .summary-foot b, [dir="rtl"] .ready, [dir="rtl"] .segbar + .row b, [dir="rtl"] .ww span { direction: ltr; unicode-bidi: isolate; }
 [dir="rtl"] .searchbar input, [dir="rtl"] input[type="number"], [dir="rtl"] input[type="time"] { text-align: right; }
 [dir="rtl"] .carousel { direction: rtl; }
+
+/* ---- Recipe detail ---- */
+.ing { gap: 14px; padding: 12px 2px; }
+.ing .name { font-weight: 500; }
+.ing.have .name::after { content: none; }
+.have-dot { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line2); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.ing.have .have-dot { background: var(--green); border-color: transparent; color: #04140b; }
+.have-dot svg { width: 13px; height: 13px; }
+.step .n { background: var(--surface2); color: var(--text); font-weight: 600; }
+.timer-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 8px; background: var(--surface2); font-size: 12px; font-weight: 600; color: var(--muted); vertical-align: 1px; white-space: nowrap; }
+.timer-pill svg { width: 12px; height: 12px; }
+
+/* ---- Delivery ---- */
+.deliv .dthumb { width: 64px; height: 64px; flex: 0 0 64px; border-radius: 12px; overflow: hidden; }
+.deliv .dthumb img.ph { width: 100%; height: 100%; object-fit: cover; }
+.deliv .dthumb .mono { font-size: 20px; }
+
+/* ---- Empty states ---- */
+.empty-state { text-align: center; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.empty-state .es-ico { width: 48px; height: 48px; border-radius: 14px; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); margin-bottom: 6px; }
+.empty-state .es-ico svg { width: 22px; height: 22px; }
+.empty-state p { max-width: 300px; }
+.section-title { display: flex; justify-content: space-between; align-items: baseline; }
+.chip svg { flex: 0 0 auto; }
+.star { color: var(--surface3); padding: 2px; }
+.star svg { width: 26px; height: 26px; }
+.star.on { color: var(--amber); }
+.star.on svg { fill: currentColor; }
+.slot-tag { width: 76px; flex: 0 0 76px; font-size: 12px; color: var(--muted); }
+
+/* ---- Lock screen ---- */
+.lock { background: var(--bg) !important; }
+.lock .logo { width: 64px; height: 64px; }
+.lock h2 { font-size: 20px; font-weight: 600; }
+.lock .dots i.on { background: var(--text); border-color: var(--text); }
+.keypad button { background: var(--surface); border: 1px solid var(--line); font-weight: 500; }
+.keypad button:focus-visible { outline: 2px solid var(--text); }

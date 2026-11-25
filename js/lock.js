@@ -56,7 +56,7 @@ export function showLock(onUnlock) {
   if (!st.lock.enabled) { unlocked = true; onUnlock(); return; }
   let pin = '';
   const close = UI.fullscreen(`<div class="lock">
-      <div class="logo"></div>
+      <img class="logo" src="icons/mark.svg" alt="" width="64" height="64">
       <h2>Revive is locked</h2>
       <div class="dots" id="pin-dots">${'<i></i>'.repeat(4)}</div>
       <div class="keypad">
