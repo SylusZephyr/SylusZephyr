@@ -14,6 +14,14 @@ Runs on **Android**, **Windows**, **iPhone** and the **web**, works offline, and
 - **Publishing to stores:** [docs/STORES.md](docs/STORES.md)
 - **Privacy policy:** [privacy.html](privacy.html)
 
+## What's new in 7.0
+
+- Screens update in place instead of being rebuilt, so typing, scrolling, images and animations are never interrupted.
+- One stylesheet instead of two layered ones, with the override flags removed.
+- Inter is bundled as the app typeface, so it looks the same on Windows, Android and iPhone.
+- Cleaner Today header, a single stats strip on Track, Me and recipes, and a Track heatmap that fits any screen.
+- Right-to-left fixes for Urdu, and desktop layouts keep their margins on smaller windows.
+
 ## What's new in 5.0
 - **Three languages:** English, 简体中文 and اردو on every screen, recipe and article, with right-to-left layout for Urdu and a 24-hour clock outside English.
 - **Food logging:**

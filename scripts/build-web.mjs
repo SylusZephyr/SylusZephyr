@@ -8,7 +8,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'www');
 if (existsSync(out)) rmSync(out, { recursive: true });
 mkdirSync(out);
-for (const f of ['index.html', 'manifest.webmanifest', 'privacy.html', 'css', 'js', 'icons', 'img']) {
+for (const f of ['index.html', 'manifest.webmanifest', 'privacy.html', 'css', 'js', 'icons', 'img', 'fonts']) {
   const src = join(root, f);
   if (existsSync(src)) cpSync(src, join(out, f), { recursive: true });
 }

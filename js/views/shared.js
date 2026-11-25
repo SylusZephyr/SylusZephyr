@@ -56,7 +56,7 @@ export function mealSheet(onDone, preset = {}) {
     <div class="kicker mt16">Your recipes</div>
     <div class="carousel mini">${picks.map((r) => `<button class="ccard" data-rec="${r.id}"><div class="ph-wrap ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div><div class="cc-body"><div class="cc-name">${UI.esc(r.name)}</div><div class="cc-meta">${r.kcal} kcal · ${r.protein} g</div></div></button>`).join('')}</div>
     <div class="kicker mt16">Quick estimate</div>
-    <div class="grid2">${QUICK.map((q, i) => `<button class="btn" data-quick="${i}" style="justify-content:space-between">${q.name}<span class="muted small">${q.kcal}</span></button>`).join('')}</div>
+    <div class="grid2">${QUICK.map((q, i) => `<button class="btn quick-est" data-quick="${i}"><span>${q.name}</span><span class="muted small">${q.kcal} kcal</span></button>`).join('')}</div>
     <div class="kicker mt16">Delivery (Meituan 清真)</div>
     <div class="chips">${DELIVERY.map((d) => `<button class="chip" data-del="${d.id}">${UI.esc(d.name)}</button>`).join('')}</div>
     <div class="kicker mt16">Something else</div>

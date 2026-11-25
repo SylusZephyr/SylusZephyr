@@ -48,7 +48,7 @@ def prune(css):
         i = k
     return ''.join(out), removed
 
-for name in ('app.css', 'v4.css'):
+for name in ('app.css',):
     p = os.path.join(ROOT, 'css', name); css = open(p, encoding='utf-8').read()
     new, removed = prune(css)
     print(f'{name}: {len(removed)} rules unused')
