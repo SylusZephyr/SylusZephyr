@@ -374,3 +374,6 @@ html[lang="ur"] h1, html[lang="ur"] h2, html[lang="ur"] h3 { line-height: 1.6; l
 .lock .dots i.on { background: var(--text); border-color: var(--text); }
 .keypad button { background: var(--surface); border: 1px solid var(--line); font-weight: 500; }
 .keypad button:focus-visible { outline: 2px solid var(--text); }
+.meal-dots { display: flex; flex-direction: column-reverse; gap: 4px; align-items: center; margin-bottom: 6px; }
+.meal-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface3); display: block; }
+.meal-dots i.on { background: var(--green); }
