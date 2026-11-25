@@ -1,8 +1,9 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-37b18ea4b7bf';
+const VERSION = 'revive-119bb835cea7';
 const ASSETS = [
   './',
   'css/app.css',
+  'fonts/inter-latin.woff2',
   'icons/apple-touch-icon.png',
   'icons/icon-192.png',
   'icons/icon-512.png',

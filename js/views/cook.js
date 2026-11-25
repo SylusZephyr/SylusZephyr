@@ -95,7 +95,7 @@ function main() {
 
   <label class="searchbar">${UI.ICON.search}<input id="rq" type="search" placeholder="Search recipes or ingredients" value="${UI.esc(filt.q)}" autocomplete="off"></label>
 
-  ${filt.q ? '' : `<div class="row between" style="margin:18px 2px 10px"><div><div style="font-weight:650;font-size:18px">${P.SLOT_LABEL[slot]} ideas</div><div class="small muted">${active.length ? active.join(' · ') : `From your ${st.pantry.length} pantry items`}</div></div>
+  ${filt.q ? '' : `<div class="row between" style="margin:18px 2px 10px"><div><div style="font-weight:650;font-size:18px">${P.SLOT_LABEL[slot]} ideas</div><div class="small muted">${active.length ? active.join(' · ') : (st.pantry.length ? `From your ${st.pantry.length} pantry items` : 'Mark what you have in My pantry for better picks')}</div></div>
     <button class="btn sm" data-filters>${UI.ICON.sliders}<span>Filters${active.length ? ` · ${active.length}` : ''}</span></button></div>
   <div class="carousel" role="list">${sug.map(({ r, have, total, missing }) => { const a = art(r); return `<a class="ccard" role="listitem" href="#cook/r/${r.id}">
       <div class="ph-wrap ${a.cls}" style="${a.style}">${a.emoji}<span class="ready ${have === total ? 'yes' : ''}">${have === total ? 'Ready' : `Need ${missing.length}`}</span></div>
@@ -143,9 +143,9 @@ function detail(r) {
   <div class="row wrap mb8" style="gap:6px">${methodPill(r.method)}${r.tags.map((t) => `<span class="pill">${t}</span>`).join('')}${cookedN ? `<span class="pill green">Cooked ${cookedN}×</span>` : ''}</div>
   <h1 style="font-size:28px">${UI.esc(r.name)}</h1>
   <p class="muted mt8">${UI.esc(r.desc)}</p>
-  <div class="grid3 mt16" style="grid-template-columns:repeat(4,1fr)">
-    <div class="macro"><b>${r.mins}′</b><span>minutes</span></div><div class="macro"><b>${r.kcal}</b><span>kcal</span></div>
-    <div class="macro"><b>${r.protein}g</b><span>protein</span></div><div class="macro"><b>¥${r.cost}</b><span>approx</span></div>
+  <div class="stats mt16">
+    <div class="stat"><b>${r.mins}<small> min</small></b><span>Time</span></div><div class="stat"><b>${r.kcal}</b><span>kcal</span></div>
+    <div class="stat"><b>${r.protein}<small> g</small></b><span>Protein</span></div><div class="stat"><b>¥${r.cost}</b><span>Approx.</span></div>
   </div>
   <div class="grid2 mt16"><button class="btn primary" data-cook>Start cooking</button><button class="btn" data-ate>I ate this</button></div>
 
@@ -191,7 +191,7 @@ function shopView() {
   const items = st.shopping.map((x) => ({ ...x, g: ING[x.id] })).filter((x) => x.g);
   const left = items.filter((x) => !x.done); const total = left.reduce((a, x) => a + x.g.price, 0);
   const weekly = st.profile.weeklyBudget; const bought = items.length - left.length;
-  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Shopping list</h1><div class="sub">~¥${total} remaining · budget ¥${weekly}/week</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Shopping list</h1><div class="sub">${total ? `About ¥${total} to buy · ` : ''}Budget ¥${weekly} a week</div></div></div>
   ${items.length ? `<div class="card tight"><div class="row between small"><span class="muted">${bought} of ${items.length} bought</span><b>~¥${total}</b></div><div class="lvlbar mt8"><i style="width:${Math.round(bought / items.length * 100)}%;background:var(--green)"></i></div></div>` : ''}
   ${total > weekly ? '<div class="notice mb12">This list is over your weekly budget. Spices and protein powder last for weeks, so it evens out.</div>' : ''}
   ${items.length ? `<div class="card ess-list">${items.map((x) => `<button class="check ${x.done ? 'done' : ''}" data-shop="${x.id}" style="width:100%;text-align:left"><span class="box">${UI.ICON.check}</span><span class="label">${UI.esc(x.g.name)}<span class="zh muted small" style="display:block">${UI.esc(x.g.zh)} · ${x.g.unit}</span></span><span class="muted small">¥${x.g.price}</span></button>`).join('')}</div>`

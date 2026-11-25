@@ -94,21 +94,24 @@ const item = (href, ico, title, subt) => `<a class="list-item" href="#${href}" s
 function main() {
   const st = S.get(); const lv = G.levelInfo(); const nb = Object.keys(st.game.badges).length;
   const qs = (st.medical.questions || []); const open = qs.filter((q) => !q.done).length;
-  return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><a class="icon-btn" href="#me/settings" aria-label="Settings">${UI.ICON.gear}</a></div>
-  <div class="card">
-    <div class="small muted">Level ${lv.level}</div><h2 style="font-size:24px;margin-top:2px">${lv.title}</h2>
-    <p class="small muted mt8">${G.TITLE_NOTE[Math.min(G.TITLE_NOTE.length - 1, Math.floor((lv.level - 1) / 2))]}</p>
-    <div class="grid3 mt12">
-      <div class="macro"><b>${G.streak()}</b><span>day streak</span></div>
-      <div class="macro"><b>${st.game.bestStreak}</b><span>best streak</span></div>
-      <div class="macro"><b>${Object.values(st.game.challenges || {}).filter((c) => c.done).length}</b><span>challenges</span></div>
+  const days = (n) => `${n}<small> ${n === 1 ? 'day' : 'days'}</small>`;
+  const pct = Math.round(lv.pct * 100);
+  return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><div class="row" style="gap:8px"><button class="icon-btn" data-sharecard aria-label="Share progress image">${UI.ICON.share}</button><a class="icon-btn" href="#me/settings" aria-label="Settings">${UI.ICON.gear}</a></div></div>
+  <div class="card level-card">
+    <div class="level-head">
+      <div class="level-ring" style="--p:${pct}"><span>${lv.level}</span></div>
+      <div class="grow"><div class="kicker">Level ${lv.level}</div><h3>${lv.title}</h3><div class="small muted">${lv.need - lv.into} XP to level ${lv.level + 1}</div></div>
     </div>
-    <div class="row between small muted mt12"><span>${lv.need - lv.into} XP to level ${lv.level + 1}</span><span>${st.game.freezes} streak freeze${st.game.freezes === 1 ? '' : 's'}</span></div>
-    <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
-    <button class="btn block mt12" data-sharecard>Share progress image</button>
+    <div class="stats mt16">
+      <div class="stat"><b>${days(G.streak())}</b><span>Streak</span></div>
+      <div class="stat"><b>${days(st.game.bestStreak)}</b><span>Best</span></div>
+      <div class="stat"><b>${st.game.freezes}</b><span>${st.game.freezes === 1 ? 'Streak freeze' : 'Streak freezes'}</span></div>
+    </div>
   </div>
-  <button class="card" data-recap style="display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left"><span><b>Monthly recap</b><div class="small muted">${Progress.monthData(Progress.lastMonthKey()).label}</div></span><span class="chev">${UI.ICON.chev}</span></button>
-  <a class="card" href="#me/badges" style="display:flex;align-items:center;justify-content:space-between;color:inherit;text-decoration:none"><span><b>Milestones</b><div class="small muted">${nb} of ${G.BADGES.length} reached</div></span><span class="chev">${UI.ICON.chev}</span></a>
+  <div class="card tight">
+    <button class="list-item" data-recap><div class="li-ico">${UI.ICON.calendar}</div><div class="grow"><b>Monthly recap</b><div class="muted small">${Progress.monthData(Progress.lastMonthKey()).label}</div></div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></button>
+    ${item('me/badges', UI.ICON.star, 'Milestones', `${nb} of ${G.BADGES.length} reached`)}
+  </div>
   <div class="card tight">
     ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', UI.ICON.me, Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
     ${item('me/medical', UI.ICON.doctor, 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}

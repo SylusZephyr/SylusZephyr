@@ -146,11 +146,14 @@ export function render(_, { night }) {
 
   return `
   <header class="t-head">
-    <div><div class="date">${S.prettyDate(k, { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>${greeting()}</h1></div>
-    <div class="actions">
-      <span class="streak-chip ${streak ? '' : 'off'}" title="Streak: days with 5 or more essentials">${I.flame}<span data-count="${streak}">${streak}</span></span>
-      <button class="icon-btn" data-search aria-label="Search">${I.search}</button>
+    <div class="t-top">
+      <div class="date">${S.prettyDate(k, { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+      <div class="actions">
+        ${streak ? `<span class="streak-chip" title="Streak: days with 5 or more essentials">${I.flame}<span data-count="${streak}">${streak}</span></span>` : ''}
+        <button class="icon-btn" data-search aria-label="Search">${I.search}</button>
+      </div>
     </div>
+    <h1>${greeting()}</h1>
   </header>
   <div class="t-grid"><div class="t-col">
   <section class="card">
@@ -179,7 +182,7 @@ export function render(_, { night }) {
   </section>` : ''}
 
   <section class="card">
-    <div class="row between mb8"><div class="kicker" style="margin:0">Up next</div><span class="small muted">${S.prettyTime(S.hm())}</span></div>
+    <div class="kicker mb8">Up next</div>
     <div class="next-list">${next.map((x) => `<button class="nx ${x.now || x.soon ? 'now' : ''}" data-act="${x.act}"><span class="ico">${x.icon}</span><span class="grow"><div class="t">${x.t}</div><div class="s">${x.s}</div></span><span class="when">${x.anytime ? 'Today' : x.now ? 'Now' : S.prettyTime(S.fmtMin(x.at))}</span></button>`).join('') || '<p class="small muted">Nothing else scheduled today.</p>'}</div>
   </section>
   </div><div class="t-col">

@@ -23,13 +23,13 @@ function overview() {
   const firstWd = (S.keyToDate(days[0]).getDay() + 6) % 7;
   const avg7 = lastNDays(7).reduce((s, k) => s + G.essentialsDone(k), 0) / 7;
   return `
-  <div class="grid3">
-    <div class="macro"><b>${G.streak()}</b><span>streak</span></div>
-    <div class="macro"><b>${st.game.bestStreak}</b><span>best</span></div>
-    <div class="macro"><b>${avg7.toFixed(1)}</b><span>avg per day, 7 d</span></div>
-  </div>
-  <div class="card cool glow"><div class="kicker">4-week plan · week ${Math.min(wk, 4)}${wk > 4 ? ' (maintenance)' : ''}</div><h3>${UI.esc(prog.t)}</h3>
-    ${prog.goals.map((g) => `<div class="small" style="padding:4px 0">• ${UI.esc(g)}</div>`).join('')}</div>
+  <div class="card"><div class="stats">
+    <div class="stat"><b>${G.streak()}<small> ${G.streak() === 1 ? 'day' : 'days'}</small></b><span>Streak</span></div>
+    <div class="stat"><b>${st.game.bestStreak}<small> ${st.game.bestStreak === 1 ? 'day' : 'days'}</small></b><span>Best</span></div>
+    <div class="stat"><b>${avg7.toFixed(1)}<small> / 7</small></b><span>Daily average</span></div>
+  </div></div>
+  <div class="card"><div class="kicker">4-week plan · week ${Math.min(wk, 4)}${wk > 4 ? ' (maintenance)' : ''}</div><h3>${UI.esc(prog.t)}</h3>
+    <ul class="goals">${prog.goals.map((g) => `<li>${UI.esc(g)}</li>`).join('')}</ul></div>
   ${yearCard()}
   ${insightsCard()}
   ${journalCard()}
@@ -52,7 +52,7 @@ function yearCard() {
   const months = []; let lastM = -1;
   for (let w = 0; w < weeks; w++) { const d = S.keyToDate(S.addDays(start, w * 7)); if (d.getMonth() !== lastM) { months.push({ w, l: d.toLocaleDateString(S.uiLocale(), { month: 'short' }) }); lastM = d.getMonth(); } }
   return `<div class="card"><div class="row between"><div class="kicker">6 months of showing up</div><span class="small muted">${secured} streak days</span></div>
-    <div style="position:relative;height:14px;margin-top:6px">${months.map((m) => `<span class="tiny muted" style="position:absolute;left:${m.w * 15}px">${m.l}</span>`).join('')}</div>
+    <div class="yheat-months" aria-hidden="true">${months.map((m) => `<span class="tiny muted" style="grid-column:${m.w + 1}">${m.l}</span>`).join('')}</div>
     <div class="yheat" role="img" aria-label="${secured} days with 5 or more essentials in the last 6 months">${cells.join('')}</div>
     <div class="row between mt8"><span class="tiny muted">${counted ? Math.round(active / counted * 100) : 0}% of days active · ${perfect} perfect</span>
     <span class="yheat-legend tiny muted">less <i style="background:var(--surface3)"></i><i style="background:rgba(52,211,153,.25)"></i><i style="background:rgba(52,211,153,.45)"></i><i style="background:rgba(52,211,153,.7)"></i><i style="background:#34d399"></i> more</span></div></div>`;

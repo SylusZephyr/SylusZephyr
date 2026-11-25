@@ -10,7 +10,7 @@ const walk = (dir) => readdirSync(join(root, dir)).flatMap((f) => {
   const p = join(dir, f);
   return statSync(join(root, p)).isDirectory() ? walk(p) : [p];
 });
-const files = ['index.html', 'manifest.webmanifest', 'privacy.html', ...walk('css'), ...walk('js'), ...walk('icons'), ...walk('img')]
+const files = ['index.html', 'manifest.webmanifest', 'privacy.html', ...walk('css'), ...walk('js'), ...walk('icons'), ...walk('img'), ...walk('fonts').filter((f) => f.endsWith('.woff2'))]
   .map((f) => f.split('\\').join('/')).sort();
 const hash = createHash('sha256');
 for (const f of files) hash.update(f).update(readFileSync(join(root, f)));
