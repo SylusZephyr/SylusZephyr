@@ -8,6 +8,7 @@ import * as Search from './search.js';
 import * as Caf from '../caffeine.js';
 import * as Pr from '../prayer.js';
 import * as Progress from '../progress.js';
+import * as Cloud from '../cloud.js';
 
 const I = UI.ICON;
 const nowMin = (d = new Date()) => d.getHours() * 60 + d.getMinutes();
@@ -58,6 +59,9 @@ export function upNext(now = new Date()) {
   const upcoming = items.filter((x) => x.now || dm(x.at) >= dm(m) - 5).sort((a, b) => (b.now - a.now) || dm(a.at) - dm(b.at));
   const extra = [];
   if ((d.pf || 0) < 3 && dm(m) > dm(wake) + 120) extra.push({ id: 'pf', icon: I.pulse, t: 'Pelvic-floor session', s: `${d.pf || 0} of 3 today · 2 min`, act: 'train', anytime: true });
+  // Data lives on this phone unless sync is on: ask for a backup file about once a month.
+  const ageDays = (Date.now() - (st.createdAt || Date.now())) / 864e5; const sinceBackup = (Date.now() - (st.lastExportAt || 0)) / 864e5;
+  if (!Cloud.status.user && ageDays > 14 && sinceBackup > 30) extra.push({ id: 'backup', icon: I.share, t: 'Back up your progress', s: 'Save a file in case this phone is lost', act: 'backup', anytime: true });
   if (d.energy == null && dm(m) > dm(wake) + 240) extra.push({ id: 'energy', icon: I.mood, t: 'How do you feel?', s: 'Energy and mood, 10 seconds', act: 'energy', anytime: true });
   return [...upcoming.slice(0, 3), ...extra].slice(0, 5);
 }
@@ -240,5 +244,6 @@ export function bind(root, _, { rerender }) {
     else if (a === 'energy') Sh.energySheet(rerender);
     else if (a === 'breath') Sh.breathing({ onDone: rerender });
     else if (a === 'prayer') location.hash = 'me/prayer';
+    else if (a === 'backup') location.hash = 'me/settings';
   }));
 }

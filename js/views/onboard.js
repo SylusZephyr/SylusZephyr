@@ -4,6 +4,7 @@ import * as Lock from '../lock.js';
 import { INGREDIENTS, STARTER_PANTRY } from '../data/ingredients.js';
 import { RED_FLAGS, DOCTOR_QUESTIONS } from '../data/content.js';
 import * as Pr from '../prayer.js';
+import * as Region from '../region.js';
 import { LANGUAGES, locale, setLocale } from '../i18n.js';
 
 let step = 0;
@@ -37,7 +38,7 @@ const STEPS = [
   () => `<div class="ob-badge red"></div><h1 class="mb8">Safety first</h1>
       <p class="muted">Your assessment flagged chest pain, breathlessness or dizziness during exertion. Your last doctor visit was brief, so until a doctor clears you:</p>
       <div class="card danger mt12"><b>Avoid</b> strenuous exercise, hard cycling, intense sports and any erection medication not prescribed to you. Revive keeps training to gentle walking + pelvic-floor work until you mark yourself cleared.</div>
-      <div class="card"><div class="kicker">Get emergency help (120) for</div>${RED_FLAGS.map((r) => `<div class="small" style="padding:4px 0">• ${UI.esc(r)}</div>`).join('')}</div>
+      <div class="card"><div class="kicker">Get emergency help (${Region.region().ambulance}) for</div>${RED_FLAGS.map((r) => `<div class="small" style="padding:4px 0">• ${UI.esc(r)}</div>`).join('')}</div>
       <label class="row mt8" style="gap:12px"><input type="checkbox" id="ob-ack" style="width:22px;height:22px"> <span>I understand</span></label>`,
   () => `<div class="col" style="min-height:60vh;justify-content:center;text-align:center;gap:14px">
       <div class="ob-badge big cool"></div><h1>Lock Revive?</h1>

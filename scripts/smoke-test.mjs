@@ -148,7 +148,35 @@ await test('migration 2 → 3 drops retired coins, chests and quests', () => {
   assert.ok(!('quests' in out.days['2026-01-01']) && out.days['2026-01-01'].checks.breakfast);
 });
 
+await test('emergency numbers follow the region', async () => {
+  const R = await import('../js/region.js');
+  const st = S.get(); const keep = st.prayer;
+  st.prayer = { city: 'lahore' }; assert.equal(R.region().ambulance, '1122');
+  st.prayer = { city: 'hongkong' }; assert.equal(R.region().ambulance, '999');
+  st.prayer = { city: 'beijing' }; assert.equal(R.region().ambulance, '120');
+  st.prayer = { city: 'custom', tz: 5 }; assert.equal(R.regionCode(), 'PK');
+  st.prayer = keep;
+});
+
+await test('app version matches package.json everywhere', async () => {
+  const { readFileSync } = await import('node:fs');
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
+  const desk = JSON.parse(readFileSync(new URL('../desktop/package.json', import.meta.url)));
+  const { APP_VERSION } = await import('../js/config.js');
+  assert.equal(APP_VERSION, pkg.version); assert.equal(desk.version, pkg.version);
+});
+
 const { merge } = await import('../js/sync.js');
+await test('same day from two windows merges field by field', async () => {
+  const { mergeDay } = await import('../js/sync.js');
+  const a = { meals: [{ id: 'm1', name: 'Oats', kcal: 500 }], waterMl: 750, checks: { breakfast: true }, coffee: ['09:00'], removedMeals: [] };
+  const b = { meals: [{ id: 'm1', name: 'Oats', kcal: 500 }, { id: 'm2', name: 'Wrap', kcal: 600 }, { id: 'm3', name: 'Gone', kcal: 1 }], waterMl: 500, checks: { lunch: true }, coffee: [], removedMeals: ['m3'], energy: 3 };
+  const m = mergeDay(a, b);
+  assert.deepEqual(m.meals.map((x) => x.id).sort(), ['m1', 'm2']);
+  assert.equal(m.waterMl, 750); assert.deepEqual(m.checks, { lunch: true, breakfast: true });
+  assert.equal(m.coffee.length, 1); assert.equal(m.energy, 3);
+});
+
 await test('sync merge never drops entries', () => {
   const a = { days: { d1: { xpToday: 10, meals: [], checks: {} } }, weights: [{ date: '2026-01-01', kg: 62 }], pf: { sessions: [{ date: 'd1', at: 1 }] }, game: { xp: 100, badges: { a: 1 } }, editedAt: 1 };
   const b = { days: { d2: { xpToday: 5, meals: [], checks: {} } }, weights: [{ date: '2026-01-08', kg: 62.3 }], pf: { sessions: [{ date: 'd2', at: 2 }] }, game: { xp: 80, badges: { b: 1 } }, editedAt: 2 };

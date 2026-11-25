@@ -2,7 +2,7 @@
 // Rules: days keep whichever copy has more activity; lists are unioned by a stable key;
 // counters take the max; profile/settings follow the copy edited most recently.
 
-const LOCAL_ONLY = ['lock', 'closedDays', 'remindersSyncedFor', 'nativeReminders'];
+const LOCAL_ONLY = ['lock', 'closedDays', 'remindersSyncedFor', 'nativeReminders', 'lastExportAt'];
 
 const activity = (d) => (d ? (d.xpToday || 0) + (d.meals?.length || 0) * 5 + Object.values(d.checks || {}).filter(Boolean).length * 3 + (d.waterMl || 0) / 250 : -1);
 
@@ -12,6 +12,26 @@ function unionBy(a = [], b = [], key) {
   return [...map.values()];
 }
 const unique = (a = [], b = []) => [...new Set([...a, ...b])];
+
+// Same day logged on two devices or windows: combine field by field instead of picking one copy.
+// Meals are unioned by id minus anything deleted on either side; counters take the larger value;
+// checks are ticked if ticked anywhere; single answers come from the busier copy.
+export function mergeDay(a, b) {
+  const [main, other] = activity(a) >= activity(b) ? [a, b] : [b, a];
+  const removed = unique(a.removedMeals, b.removedMeals);
+  const out = { ...other, ...main };
+  out.removedMeals = removed;
+  out.meals = unionBy(main.meals, other.meals, (m) => m.id || `${m.time}|${m.name}`).filter((m) => !removed.includes(m.id));
+  out.coffee = (main.coffee || []).length >= (other.coffee || []).length ? main.coffee || [] : other.coffee || [];
+  out.waterMl = Math.max(main.waterMl || 0, other.waterMl || 0);
+  out.checks = { ...(other.checks || {}) }; for (const [k, v] of Object.entries(main.checks || {})) out.checks[k] = !!(v || out.checks[k]);
+  out.xpLog = { ...(other.xpLog || {}), ...(main.xpLog || {}) };
+  out.xpToday = Object.values(out.xpLog).reduce((s, x) => s + (+x || 0), 0) || Math.max(main.xpToday || 0, other.xpToday || 0);
+  for (const k of ['pf', 'walkMin', 'breath', 'cookedCount']) if (main[k] != null || other[k] != null) out[k] = Math.max(main[k] || 0, other[k] || 0);
+  out.sleep = main.sleep?.wake ? main.sleep : other.sleep?.wake ? other.sleep : main.sleep || other.sleep;
+  for (const k of ['energy', 'mood', 'appetite', 'notes']) if (main[k] == null && other[k] != null) out[k] = other[k];
+  return out;
+}
 
 export function stripLocal(state) {
   const out = { ...state };
@@ -36,9 +56,7 @@ export function merge(local, remote) {
   };
 
   out.days = { ...remote.days };
-  for (const [k, d] of Object.entries(local.days || {})) {
-    if (!out.days[k] || activity(d) >= activity(out.days[k])) out.days[k] = d;
-  }
+  for (const [k, d] of Object.entries(local.days || {})) out.days[k] = out.days[k] ? mergeDay(d, out.days[k]) : d;
 
   out.checkins = { ...remote.checkins };
   for (const [wk, c] of Object.entries(local.checkins || {})) out.checkins[wk] = { ...(out.checkins[wk] || {}), ...c };

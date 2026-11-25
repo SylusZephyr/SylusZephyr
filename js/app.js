@@ -18,6 +18,7 @@ import { applyRemoteContent } from './content.js';
 import * as Theme from './theme.js';
 import * as Prayer from './prayer.js';
 import * as Progress from './progress.js';
+import { merge } from './sync.js';
 
 await Native.restoreStorage();
 await loadCatalog();
@@ -28,6 +29,15 @@ S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
 applyRemoteContent();
 window.addEventListener('revive:content', () => { if (applyRemoteContent()) render({ keepScroll: true }); });
+// Another window or tab of Revive saved. Merge instead of letting the last writer win,
+// so a meal logged in one window is never wiped out by a save from the other.
+window.addEventListener('storage', (e) => {
+  if (e.key !== S.STORAGE_KEY || !e.newValue) return;
+  let other; try { other = JSON.parse(e.newValue); } catch (err) { return; }
+  const merged = merge(S.get(), other);
+  S.replace(merged, { write: JSON.stringify(merged) !== e.newValue });
+  if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true });
+});
 window.addEventListener('revive:remote-update', () => { Theme.apply(); if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', ''); });
 
 const TABS = [
@@ -58,7 +68,7 @@ export function render({ keepScroll = false } = {}) {
   try { body = tab.view.render(r.parts, { night: nightMode }); }
   catch (e) { logError(e, 'render:' + r.tab); body = crashCard(); }
   app.innerHTML = `<main class="screen" id="screen">${body}</main>
-    <nav class="tabbar"><div class="brand"><img src="icons/mark.svg" alt="" width="26" height="26">Revive</div>${TABS.map((t, i) => `<a class="tab ${t.id === r.tab ? 'active' : ''}" href="#${t.id}" aria-label="${t.label}">${t.icon}<span>${t.label}</span>${IS_DESKTOP ? `<kbd>${i + 1}</kbd>` : ''}</a>`).join('')}${IS_DESKTOP ? '<div class="side-foot">Private · stored only on this PC<br>Keys: 1–5 tabs · Esc closes</div>' : ''}</nav>`;
+    <nav class="tabbar"><div class="brand"><img src="icons/mark.svg" alt="" width="26" height="26">Revive</div>${TABS.map((t, i) => `<a class="tab ${t.id === r.tab ? 'active' : ''}" href="#${t.id}" aria-label="${t.label}">${t.icon}<span>${t.label}</span>${IS_DESKTOP ? `<kbd>${i + 1}</kbd>` : ''}</a>`).join('')}${IS_DESKTOP ? `<div class="side-foot">${Cloud.status.user ? 'Private · synced to your own project' : 'Private · stored on this PC'}<br>Keys: 1–5 tabs · Esc closes</div>` : ''}</nav>`;
   try { tab.view.bind && tab.view.bind(UI.$('#screen'), r.parts, { rerender: () => render({ keepScroll: true }) }); }
   catch (e) { logError(e, 'bind:' + r.tab); }
   UI.$('#screen [data-crash-home]')?.addEventListener('click', () => { location.hash = 'today'; render(); });

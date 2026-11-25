@@ -16,6 +16,8 @@ for path in sorted(glob.glob(os.path.join(ROOT, 'translations', '*.tsv'))):
         if len(parts) != 3:
             problems.append(f'{os.path.basename(path)}:{n}: expected 3 columns, got {len(parts)}'); continue
         en, zh, ur = parts
+        if re.search(r'\d', en):
+            problems.append(f'{os.path.basename(path)}:{n}: English key has a digit; write numbers as #: {en[:60]}')
         want = en.count('#')
         for code, txt in (('zh', zh), ('ur', ur)):
             got = txt.count('#') + len(re.findall(r'\{\d\}', txt))

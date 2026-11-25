@@ -80,7 +80,9 @@ export function weightTrend(ws = S.get().weights, goal = S.get().profile.goalKgM
 // Personal insights: compare average energy/mood on days with vs without a habit.
 export function insights() {
   const st = S.get(); const out = [];
-  const days = Object.keys(st.days).filter((k) => st.days[k].energy != null && k < S.dayKey() || (k === S.dayKey() && st.days[k].energy != null));
+  // Recent behaviour is what matters, and it keeps this fast with years of history.
+  const since = S.addDays(S.dayKey(), -90);
+  const days = Object.keys(st.days).filter((k) => k >= since && k <= S.dayKey() && st.days[k].energy != null);
   if (days.length < 5) return { need: 5 - days.length, list: [] };
   const avg = (arr, f) => arr.length ? arr.reduce((a, k) => a + f(st.days[k]), 0) / arr.length : null;
   const tests = [
@@ -228,8 +230,8 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
   root.querySelectorAll('[data-delmeal]').forEach((b) => b.onclick = () => {
     const d = S.day(); const idx = d.meals.findIndex((m) => m.id === b.dataset.delmeal); if (idx < 0) return;
-    const [removed] = d.meals.splice(idx, 1); S.save(); rerender();
-    UI.undoToast(`Removed ${removed.name}`, () => { d.meals.splice(idx, 0, removed); S.save(); rerender(); });
+    const [removed] = d.meals.splice(idx, 1); d.removedMeals = [...(d.removedMeals || []), removed.id]; S.save(); rerender();
+    UI.undoToast(`Removed ${removed.name}`, () => { d.meals.splice(idx, 0, removed); d.removedMeals = (d.removedMeals || []).filter((x) => x !== removed.id); S.save(); rerender(); });
   });
   root.querySelector('[data-sleepset]')?.addEventListener('click', () => sleepSettings(rerender));
   root.querySelector('[data-earlier]')?.addEventListener('click', (ev) => {

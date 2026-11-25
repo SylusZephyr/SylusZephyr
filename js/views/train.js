@@ -2,6 +2,7 @@ import * as S from '../store.js';
 import * as UI from '../ui.js';
 import * as G from '../gamify.js';
 import * as Sh from './shared.js';
+import * as Region from '../region.js';
 import { PF_PHASES, PF_EDU, pfPhase, RED_FLAGS } from '../data/content.js';
 
 export function pfWeek() {
@@ -97,7 +98,7 @@ export function render() {
     <div class="walk-week mt12">${w.days.map((k, i) => `<div class="ww ${k === S.dayKey() ? 'today' : ''}"><div class="col-bar"><i style="height:${Math.min(100, Math.round(w.mins[i] / w.c.min * 100))}%" class="${w.mins[i] >= w.c.min ? 'hit' : ''}"></i></div><span>${S.prettyDate(k, { weekday: 'narrow' })}</span></div>`).join('')}</div>
     <div class="grid3 mt12">${[5, 10, 15].map((m) => `<button class="btn sm" data-walk="${m}">+${m} min</button>`).join('')}</div>
     ${w.cleared ? '' : `<p class="small muted mt12">You reported chest pain, breathlessness or dizziness on exertion. Walk at a pace where you can talk. Mark yourself cleared in <a href="#me/medical">Medical</a> once a doctor has checked you.</p>`}
-    <p class="tiny muted mt8">Stop and call 120 for chest pain or pressure, fainting, or severe breathlessness.</p>
+    <p class="tiny muted mt8">Stop and call ${Region.region().ambulance} for chest pain or pressure, fainting, or severe breathlessness.</p>
   </section>
 
   <div class="grid2">

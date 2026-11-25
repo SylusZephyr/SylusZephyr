@@ -96,7 +96,7 @@ await test('Chinese translates every main screen', async (p) => {
   for (const h of ['today', 'cook', 'train', 'track', 'me']) {
     await go(p, h);
     const left = await p.evaluate(() => { const out = []; const w = document.createTreeWalker(document.querySelector('#screen'), NodeFilter.SHOW_TEXT); while (w.nextNode()) { const t = w.currentNode.nodeValue.trim(); if (/[A-Za-z]{4}/.test(t) && !/Revive|Wajid|Supabase|iPhone|Windows|OLED|ISNA|UTC|PHQ|XP/.test(t)) out.push(t); } return out; });
-    assert.deepEqual(left, [], `${h} still has English`);
+    assert.deepEqual(left, [], `${h} still has English: ${left.join(" / ")}`);
   }
 });
 
@@ -112,6 +112,64 @@ await test('Accessibility: no WCAG A/AA violations', async (p) => {
     await go(p, h); await p.addScriptTag({ path: axePath });
     const v = await p.evaluate(async () => (await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa'] })).violations.map((x) => `${x.id} (${x.nodes.length})`));
     assert.deepEqual(v, [], h);
+  }
+});
+
+await test('Hostile text in any field is shown as text, never run', async (p) => {
+  await ready(p);
+  const X = '<img src=x onerror="window.__xss=1"><b id="inj">x</b>';
+  await p.evaluate((X) => {
+    const S = window.__revive.S; const st = S.get(); const d = S.day();
+    st.profile.name = X; d.notes = X; d.meals.push({ id: 'x', slot: 'lunch', name: X, kcal: 100, protein: 5, time: '12:00' });
+    st.myMeals = [{ id: 'm', name: X, kcal: 100, protein: 5 }];
+    st.medical.visits.push({ id: 'v', date: S.dayKey(), who: X, notes: X }); st.medical.labs.push({ id: 'l', date: S.dayKey(), name: X, value: X, unit: X, ref: X });
+    st.medical.questions = [{ id: 'q', q: X, done: false }]; st.recipeNotes = { egg_paratha: { rating: 4, note: X } };
+    st.prayer = { enabled: true, city: 'custom', lat: 39.9, lng: 116.4, tz: 8 }; S.saveNow();
+  }, X);
+  await p.reload(); await p.waitForSelector('#screen');
+  for (const h of ['today', 'track', 'me', 'me/medical', 'me/summary', 'me/settings', 'cook/r/egg_paratha']) {
+    await go(p, h); if (h === 'track') { await p.click('[data-tab="food"]'); await p.waitForTimeout(150); }
+  }
+  await go(p, 'today'); await p.click('[data-logmeal]'); await p.waitForTimeout(300);
+  assert.equal(await p.evaluate(() => window.__xss), undefined, 'injected script ran');
+  assert.equal(await p.$('#inj'), null, 'injected element was rendered');
+});
+
+await test('Imported backup files are validated', async (p) => {
+  await ready(p);
+  const bad = await p.evaluate(() => { try { window.__revive.S.importJSON('{"profile":5,"days":"x"}'); return 'accepted'; } catch (e) { return 'rejected'; } });
+  assert.equal(bad, 'rejected');
+  const odd = await p.evaluate(() => { const S = window.__revive.S; S.importJSON(JSON.stringify({ version: 2, profile: { name: 'A' }, days: { 'not-a-date': {}, '2026-01-02': { meals: [{ name: 'ok', kcal: 'NaN' }], waterMl: -5 } }, weights: [{ date: 'bad', kg: 'x' }, { date: '2026-01-02', kg: 63 }] })); const st = S.get(); return { days: Object.keys(st.days), water: st.days['2026-01-02'].waterMl, kcal: st.days['2026-01-02'].meals[0].kcal, weights: st.weights.length }; });
+  assert.deepEqual(odd, { days: ['2026-01-02'], water: 0, kcal: 0, weights: 1 });
+});
+
+await test('Two windows open at once never lose each other’s entries', async (p) => {
+  await ready(p);
+  const q = await p.context().newPage(); await q.goto(BASE); await q.waitForSelector('#screen'); await q.waitForTimeout(300);
+  await q.evaluate(() => document.querySelectorAll('#overlay-root > *, .toast').forEach((e) => e.remove()));
+  await p.click('[data-water]'); await p.waitForTimeout(300);           // window A: water
+  await q.click('[data-logmeal]'); await q.click('[data-quick="1"]');      // window B: a meal, saved after A
+  await q.waitForTimeout(500); await p.waitForTimeout(300);
+  for (const page of [p, q]) {
+    const d = await page.evaluate(() => { const d = window.__revive.S.day(); return { water: d.waterMl, meals: d.meals.length }; });
+    assert.deepEqual(d, { water: 250, meals: 1 });
+  }
+  const stored = await p.evaluate(() => { const d = Object.values(JSON.parse(localStorage.getItem('revive.v1')).days).pop(); return { water: d.waterMl, meals: d.meals.length }; });
+  assert.deepEqual(stored, { water: 250, meals: 1 });
+  await q.close();
+});
+
+await test('Stays fast with three years of history', async (p) => {
+  await ready(p);
+  const kb = await p.evaluate(() => { const S = window.__revive.S; const st = S.get(); st.createdAt = Date.now() - 1100 * 864e5;
+    for (let i = 0; i < 1095; i++) { const d = S.day(S.addDays(S.dayKey(), -i)); d.meals = Array.from({ length: 5 }, (_, j) => ({ id: `${i}-${j}`, slot: 'lunch', name: 'Chicken wrap', kcal: 500, protein: 30, time: '13:00' })); d.checks = { breakfast: true, lunch: true, dinner: true }; d.energy = 3; d.mood = 3; d.sleep = { bed: '00:30', wake: '08:30' }; d.coffee = ['09:00']; d.waterMl = 2000; }
+    S.saveNow(); return Math.round(localStorage.getItem('revive.v1').length / 1024); });
+  assert.ok(kb < 2500, `stored ${kb} KB`);
+  await p.reload(); await p.waitForSelector('.t-head');
+  const cdp = await p.context().newCDPSession(p); await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  for (const h of ['today', 'cook', 'train', 'track', 'me']) {
+    const ms = await p.evaluate(async (h) => { const t = performance.now(); location.hash = h; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return performance.now() - t; }, h);
+    assert.ok(ms < 500, `${h} took ${Math.round(ms)} ms on a slow phone`);
   }
 });
 

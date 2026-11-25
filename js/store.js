@@ -30,9 +30,12 @@ export function prettyTime(hhmm) {
   return `${h}:${pad(m)}${ap}`;
 }
 export const uiLocale = () => { const l = (typeof document !== 'undefined' && document.documentElement.lang) || 'en'; return l === 'en' ? 'en-GB' : l === 'zh' ? 'zh-CN' : l === 'ur' ? 'ur-PK' : l; };
+// Creating a date formatter is expensive; screens format hundreds of dates, so reuse them.
+const fmtCache = new Map();
 export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'numeric' }) {
-  const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'en';
-  return keyToDate(k).toLocaleDateString(lang === 'en' ? 'en-GB' : lang === 'zh' ? 'zh-CN' : lang === 'ur' ? 'ur-PK' : lang, opts);
+  const loc = uiLocale(); const key = loc + JSON.stringify(opts);
+  let f = fmtCache.get(key); if (!f) { f = new Intl.DateTimeFormat(loc, opts); fmtCache.set(key, f); }
+  return f.format(keyToDate(k));
 }
 
 export const SCHEMA_VERSION = 3;
@@ -99,7 +102,7 @@ export function load() {
       if ((parsed.version || 1) < SCHEMA_VERSION) {
         try { localStorage.setItem(KEY + '.backup', raw); } catch (e) {}
       }
-      state = deepMerge(defaults(), migrate(parsed));
+      state = sanitize(deepMerge(defaults(), migrate(parsed)));
     } catch (e) {
       // Never throw away unreadable data: park it so it can be recovered later.
       try { localStorage.setItem(`${KEY}.corrupt.${Date.now()}`, raw); } catch (err) {}
@@ -112,25 +115,39 @@ export function load() {
 }
 
 // Step-by-step upgrades of saved data. Each step takes the previous shape and returns the next.
+const isObj = (x) => x && typeof x === 'object' && !Array.isArray(x);
+const isDate = (k) => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k);
+const num = (v, lo = 0, hi = Infinity) => (Number.isFinite(+v) ? Math.min(hi, Math.max(lo, +v)) : 0);
+// Repairs anything malformed instead of trusting it: saved data can come from old versions,
+// another device, an edited backup file or a half-finished write. Runs on every load and import.
+export function sanitize(s) {
+  for (const k of ['shopping', 'sxLog', 'walks', 'weights', 'favorites', 'pantry', 'savedTips', 'likedTips', 'myMeals']) if (!Array.isArray(s[k])) s[k] = [];
+  for (const k of ['profile', 'medical', 'checkins', 'cooked', 'settings', 'game', 'storiesSeen', 'recipeNotes']) if (!isObj(s[k])) s[k] = {};
+  s.pf = isObj(s.pf) ? s.pf : {}; if (!Array.isArray(s.pf.sessions)) s.pf.sessions = []; if (!Array.isArray(s.pf.control)) s.pf.control = [];
+  const days = {};
+  for (const [k, d] of Object.entries(isObj(s.days) ? s.days : {})) {
+    if (!isDate(k) || !isObj(d)) continue;
+    d.meals = Array.isArray(d.meals) ? d.meals.filter(isObj) : [];
+    d.meals.forEach((m) => { m.kcal = num(m.kcal, 0, 10000); m.protein = num(m.protein, 0, 500); m.name = String(m.name ?? '').slice(0, 120); });
+    d.coffee = Array.isArray(d.coffee) ? d.coffee.filter((c) => typeof c === 'string').slice(0, 30) : [];
+    d.waterMl = num(d.waterMl, 0, 10000);
+    d.checks = isObj(d.checks) ? d.checks : {};
+    d.sleep = isObj(d.sleep) ? d.sleep : { bed: null, wake: null };
+    if (d.notes != null) d.notes = String(d.notes).slice(0, 2000);
+    days[k] = d;
+  }
+  s.days = days;
+  s.weights = s.weights.filter((w) => isObj(w) && isDate(w.date) && Number.isFinite(+w.kg) && +w.kg > 20 && +w.kg < 300).map((w) => ({ date: w.date, kg: +w.kg }));
+  for (const k of ['visits', 'labs']) s.medical[k] = Array.isArray(s.medical[k]) ? s.medical[k].filter(isObj) : [];
+  for (const k of ['xp', 'freezes', 'bestStreak']) s.game[k] = num(s.game[k]);
+  s.game.freezes = Math.min(3, s.game.freezes);
+  return s;
+}
+
 const MIGRATIONS = {
   // 1 → 2: guarantee list fields exist, drop malformed day entries, clean non-finite numbers.
   1: (s) => {
-    for (const k of ['shopping', 'sxLog', 'walks', 'weights', 'favorites', 'pantry', 'savedTips', 'likedTips']) if (!Array.isArray(s[k])) s[k] = [];
-    s.pf = s.pf || {}; if (!Array.isArray(s.pf.sessions)) s.pf.sessions = []; if (!Array.isArray(s.pf.control)) s.pf.control = [];
-    const days = {};
-    for (const [k, d] of Object.entries(s.days || {})) {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !d || typeof d !== 'object') continue;
-      d.meals = Array.isArray(d.meals) ? d.meals.filter((m) => m && typeof m === 'object') : [];
-      d.meals.forEach((m) => { m.kcal = Number.isFinite(+m.kcal) ? +m.kcal : 0; m.protein = Number.isFinite(+m.protein) ? +m.protein : 0; });
-      d.coffee = Array.isArray(d.coffee) ? d.coffee : [];
-      d.waterMl = Number.isFinite(+d.waterMl) ? Math.max(0, +d.waterMl) : 0;
-      d.checks = d.checks && typeof d.checks === 'object' ? d.checks : {};
-      d.sleep = d.sleep && typeof d.sleep === 'object' ? d.sleep : { bed: null, wake: null };
-      days[k] = d;
-    }
-    s.days = days;
-    s.weights = s.weights.filter((w) => w && Number.isFinite(+w.kg) && /^\d{4}-\d{2}-\d{2}$/.test(w.date)).map((w) => ({ date: w.date, kg: +w.kg }));
-    if (s.game) for (const k of ['xp', 'coins', 'freezes', 'bestStreak']) s.game[k] = Number.isFinite(+s.game[k]) ? Math.max(0, +s.game[k]) : 0;
+    sanitize(s);
     s.version = 2;
     return s;
   },
@@ -187,13 +204,14 @@ export function compact(keepDays) {
 export function save() { if (state) state.editedAt = Date.now(); clearTimeout(saveTimer); saveTimer = setTimeout(write, 60); }
 export function saveNow() { if (state) state.editedAt = Date.now(); clearTimeout(saveTimer); write(); }
 // Swap in a merged copy (from cloud sync) without marking it as a local edit.
-export function replace(next) {
+export function replace(next, { write = true } = {}) {
   const keep = { lock: state.lock, closedDays: state.closedDays, remindersSyncedFor: state.remindersSyncedFor, nativeReminders: state.nativeReminders };
-  state = deepMerge(defaults(), { ...next, ...keep });
+  state = sanitize(deepMerge(defaults(), { ...next, ...keep }));
   clearTimeout(saveTimer);
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  if (write) { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
   listeners.forEach((l) => l(state));
 }
+export const STORAGE_KEY = KEY;
 
 export function get() { return state; }
 export function update(fn) { fn(state); save(); listeners.forEach((l) => l(state)); }
@@ -211,9 +229,12 @@ export function day(k = dayKey()) {
 
 export function exportJSON() { return JSON.stringify(state, null, 2); }
 export function importJSON(text) {
-  const obj = JSON.parse(text);
-  if (!obj || typeof obj !== 'object' || !obj.profile) throw new Error('Not a Revive file');
-  state = deepMerge(defaults(), obj); saveNow(); listeners.forEach((l) => l(state));
+  let obj; try { obj = JSON.parse(text); } catch (e) { throw new Error('Not a Revive file'); }
+  if (!isObj(obj) || !isObj(obj.profile) || (obj.days != null && !isObj(obj.days))) throw new Error('Not a Revive file');
+  if ((obj.version || 1) > SCHEMA_VERSION) throw new Error('This file is from a newer version of Revive');
+  try { localStorage.setItem(KEY + '.backup', JSON.stringify(state)); } catch (e) {}
+  state = sanitize(deepMerge(defaults(), migrate(obj))); state.version = SCHEMA_VERSION;
+  saveNow(); listeners.forEach((l) => l(state));
 }
 export function resetAll() { localStorage.removeItem(KEY); state = defaults(); saveNow(); }
 
