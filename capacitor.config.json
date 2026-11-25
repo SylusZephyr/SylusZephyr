@@ -4,12 +4,12 @@
   "webDir": "www",
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#0b0f1a",
+    "backgroundColor": "#0b0c0e",
     "scheme": "Revive",
     "limitsNavigationsToAppBoundDomains": true
   },
   "plugins": {
-    "SplashScreen": { "launchShowDuration": 600, "backgroundColor": "#0b0f1a", "showSpinner": false, "launchAutoHide": true },
+    "SplashScreen": { "launchShowDuration": 600, "backgroundColor": "#0b0c0e", "showSpinner": false, "launchAutoHide": true },
     "LocalNotifications": { "iconColor": "#ffb547" }
   }
 }

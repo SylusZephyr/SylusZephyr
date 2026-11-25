@@ -51,6 +51,8 @@
 	<array>
 		<string>arm64</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Revive uses the camera only to read barcodes on food packs.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Revive uses Face ID to keep your health notes private.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

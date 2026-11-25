@@ -37,7 +37,7 @@ function createWindow() {
     height: 860,
     minWidth: 380,
     minHeight: 640,
-    backgroundColor: '#0b0f1a',
+    backgroundColor: '#0b0c0e',
     title: 'Revive',
     icon: path.join(__dirname, 'build', 'icon.png'),
     autoHideMenuBar: true,

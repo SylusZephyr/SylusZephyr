@@ -7,6 +7,7 @@ import { suggest, planToday, art } from './cook.js';
 import * as Search from './search.js';
 import * as Caf from '../caffeine.js';
 import * as Pr from '../prayer.js';
+import * as Progress from '../progress.js';
 
 const I = UI.ICON;
 const nowMin = (d = new Date()) => d.getHours() * 60 + d.getMinutes();
@@ -20,7 +21,7 @@ function essLabel(e) { return (Pr.fasting() && FAST_ESS[e.id]) || ESS_LABEL[e.id
 function greeting() {
   const h = new Date().getHours(); const n = S.get().profile.name;
   const g = h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Late night';
-  return n ? `${g}, ${UI.esc(n.split(' ')[0])}` : g;
+  return n ? `<span>${g}</span>, ${UI.esc(n.split(' ')[0])}` : g;
 }
 
 // Three rings, Apple-Fitness style: essentials, calories, water.
@@ -97,6 +98,16 @@ function drinkSheet(onDone, onRemove) {
   });
 }
 
+function challengeCard() {
+  const c = Progress.thisWeek();
+  return `<section class="card challenge ${c.done ? 'done' : ''}">
+    <div class="row between"><div class="kicker" style="margin:0">This week’s challenge</div><span class="small muted">${c.done ? 'Complete' : c.daysLeft ? `${c.daysLeft} day${c.daysLeft === 1 ? '' : 's'} left` : 'Last day'}</span></div>
+    <h3 class="mt8">${UI.esc(c.t)}</h3>
+    <div class="segbar mt12" role="img" aria-label="${c.value} of ${c.goal}">${Array.from({ length: c.goal }, (_, i) => `<i class="${i < c.value ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="row between mt8 small"><span class="muted">${c.done ? 'Earned 150 XP and a streak freeze' : UI.esc(c.why)}</span><b style="white-space:nowrap;margin-left:12px">${c.value} / ${c.goal}</b></div>
+  </section>`;
+}
+
 function prayerCard() {
   const cfg = Pr.settings(); const now = new Date();
   const fast = Pr.fasting(now) ? Pr.fastWindow(now) : null;
@@ -107,7 +118,7 @@ function prayerCard() {
       <h3>${fast.state === 'fasting' ? `Iftar in ${Pr.countdown(fast.toIftar)}` : fast.state === 'suhoor' ? `Suhoor ends in ${Pr.countdown(fast.toSuhoorEnd)}` : 'Fast complete'}</h3>
       <div class="lvlbar mt8 fastbar"><i style="width:${Math.round(fast.pct * 100)}%"></i></div>
       <div class="row between tiny mt8 muted"><span>Suhoor ${S.prettyTime(fast.suhoorClock)}</span><span>Iftar ${S.prettyTime(fast.iftarClock)}</span></div>` : ''}
-    ${cfg.enabled ? `<div class="row between ${fast ? 'mt12' : ''}"><div class="kicker">${UI.esc(cfg.cityName.split(' ')[0])}</div><span class="small">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
+    ${cfg.enabled ? `<div class="row between ${fast ? 'mt12' : ''}"><div class="kicker">${UI.esc(cfg.cityName.split(' ')[0])}</div><span class="small"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
     <div class="prayer-row mt8">${list.map((p) => `<div class="pr ${p.id === nx.id && !nx.tomorrow ? 'next' : ''} ${p.id === 'sunrise' ? 'faint' : ''}"><span>${p.label}</span><b>${p.clock ? S.prettyTime(p.clock).replace(/(am|pm)$/, '<small>$1</small>') : '—'}</b></div>`).join('')}</div>` : ''}
   </div>`;
 }
@@ -168,6 +179,7 @@ export function render(_, { night }) {
     <div class="next-list">${next.map((x) => `<button class="nx ${x.now || x.soon ? 'now' : ''}" data-act="${x.act}"><span class="ico">${x.icon}</span><span class="grow"><div class="t">${x.t}</div><div class="s">${x.s}</div></span><span class="when">${x.anytime ? 'Today' : x.now ? 'Now' : S.prettyTime(S.fmtMin(x.at))}</span></button>`).join('') || '<p class="small muted">Nothing else scheduled today.</p>'}</div>
   </section>
   </div><div class="t-col">
+  ${challengeCard()}
   ${prayerCard()}
   ${cafCard(k)}
 
@@ -183,7 +195,7 @@ export function render(_, { night }) {
   </section>
 
   ${due.length ? `<button class="card" style="display:flex;width:100%;text-align:left;align-items:center;gap:12px" data-weekly>
-    <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div style="font-weight:600">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left · ${due.map((x) => ({ weigh: 'weight', erection: 'erection', mood: 'mood', energy: 'energy' }[x])).join(', ')}</div></span><span class="chev">${I.chev}</span></button>` : ''}
+    <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div style="font-weight:600">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left</div></span><span class="chev">${I.chev}</span></button>` : ''}
   </div></div>
   `;
 }

@@ -2,7 +2,7 @@
 into a review folder, with licence/author metadata. Pick winners in scripts/photo-picks.json,
 then run scripts/build-photos.py.
 
-usage: python3 scripts/fetch-photo-candidates.py OUT_DIR
+usage: python3 scripts/fetch-photo-candidates.py OUT_DIR [recipe_id ...]
 """
 import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
@@ -30,6 +30,10 @@ QUERIES = {
     # delivery
     'd_lamian': 'lanzhou beef noodles', 'd_dapanji': 'dapanji', 'd_polo': 'uyghur polo', 'd_samsa': 'samsa uyghur',
     'd_kebab': 'chuan lamb skewers', 'd_laghman': 'laghman', 'd_indian': 'chicken curry naan', 'd_shawarma': 'shawarma',
+    # ramadan collection
+    'suhoor_oats_dates': 'oatmeal dates', 'suhoor_egg_paratha_roll': 'egg paratha roll', 'suhoor_banana_shake': 'banana milkshake',
+    'iftar_date_plate': 'iftar dates', 'iftar_chana_chaat': 'chana chaat', 'iftar_pakora': 'onion pakora', 'iftar_chicken_rolls': 'chicken spring rolls',
+    'iftar_haleem_cheat': 'haleem', 'late_kebab_rice': 'kebab rice', 'rooh_afza_milk': 'rooh afza',
 }
 OK_LICENCES = re.compile(r'^(CC0|Public domain|PD|CC BY(-SA)? [0-9.]+)', re.I)
 UA = 'ReviveApp/1.0 (photo credits build)'
@@ -48,11 +52,13 @@ def get(url, tries=5):
 def strip(html):
     return re.sub(r'<[^>]+>', '', html or '').strip()
 
-def main(out):
+def main(out, only=None):
     os.makedirs(out, exist_ok=True)
     meta_path = os.path.join(out, 'candidates.json')
     meta = json.load(open(meta_path)) if os.path.exists(meta_path) else {}
     for rid, q in QUERIES.items():
+        if only and rid not in only:
+            continue
         if meta.get(rid):
             continue
         time.sleep(9)
@@ -90,4 +96,4 @@ def main(out):
         json.dump(meta, open(meta_path, 'w'), indent=1, ensure_ascii=False)
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], set(sys.argv[2:]) or None)

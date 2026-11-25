@@ -14,6 +14,8 @@ import { pfWeek } from './train.js';
 import * as Pr from '../prayer.js';
 import * as Caf from '../caffeine.js';
 import * as Theme from '../theme.js';
+import * as Progress from '../progress.js';
+import { LANGUAGES, locale, setLocale } from '../i18n.js';
 
 const LABS = [
   { name: 'Testosterone (morning, total)', unit: 'nmol/L', ref: '~8.6–29' },
@@ -92,22 +94,25 @@ function main() {
   const qs = (st.medical.questions || []); const open = qs.filter((q) => !q.done).length;
   return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><a class="icon-btn" href="#me/settings" aria-label="Settings">${UI.ICON.gear}</a></div>
   <div class="card">
-    <div class="grid3">
+    <div class="small muted">Level ${lv.level}</div><h2 style="font-size:24px;margin-top:2px">${lv.title}</h2>
+    <p class="small muted mt8">${G.TITLE_NOTE[Math.min(G.TITLE_NOTE.length - 1, Math.floor((lv.level - 1) / 2))]}</p>
+    <div class="grid3 mt12">
       <div class="macro"><b>${G.streak()}</b><span>day streak</span></div>
       <div class="macro"><b>${st.game.bestStreak}</b><span>best streak</span></div>
-      <div class="macro"><b>${lv.level}</b><span>level</span></div>
+      <div class="macro"><b>${Object.values(st.game.challenges || {}).filter((c) => c.done).length}</b><span>challenges</span></div>
     </div>
     <div class="row between small muted mt12"><span>${lv.need - lv.into} XP to level ${lv.level + 1}</span><span>${st.game.freezes} streak freeze${st.game.freezes === 1 ? '' : 's'}</span></div>
     <div class="lvlbar mt8"><i style="width:${Math.round(lv.pct * 100)}%"></i></div>
     <button class="btn block mt12" data-sharecard>Share progress image</button>
   </div>
+  <button class="card" data-recap style="display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left"><span><b>Monthly recap</b><div class="small muted">${Progress.monthData(Progress.lastMonthKey()).label}</div></span><span class="chev">${UI.ICON.chev}</span></button>
   <a class="card" href="#me/badges" style="display:flex;align-items:center;justify-content:space-between;color:inherit;text-decoration:none"><span><b>Milestones</b><div class="small muted">${nb} of ${G.BADGES.length} reached</div></span><span class="chev">${UI.ICON.chev}</span></a>
   <div class="card tight">
-    ${item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
+    ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
     ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
     ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
     ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
-    ${item('me/prayer', '🕌', 'Prayer times & Ramadan', Pr.settings().enabled ? `${UI.esc(Pr.settings().cityName)} · ${Pr.fasting() ? 'fasting mode on' : 'next: ' + Pr.next().label}` : 'Off · offline, no location needed')}
+    ${item('me/prayer', '🕌', 'Prayer times & Ramadan', Pr.settings().enabled ? `<span>${UI.esc(Pr.settings().cityName)}</span> · <span>${Pr.fasting() ? 'Fasting mode on' : Pr.next().label}</span> <span>${S.prettyTime(Pr.next().clock)}</span>` : 'Off · offline, no location needed')}
     ${item('me/saved', '🔖', 'Library', `${TIPS.length} short reads · ${st.savedTips.length} saved`)}
     ${Native.isNative || window.reviveDesktop ? '' : item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
     ${item('me/settings', '⚙️', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
@@ -154,7 +159,7 @@ function summary() {
   const energyRed = weeks.some((w) => st.checkins[w].energy?.score?.redFlag);
   const html = `
     <h1>Revive — patient summary</h1>
-    <p>Generated ${new Date().toLocaleString('en-GB')} · last 28 days · self-reported</p>
+    <p><span>Generated</span> ${S.prettyDate(S.dayKey(), { day: 'numeric', month: 'long', year: 'numeric' })} ${S.prettyTime(S.hm())} · <span>last 28 days · self-reported</span></p>
     <h2>Profile</h2><p>Male, ${st.profile.age} y · ${st.profile.heightCm} cm · ${ws.at(-1)?.kg ?? st.profile.startKg} kg (start ${st.profile.startKg} kg) · Halal diet · Lives in China</p>
     <h2>Main concerns (from 200-question self-assessment)</h2>
     <ul><li>Erections enlarge but not hard; lose erection almost always; rarely without direct stimulation; 6–12 months. High desire.</li>
@@ -238,7 +243,7 @@ function prayer() {
     <div class="field"><label>Calculation method</label><select id="pr-method">${Object.entries(Pr.METHODS).map(([id, m]) => `<option value="${id}" ${cfg.method === id ? 'selected' : ''}>${m.name}</option>`).join('')}</select></div>
     <div class="field"><label>Asr</label><div class="seg" id="pr-asr"><button data-asr="standard" class="${cfg.asr === 'standard' ? 'on' : ''}">Standard</button><button data-asr="hanafi" class="${cfg.asr === 'hanafi' ? 'on' : ''}">Hanafi</button></div></div>
   </div>
-  <div class="card"><div class="row between"><div class="kicker">Today · ${UI.esc(cfg.cityName)}</div><span class="small" style="font-weight:700">${nx.label} in ${Pr.countdown(nx.inMin)}</span></div>
+  <div class="card"><div class="row between"><div class="kicker"><span>Today</span> · <span>${UI.esc(cfg.cityName)}</span></div><span class="small" style="font-weight:700"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
     ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span style="font-weight:800">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
     <p class="tiny muted mt8">If your local mosque’s timetable differs, follow the mosque.</p></div>
   <div class="section-title" style="font-size:16px">Ramadan fasting mode</div>
@@ -265,9 +270,12 @@ function settings() {
     ${tg('sounds', 'Sounds', 'Reward chimes', s.sounds)}
     ${tg('haptics', 'Vibration', 'Where supported', s.haptics)}
   </div>
+  <div class="section-title" style="font-size:16px">Language</div>
+  <div class="card"><div class="seg lang-pick" data-no-tr>${LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${locale === l.code ? 'on' : ''}" lang="${l.code}">${l.native}</button>`).join('')}</div></div>
   <div class="section-title" style="font-size:16px">Look</div>
   <div class="card">
-    <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}</div></div>
+    <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
+      <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''}" style="cursor:pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" style="position:absolute;opacity:0;width:1px;height:1px" aria-label="Pick a custom accent colour"></label></div></div>
     <div class="field"><label>Background</label><div class="seg" id="bgseg">${Theme.BACKGROUNDS.map((b) => `<button data-bg="${b.id}" class="${Theme.current().bg === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
     <div class="field"><label>Text size</label><div class="seg" id="fsseg">${Theme.SIZES.map((b) => `<button data-fs="${b.id}" class="${Theme.current().size === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
   </div>
@@ -288,9 +296,10 @@ function settings() {
   <div class="notice">${Cloud.status.user ? 'Your data lives on this device and syncs to your own private Supabase project while you’re signed in.' : 'Your data lives only on this device. Nothing is uploaded unless you sign in to sync. If you uninstall the app or clear site data, it’s gone — export a file now and then to be safe.'}</div>
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
-  <a class="list-item mt12" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
+  <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">☁️</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
+  <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
-  <p class="tiny faint mt16" style="text-align:center">Revive 4.0 · not medical advice</p>`;
+  <p class="tiny faint mt16" style="text-align:center">Revive 5.0 · not medical advice</p>`;
 }
 
 function install() {
@@ -350,6 +359,7 @@ export function bind(root, parts, { rerender }) {
   const st = S.get(); const sub = parts[0];
   if (!sub) {
     root.querySelector('[data-sharecard]')?.addEventListener('click', async () => { try { await ShareCard.share(); G.award('share_card', 10, null, { silent: true }); } catch (e) { UI.toast('Could not create the image', '⚠️'); } });
+    root.querySelector('[data-recap]')?.addEventListener('click', () => Progress.openRecap(Progress.lastMonthKey()));
     root.querySelector('[data-buyfreeze]')?.addEventListener('click', () => { if (st.game.coins >= 100 && st.game.freezes < 3) { st.game.coins -= 100; st.game.freezes++; S.save(); UI.toast('Streak freeze bought', '❄️'); rerender(); } });
   }
   if (sub === 'medical') {
@@ -464,10 +474,13 @@ export function bind(root, parts, { rerender }) {
       p.weeklyBudget = +root.querySelector('#p-b').value || p.weeklyBudget; p.startKg = +root.querySelector('#p-s').value || p.startKg;
       S.save(); UI.toast('Profile saved', '✅'); rerender();
     };
+    root.querySelectorAll('[data-lang]').forEach((b) => b.onclick = () => { if (b.dataset.lang === locale) return; S.get().settings.locale = b.dataset.lang; S.saveNow(); setLocale(b.dataset.lang); location.reload(); });
     const cup = root.querySelector('#p-cup'); const cut = root.querySelector('#p-cut');
     cup.onchange = () => { const v = Math.round(+cup.value); if (v >= 5 && v <= 400) { st.profile.cupMg = v; S.save(); UI.toast('Cup size saved', '☕'); } else cup.value = Caf.cupMg(); };
     cut.onchange = () => { if (/^\d{2}:\d{2}$/.test(cut.value)) { st.profile.caffeineCutoff = cut.value; S.save(); UI.toast('Cutoff saved', '☕'); } };
     root.querySelectorAll('[data-accent]').forEach((b) => b.onclick = () => { Theme.set({ accent: b.dataset.accent }); rerender(); });
+    const ca = root.querySelector('[data-customaccent]');
+    if (ca) { ca.oninput = () => Theme.set({ accent: 'custom', custom: ca.value }); ca.onchange = () => rerender(); }
     root.querySelectorAll('[data-bg]').forEach((b) => b.onclick = () => { Theme.set({ bg: b.dataset.bg }); rerender(); });
     root.querySelectorAll('[data-fs]').forEach((b) => b.onclick = () => { Theme.set({ size: b.dataset.fs }); rerender(); });
     root.querySelector('[data-export]').onclick = async () => {

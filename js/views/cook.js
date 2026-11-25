@@ -53,7 +53,7 @@ export function art(r, { eager = false } = {}) {
     const mono = r.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter((w) => w.length > 2 && !/^(the|and|with|air|fryer|quick|cheat|big|easy)$/i.test(w)).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
     return { cls: 'mono-tile', style: `--tint:${r.bg[0]}`, emoji: `<span class="mono">${mono}</span>` };
   }
-  return { cls: 'has-photo', style: `background:${r.bg[1]}`, emoji: `<img class="ph" src="${p.src}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="720" height="540">` };
+  return { cls: 'has-photo', style: 'background:var(--surface2)', emoji: `<img class="ph" src="${p.src}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="720" height="540">` };
 }
 
 function recipeCard(r) {
@@ -75,41 +75,61 @@ export function render(parts) {
 function main() {
   const st = S.get();
   const slot = filt.slot || P.currentSlot();
-  const sug = suggest({ slot, feel: filt.feel, mins: filt.mins, budget: filt.budget }).slice(0, 4);
+  const sug = suggest({ slot, feel: filt.feel, mins: filt.mins, budget: filt.budget }).slice(0, 8);
   let list = RECIPES;
   if (filt.cat === 'fav') list = list.filter((r) => st.favorites.includes(r.id));
+  else if (filt.cat === 'ready') { const pantry = new Set(st.pantry); list = list.filter((r) => r.ing.filter((i) => !i.opt).every((i) => pantry.has(i.id))); }
   else if (filt.cat === 'ramadan') list = list.filter((r) => r.tags.includes('suhoor') || r.tags.includes('iftar'));
   else if (filt.cat === 'nocook') list = list.filter((r) => r.method === 'nocook');
   else if (['breakfast', 'lunch', 'dinner', 'snack'].includes(filt.cat)) list = list.filter((r) => r.meals.includes(filt.cat));
-  else if (filt.cat === 'protein') list = [...list].sort((a, b) => b.protein - a.protein).slice(0, 12);
+  else if (filt.cat === 'protein') list = [...list].sort((a, b) => b.protein - a.protein).slice(0, 16);
+  else if (filt.cat === 'quick') list = list.filter((r) => r.mins <= 10);
   if (filt.q) { const q = filt.q.toLowerCase(); list = list.filter((r) => r.name.toLowerCase().includes(q) || r.ing.some((i) => ING[i.id]?.name.toLowerCase().includes(q)) || r.tags.join(' ').includes(q)); }
   const shopN = (st.shopping || []).filter((x) => !x.done).length;
+  const active = [filt.slot && P.SLOT_LABEL[filt.slot], filt.feel && FEELS.find((f) => f.id === filt.feel)?.l, filt.mins && `≤ ${filt.mins} min`, filt.budget && filt.budget < 99 && `≤ ¥${filt.budget}`].filter(Boolean);
+  const CATS = [['all', 'All'], ['ready', 'Ready to make'], ['fav', 'Favourites'], ['quick', 'Under 10 min'], ['protein', 'High protein'], ['breakfast', 'Breakfast'], ['lunch', 'Lunch'], ['dinner', 'Dinner'], ['snack', 'Snacks'], ['nocook', 'No-cook'], ['ramadan', 'Suhoor & iftar']];
   return `
-  <div class="topbar"><div><div class="sub">Air fryer · no-cook · halal</div><h1>Cook</h1></div>
-    <div class="row"><button class="icon-btn" data-search aria-label="Search">${UI.ICON.search}</button><a class="icon-btn" href="#cook/shop" aria-label="Shopping list" style="position:relative">${UI.ICON.cart}${shopN ? `<span class="pill coral" style="position:absolute;top:-6px;right:-8px">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">${UI.ICON.pantry}</a></div></div>
+  <div class="topbar"><div><div class="sub">${RECIPES.length} halal recipes · air fryer & no-cook</div><h1>Cook</h1></div>
+    <div class="row"><a class="icon-btn" href="#cook/shop" aria-label="Shopping list${shopN ? `, ${shopN} items` : ''}" style="position:relative">${UI.ICON.cart}${shopN ? `<span class="badge-dot">${shopN}</span>` : ''}</a><a class="icon-btn" href="#cook/pantry" aria-label="Pantry">${UI.ICON.pantry}</a></div></div>
 
-  <div class="card glow">
-    <div class="kicker">What can I make right now?</div>
-    <h3>Based on your ${st.pantry.length} items, mood, time & budget</h3>
-    <div class="field"><label>Meal</label><div class="chips scroll">${Object.keys(P.SLOT_LABEL).map((s) => `<button class="chip ${slot === s ? 'on' : ''}" data-slot="${s}">${P.SLOT_EMOJI[s]} ${P.SLOT_LABEL[s]}</button>`).join('')}</div></div>
-    <div class="field"><label>I feel…</label><div class="chips scroll">${FEELS.map((f) => `<button class="chip ${filt.feel === f.id ? 'on' : ''}" data-feel="${f.id}">${f.e} ${f.l}</button>`).join('')}</div></div>
-    <div class="field"><label>Time & budget</label><div class="chips scroll">${TIMES.map((t) => `<button class="chip ${filt.mins === t.v ? 'on' : ''}" data-mins="${t.v}">⏱ ${t.l}</button>`).join('')}${BUDGETS.map((t) => `<button class="chip ${filt.budget === t.v ? 'on' : ''}" data-budget="${t.v}">💴 ${t.l}</button>`).join('')}</div></div>
-    <div class="mt16">${sug.map(({ r, have, total, missing }, i) => `<a class="rwide" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none">
-      <div class="thumb ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div>
-      <div class="grow"><div class="row between"><b class="ellipsis">${i === 0 ? '⭐ ' : ''}${UI.esc(r.name)}</b></div>
-      <div class="muted small">${r.mins} min · ${r.kcal} kcal · ${r.protein} g P · ¥${r.cost}</div>
-      <div class="match" style="color:${have === total ? 'var(--green)' : 'var(--amber)'}">${have === total ? 'Ready to make ✓' : `Missing: ${missing.map((m) => ING[m.id]?.name.split(' (')[0]).slice(0, 2).join(', ')}${missing.length > 2 ? '…' : ''}`}</div></div></a>`).join('')}</div>
-    ${filt.feel === 'tired' ? '<a class="btn block mt8" href="#cook/delivery">📦 Or order halal delivery</a>' : ''}
-  </div>
+  <label class="searchbar">${UI.ICON.search}<input id="rq" type="search" placeholder="Search recipes or ingredients" value="${UI.esc(filt.q)}" autocomplete="off"></label>
 
-  ${planTeaser()}
+  ${filt.q ? '' : `<div class="row between" style="margin:18px 2px 10px"><div><div style="font-weight:650;font-size:18px">${P.SLOT_LABEL[slot]} ideas</div><div class="small muted">${active.length ? active.join(' · ') : `From your ${st.pantry.length} pantry items`}</div></div>
+    <button class="btn sm" data-filters>${UI.ICON.sliders}<span>Filters${active.length ? ` · ${active.length}` : ''}</span></button></div>
+  <div class="carousel" role="list">${sug.map(({ r, have, total, missing }) => { const a = art(r); return `<a class="ccard" role="listitem" href="#cook/r/${r.id}">
+      <div class="ph-wrap ${a.cls}" style="${a.style}">${a.emoji}<span class="ready ${have === total ? 'yes' : ''}">${have === total ? 'Ready' : `Need ${missing.length}`}</span></div>
+      <div class="cc-body"><div class="cc-name">${UI.esc(r.name)}</div><div class="cc-meta">${r.mins} min · ${r.kcal} kcal · ${r.protein} g protein</div></div></a>`; }).join('')}</div>
+  ${filt.feel === 'tired' ? '<a class="btn block mt8" href="#cook/delivery">Too tired? Order halal delivery</a>' : ''}
+  ${planTeaser()}`}
 
-  <div class="section-title">Cookbook <span class="muted small">${RECIPES.length} recipes</span></div>
-  <div class="row mb12"><input id="rq" placeholder="Search recipes or ingredients" value="${UI.esc(filt.q)}"></div>
-  <div class="chips scroll mb12">${[['all', '✨ All'], ['fav', '❤️ Favourites'], ['breakfast', '🍳 Breakfast'], ['lunch', '🌯 Lunch'], ['dinner', '🍛 Dinner'], ['snack', '🥤 Snacks'], ['nocook', '🥄 No-cook'], ['protein', '💪 High protein'], ['ramadan', '🌙 Suhoor & iftar']].map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
-  <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1"><span class="e">🔍</span>Nothing found</div>'}</div>
+  <div class="chips scroll mb12 ${filt.q ? 'mt16' : ''}">${CATS.map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
+  <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1">No recipes match. Try another filter.</div>'}</div>
 
-  <a class="card cool glow mt16" href="#cook/delivery" style="display:block;color:inherit;text-decoration:none"><div class="kicker">Too tired to cook?</div><h3>📦 Halal delivery picks</h3><p class="muted small">Meituan / Ele.me orders that still hit your protein. Still counts for XP.</p></a>`;
+  <a class="list-row mt16" href="#cook/delivery"><span class="ico">${UI.ICON.bag}</span><span class="grow"><b>Halal delivery picks</b><span class="small muted">Meituan and Ele.me orders that still hit your protein</span></span><span class="chev">${UI.ICON.chev}</span></a>`;
+}
+
+function filterSheet(rerender) {
+  const draw = () => `<h2>Filters</h2>
+    <div class="field"><label>Meal</label><div class="seg">${Object.keys(P.SLOT_LABEL).map((s) => `<button data-slot="${s}" class="${(filt.slot || P.currentSlot()) === s ? 'on' : ''}">${P.SLOT_LABEL[s].split(' ')[0]}</button>`).join('')}</div></div>
+    <div class="field"><label>How you feel</label><div class="chips">${FEELS.map((f) => `<button class="chip ${filt.feel === f.id ? 'on' : ''}" data-feel="${f.id}">${f.l}</button>`).join('')}</div></div>
+    <div class="field"><label>Time</label><div class="chips">${TIMES.map((t) => `<button class="chip ${filt.mins === t.v ? 'on' : ''}" data-mins="${t.v}">${t.l}</button>`).join('')}</div></div>
+    <div class="field"><label>Budget</label><div class="chips">${BUDGETS.map((t) => `<button class="chip ${filt.budget === t.v ? 'on' : ''}" data-budget="${t.v}">${t.l}</button>`).join('')}</div></div>
+    <div class="grid2 mt16"><button class="btn" data-reset-f>Reset</button><button class="btn primary" data-apply>Show ideas</button></div>`;
+  UI.openSheet(draw(), {
+    onMount: (sh, close) => {
+      const wire = () => {
+        sh.querySelectorAll('[data-slot]').forEach((b) => b.onclick = () => { filt.slot = b.dataset.slot; redraw(); });
+        sh.querySelectorAll('[data-feel]').forEach((b) => b.onclick = () => { filt.feel = filt.feel === b.dataset.feel ? null : b.dataset.feel; redraw(); });
+        sh.querySelectorAll('[data-mins]').forEach((b) => b.onclick = () => { const v = +b.dataset.mins; filt.mins = filt.mins === v ? null : v; redraw(); });
+        sh.querySelectorAll('[data-budget]').forEach((b) => b.onclick = () => { const v = +b.dataset.budget; filt.budget = filt.budget === v ? null : v; redraw(); });
+        sh.querySelector('[data-reset-f]').onclick = () => { Object.assign(filt, { slot: null, feel: null, mins: null, budget: null }); redraw(); };
+        sh.querySelector('[data-apply]').onclick = () => { close(); rerender(); };
+      };
+      const redraw = () => { const keep = sh.querySelector('.grabber'); sh.innerHTML = ''; sh.appendChild(keep); sh.insertAdjacentHTML('beforeend', draw()); wire(); UI.haptic(6); };
+      wire();
+    },
+    onClose: rerender,
+  });
 }
 
 function detail(r) {
@@ -235,10 +255,7 @@ export function bind(root, parts, { rerender }) {
   const sub = parts[0];
   if (!sub) {
     root.querySelector('[data-search]')?.addEventListener('click', () => import('./search.js').then((m) => m.open()));
-    root.querySelectorAll('[data-slot]').forEach((b) => b.onclick = () => { filt.slot = b.dataset.slot; rerender(); });
-    root.querySelectorAll('[data-feel]').forEach((b) => b.onclick = () => { filt.feel = filt.feel === b.dataset.feel ? null : b.dataset.feel; rerender(); });
-    root.querySelectorAll('[data-mins]').forEach((b) => b.onclick = () => { const v = +b.dataset.mins; filt.mins = filt.mins === v ? null : v; rerender(); });
-    root.querySelectorAll('[data-budget]').forEach((b) => b.onclick = () => { const v = +b.dataset.budget; filt.budget = filt.budget === v ? null : v; rerender(); });
+    root.querySelector('[data-filters]')?.addEventListener('click', () => filterSheet(rerender));
     root.querySelectorAll('[data-cat]').forEach((b) => b.onclick = () => { filt.cat = b.dataset.cat; rerender(); });
     const q = root.querySelector('#rq');
     q.addEventListener('input', () => {
@@ -337,10 +354,7 @@ export function planToday(slot) {
 function planTeaser() {
   const st = S.get(); const has = st.weekPlan && st.weekPlan.week === S.weekKey();
   const today = has ? ['breakfast', 'lunch', 'dinner'].map((sl) => planToday(sl)).filter(Boolean) : [];
-  return `<a class="card cool glow mt16" href="#cook/plan" style="display:block">
-    <div class="kicker">📅 This week’s meal plan</div>
-    ${has ? `<h3>Today: ${today.map((r) => r.emoji).join(' ')}</h3><p class="muted small">${today.map((r) => UI.esc(r.name)).join(' · ')}</p>`
-      : '<h3>Plan the week in one tap</h3><p class="muted small">Familiar favourites, small variations, one shopping list. No thinking at mealtime.</p>'}</a>`;
+  return `<a class="list-row mt12" href="#cook/plan"><span class="ico">${UI.ICON.calendar}</span><span class="grow"><b>${has ? 'Today’s plan' : 'Plan your week'}</b><span class="small muted ellipsis">${has ? today.map((r) => UI.esc(r.name)).join(' · ') : 'Favourites with small variations, one shopping list'}</span></span><span class="chev">${UI.ICON.chev}</span></a>`;
 }
 function planView() {
   const st = S.get(); const has = st.weekPlan && st.weekPlan.week === S.weekKey();
@@ -348,13 +362,13 @@ function planView() {
   const wk = S.weekKey();
   let cost = 0, kcal = 0;
   if (has) st.weekPlan.days.forEach((d) => PLAN_SLOTS.forEach((sl) => { const r = RECIPE[d[sl]]; if (r) { cost += r.cost; kcal += r.kcal; } }));
-  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Meal plan</h1><div class="sub">Week of ${S.prettyDate(wk, { day: 'numeric', month: 'short' })}</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Meal plan</h1><div class="sub"><span>Week of</span> ${S.prettyDate(wk, { day: 'numeric', month: 'short' })}</div></div></div>
   ${has ? `<div class="grid3 mb12"><div class="macro"><b>¥${cost}</b><span>whole week</span></div><div class="macro"><b>${Math.round(kcal / 7)}</b><span>kcal/day</span></div><div class="macro"><b>${planIngredients().filter((id) => !st.pantry.includes(id)).length}</b><span>to buy</span></div></div>
-    ${st.weekPlan.days.map((d, i) => { const k = S.addDays(wk, i); return `<div class="card tight" style="${i === todayIdx ? 'border-color:rgba(255,181,71,.55)' : ''}">
+    ${st.weekPlan.days.map((d, i) => { const k = S.addDays(wk, i); return `<div class="card tight" style="${i === todayIdx ? 'border-color:var(--line2)' : ''}">
       <div class="row between mb8"><b>${S.prettyDate(k, { weekday: 'long' })}${i === todayIdx ? ' · today' : ''}</b><span class="muted small">${PLAN_SLOTS.reduce((s, sl) => s + (RECIPE[d[sl]]?.kcal || 0), 0)} kcal</span></div>
-      ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row" style="padding:5px 0"><span style="width:22px">${P.SLOT_EMOJI[sl]}</span><a href="#cook/r/${r.id}" class="grow ellipsis" style="color:inherit;text-decoration:none">${r.emoji} ${UI.esc(r.name)}</a><button class="btn sm ghost" data-swap="${i}:${sl}" aria-label="Swap">🔄</button></div>`; }).join('')}
+      ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row" style="padding:5px 0"><span style="width:22px">${P.SLOT_EMOJI[sl]}</span><a href="#cook/r/${r.id}" class="grow ellipsis" style="color:inherit;text-decoration:none">${r.emoji} ${UI.esc(r.name)}</a><button class="icon-btn" style="width:32px;height:32px" data-swap="${i}:${sl}" aria-label="Swap meal">${UI.ICON.refresh}</button></div>`; }).join('')}
     </div>`; }).join('')}
     <div class="grid2 mt8"><button class="btn" data-genplan>🎲 Regenerate</button><button class="btn primary" data-planshop>🛒 Shopping list</button></div>`
     : `<div class="empty"><span class="e">📅</span>No plan for this week yet.</div><button class="btn primary block" data-genplan>✨ Generate my week</button>`}
-  <div class="notice mt12">Plans lean on your favourites and what’s in your pantry, with small variations so you don’t get bored. Tap 🔄 to swap any meal.</div>`;
+  <div class="notice mt12">Plans lean on your favourites and what’s in your pantry, with small variations so you don’t get bored. Tap the arrows to swap any meal.</div>`;
 }

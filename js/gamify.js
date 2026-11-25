@@ -1,6 +1,7 @@
 // XP, levels, streaks, quests, loot chests, badges.
 import * as S from './store.js';
 import * as UI from './ui.js';
+import { tr } from './i18n.js';
 import { TIPS } from './data/content.js';
 
 export const ESSENTIALS = [
@@ -14,7 +15,9 @@ export const ESSENTIALS = [
 ];
 export const STREAK_THRESHOLD = 5;
 
-export const TITLES = ['Rookie', 'Starter', 'Grinder', 'Consistent', 'Rebuilder', 'Machine', 'Iron Will', 'Phoenix', 'Unbreakable', 'Legend'];
+// One title per level band. They describe where the recovery is, not a rank.
+export const TITLES = ['Starting out', 'Finding a rhythm', 'Building the base', 'Steady', 'Strong routine', 'Rebuilt', 'Thriving', 'Unshakeable', 'Revived', 'Example to others'];
+export const TITLE_NOTE = ['Every day you open this counts.', 'Meals and wake time are starting to repeat.', 'The basics happen most days now.', 'Good days outnumber bad ones.', 'The routine runs without much thought.', 'Energy, appetite and sleep are back in your hands.', 'You are adding, not just repairing.', 'A bad week no longer breaks the habit.', 'This is your normal now.', 'Long-term consistency. Keep it simple.'];
 
 export function levelFromXp(xp) { let L = 1; while (xp >= threshold(L + 1)) L++; return L; }
 export function threshold(L) { return 50 * L * L - 50 * L; } // L1=0, L2=100, L3=300, L4=600...
@@ -209,11 +212,11 @@ export const BADGES = [
   { id: 'checkin4', e: '📊', n: 'Data driven', d: 'Check-ins in 4 different weeks', c: (st) => Object.keys(st.checkins).length >= 4 },
   { id: 'weigh', e: '⚖️', n: 'On the scale', d: 'First weigh-in', c: (st) => st.weights.length >= 1 },
   { id: 'gain1', e: '📈', n: '+1 kg', d: 'Gain 1 kg from start', c: (st) => st.weights.length && Math.max(...st.weights.map((w) => w.kg)) >= st.profile.startKg + 1 },
-  { id: 'gain4', e: '🏔️', n: 'Goal zone', d: 'Reach 66 kg', c: (st) => st.weights.some((w) => w.kg >= st.profile.goalKgMin) },
+  { id: 'gain4', e: '🏔️', n: 'Goal zone', d: 'Reach your goal weight', c: (st) => st.weights.some((w) => w.kg >= st.profile.goalKgMin) },
   { id: 'doctor', e: '🩺', n: 'Proactive', d: 'Log a doctor visit', c: (st) => st.medical.visits.length >= 1 },
   { id: 'lab', e: '🧪', n: 'Know your numbers', d: 'Log a lab result', c: (st) => st.medical.labs.length >= 1 },
-  { id: 'loot5', e: '🎁', n: 'Treasure hunter', d: 'Open 5 chests', c: (st) => Object.keys(st.game.lootOpened).length >= 5 },
-  { id: 'legend', e: '🌟', n: 'Lucky', d: 'Find a legendary chest', c: (st) => Object.values(st.game.lootOpened).some((l) => l.rarity === 'LEGENDARY') },
+  { id: 'challenge1', e: '🎯', n: 'Challenge done', d: 'Finish a weekly challenge', c: (st) => Object.values(st.game.challenges || {}).some((c) => c.done) },
+  { id: 'challenge4', e: '🏆', n: 'Four for four', d: 'Finish 4 weekly challenges', c: (st) => Object.values(st.game.challenges || {}).filter((c) => c.done).length >= 4 },
   { id: 'early', e: '🌅', n: 'Early bird', d: 'Asleep before 1 am', c: (st) => Object.values(st.days).some((d) => { const b = S.minutesOf(d.sleep?.bed); return b != null && (b >= 20 * 60 || b <= 60); }) },
   { id: 'level5', e: '🎖️', n: 'Level 5', d: 'Reach level 5', c: (st) => levelFromXp(st.game.xp) >= 5 },
   { id: 'level10', e: '🏅', n: 'Level 10', d: 'Reach level 10', c: (st) => levelFromXp(st.game.xp) >= 10 },
@@ -225,8 +228,8 @@ export function checkBadges() {
   }
   if (!fresh.length) return;
   S.save();
-  if (fresh.length <= 2) fresh.forEach((b) => setTimeout(() => UI.toast(`Badge unlocked: ${b.n}`, b.e), 500));
-  else setTimeout(() => UI.toast(`${fresh.length} badges unlocked! ${fresh.map((b) => b.e).join('')}`, '🏅'), 500);
+  if (fresh.length === 1) setTimeout(() => UI.toast(`${tr('Milestone')}: ${tr(fresh[0].n)}`), 500);
+  else if (fresh.length > 1) setTimeout(() => UI.toast(`${fresh.length} milestones reached`), 500);
 }
 function safe(fn) { try { return fn(); } catch (e) { return false; } }
 

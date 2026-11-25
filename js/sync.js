@@ -75,6 +75,8 @@ export function merge(local, remote) {
     badges: { ...rg.badges, ...lg.badges },
     lootOpened: { ...rg.lootOpened, ...lg.lootOpened },
     frozen: { ...rg.frozen, ...lg.frozen },
+    challenges: { ...rg.challenges, ...lg.challenges },
+    moments: { ...rg.moments, ...lg.moments },
   };
   out.createdAt = Math.min(local.createdAt || Date.now(), remote.createdAt || Date.now());
   out.editedAt = Math.max(local.editedAt || 0, remote.editedAt || 0);

@@ -13,12 +13,14 @@ import * as Native from './native.js';
 import { reminderList } from './ics.js';
 import * as Cloud from './cloud.js';
 import * as A11y from './a11y.js';
-import { t, locale, dir } from './i18n.js';
+import { t, locale, dir, loadCatalog, translateTree } from './i18n.js';
 import { applyRemoteContent } from './content.js';
 import * as Theme from './theme.js';
 import * as Prayer from './prayer.js';
+import * as Progress from './progress.js';
 
 await Native.restoreStorage();
+await loadCatalog();
 document.documentElement.lang = locale; document.documentElement.dir = dir;
 S.load();
 Theme.apply();
@@ -46,7 +48,7 @@ let lastScroll = {};
 export function render({ keepScroll = false } = {}) {
   const app = UI.$('#app');
   const st = S.get();
-  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); UI.stripEmoji(app); return; }
+  if (!st.onboarded) { app.innerHTML = Onboard.render(); Onboard.bind(app, () => { render(); }); UI.stripEmoji(app); translateTree(app); return; }
   const r = route();
   const tab = TABS.find((t) => t.id === r.tab);
   const y = window.scrollY;
@@ -56,14 +58,16 @@ export function render({ keepScroll = false } = {}) {
   try { body = tab.view.render(r.parts, { night: nightMode }); }
   catch (e) { logError(e, 'render:' + r.tab); body = crashCard(); }
   app.innerHTML = `<main class="screen" id="screen">${body}</main>
-    <nav class="tabbar"><div class="brand"><span>🔥</span>Revive</div>${TABS.map((t, i) => `<a class="tab ${t.id === r.tab ? 'active' : ''}" href="#${t.id}" aria-label="${t.label}">${t.icon}<span>${t.label}</span>${IS_DESKTOP ? `<kbd>${i + 1}</kbd>` : ''}</a>`).join('')}${IS_DESKTOP ? '<div class="side-foot">Private · stored only on this PC<br>Keys: 1–5 tabs · Esc closes</div>' : ''}</nav>`;
+    <nav class="tabbar"><div class="brand"><img src="icons/mark.svg" alt="" width="26" height="26">Revive</div>${TABS.map((t, i) => `<a class="tab ${t.id === r.tab ? 'active' : ''}" href="#${t.id}" aria-label="${t.label}">${t.icon}<span>${t.label}</span>${IS_DESKTOP ? `<kbd>${i + 1}</kbd>` : ''}</a>`).join('')}${IS_DESKTOP ? '<div class="side-foot">Private · stored only on this PC<br>Keys: 1–5 tabs · Esc closes</div>' : ''}</nav>`;
   try { tab.view.bind && tab.view.bind(UI.$('#screen'), r.parts, { rerender: () => render({ keepScroll: true }) }); }
   catch (e) { logError(e, 'bind:' + r.tab); }
   UI.$('#screen [data-crash-home]')?.addEventListener('click', () => { location.hash = 'today'; render(); });
   UI.$('#screen [data-crash-reload]')?.addEventListener('click', () => location.reload());
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, lastScroll[location.hash] || 0);
   UI.stripEmoji(UI.$('#screen'));
+  translateTree(UI.$('#app'));
   countUp();
+  try { Progress.evaluate(); Progress.checkMoments(); } catch (e) { logError(e, 'progress'); }
   document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
 }
 
@@ -138,6 +142,19 @@ function onForeground() {
 }
 
 // Native: keep daily notifications in step with the (shifting) sleep plan — once a day.
+// Reminders. Wake, wind-down and bedtime repeat daily. Everything else is scheduled as one-off
+// alerts for the next three days, so anything already done today is simply left out.
+// iOS keeps at most 64 pending alerts: 3 repeating + ~30 day alerts + ~24 prayer/fasting alerts.
+const REPEATING = ['wake', 'winddown', 'bed'];
+function doneAlready(id, d, st) {
+  if (['breakfast', 'lunch', 'dinner'].includes(id)) return !!d.checks[id];
+  if (id === 'snack') return (d.meals || []).some((m) => m.slot === 'snack');
+  if (id === 'water1') return (d.waterMl || 0) >= st.profile.waterGoalMl * 0.4;
+  if (id === 'water2') return (d.waterMl || 0) >= st.profile.waterGoalMl * 0.8;
+  if (id === 'kegel1') return (d.pf || 0) >= 1;
+  if (id === 'kegel2') return (d.pf || 0) >= 2;
+  return false;
+}
 export async function syncReminders(force = false) {
   const st = S.get();
   if (!Native.isNative || !st.onboarded || !st.nativeReminders) return;
@@ -147,14 +164,25 @@ export async function syncReminders(force = false) {
   const fastingNow = Prayer.fasting();
   // While fasting, daytime meal / water / coffee reminders would be wrong — the fasting alerts replace them.
   const FAST_OFF = ['breakfast', 'lunch', 'snack', 'dinner', 'water1', 'water2', 'coffee'];
-  const n = await Native.scheduleReminders(reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: (st.reminderPrefs[r.id] ?? r.on) && !(fastingNow && FAST_OFF.includes(r.id)) })));
-  await Native.scheduleTimed(Prayer.upcomingAlerts(5)); // iOS keeps at most 64 pending alerts
+  const list = reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: (st.reminderPrefs[r.id] ?? r.on) && !(fastingNow && FAST_OFF.includes(r.id)) }));
+  const n = await Native.scheduleReminders(list.filter((r) => REPEATING.includes(r.id)));
+  const today = S.dayKey(); const timed = [];
+  for (let i = 0; i < 3; i++) {
+    const k = S.addDays(today, i); const d = st.days[k] || { checks: {}, meals: [] };
+    for (const r of list) {
+      if (!r.on || REPEATING.includes(r.id) || (i === 0 && doneAlready(r.id, d, st))) continue;
+      const at = S.keyToDate(k); const m = S.minutesOf(r.time);
+      at.setMinutes(m + (m < S.DAY_ROLLOVER_HOUR * 60 ? 1440 : 0));
+      timed.push({ at, title: r.title, body: r.desc, route: r.route });
+    }
+  }
+  await Native.scheduleTimed([...timed, ...Prayer.upcomingAlerts(3)]);
   st.remindersSyncedFor = S.dayKey(); S.save();
-  return n;
+  return n + timed.length;
 }
 window.__syncReminders = syncReminders;
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') { S.saveNow(); hiddenAt = Date.now(); }
+  if (document.visibilityState === 'hidden') { S.saveNow(); hiddenAt = Date.now(); syncReminders(true); }
   else {
     // Re-lock after 60s in the background
     if (S.get().lock.enabled && Date.now() - hiddenAt > 60_000) { Lock.lockNow(); Lock.showLock(onForeground); }
@@ -236,7 +264,7 @@ function boot() {
   Lock.showLock(() => {
     if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
     render();
-    if (S.get().onboarded) setTimeout(() => G.maybeWeeklyReview(), 900);
+    if (S.get().onboarded) { setTimeout(() => G.maybeWeeklyReview(), 900); Progress.maybeMonthlyRecap(); }
   });
   S.requestPersist();
   Cloud.init();

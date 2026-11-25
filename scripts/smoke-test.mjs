@@ -12,6 +12,19 @@ const test = async (name, fn) => {
   try { await fn(); results.push(['ok', name]); } catch (e) { results.push(['FAIL', name, e.message]); }
 };
 
+// Every module must parse — the views are not imported below, so check them directly.
+{
+  const { readdirSync, readFileSync } = await import('node:fs');
+  const { execFileSync } = await import('node:child_process');
+  const walk = (d) => readdirSync(new URL(d, import.meta.url), { withFileTypes: true }).flatMap((e) => e.isDirectory() ? (e.name === 'vendor' ? [] : walk(`${d}${e.name}/`)) : e.name.endsWith('.js') ? [`${d}${e.name}`] : []);
+  await test('all modules parse', () => {
+    for (const f of walk('../js/')) {
+      try { execFileSync(process.execPath, ['--input-type=module', '--check'], { input: readFileSync(new URL(f, import.meta.url)), stdio: ['pipe', 'pipe', 'pipe'] }); }
+      catch (e) { throw new Error(`${f}: ${String(e.stderr).split('\n').find((l) => l.includes('Error')) || 'syntax error'}`); }
+    }
+  });
+}
+
 const { RECIPES } = await import('../js/data/recipes.js');
 const { ING } = await import('../js/data/ingredients.js');
 const { TIPS, STORIES, CHECKINS, scoreCheckin } = await import('../js/data/content.js');
@@ -117,6 +130,14 @@ await test('weight trend projects a goal date', () => {
   assert.ok(tr.perWeek > 0.2 && tr.perWeek < 0.35, 'rate ' + tr.perWeek);
   assert.ok(tr.eta instanceof Date && tr.eta.getFullYear() === 2027);
   assert.equal(weightTrend([{ date: '2026-10-01', kg: 62 }], 66), null);
+});
+
+await test('pending alerts stay under the iOS limit of 64', async () => {
+  const { reminderList } = await import('../js/ics.js');
+  S.get().prayer = { enabled: true, notify: true, city: 'beijing', ramadan: 'on' };
+  const repeating = 3; const timed = (reminderList().length - repeating) * 3; const prayer = Pr.upcomingAlerts(3, new Date()).length;
+  assert.ok(repeating + timed + prayer <= 64, `${repeating} + ${timed} + ${prayer}`);
+  assert.ok(reminderList().every((r) => !/\p{Extended_Pictographic}/u.test(r.title)), 'no emoji in titles');
 });
 
 const { merge } = await import('../js/sync.js');

@@ -1,7 +1,7 @@
 {
   "name": "revive-desktop",
   "productName": "Revive",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Revive \u2014 private recovery companion",
   "author": "Wajid Kanwar Abdul",
   "license": "UNLICENSED",
@@ -60,7 +60,7 @@
       "identityName": "REPLACE_WITH_PARTNER_CENTER_IDENTITY_NAME",
       "publisher": "CN=REPLACE_WITH_PARTNER_CENTER_PUBLISHER_ID",
       "applicationId": "Revive",
-      "backgroundColor": "#0b0f1a",
+      "backgroundColor": "#0b0c0e",
       "languages": [
         "en-US"
       ]
