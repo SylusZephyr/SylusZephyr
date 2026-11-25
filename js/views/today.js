@@ -212,7 +212,7 @@ export function bind(root, _, { rerender }) {
   const k = S.dayKey(); const d = S.day(k);
   root.querySelector('[data-search]')?.addEventListener('click', () => Search.open());
   root.querySelectorAll('[data-ess]').forEach((b) => b.addEventListener('click', (ev) => {
-    const id = b.dataset.ess; const on = !d.checks[id]; G.setEssential(id, on, ev); G.updateBestStreak(); G.evaluateQuests(undefined, false, true);
+    const id = b.dataset.ess; const on = !d.checks[id]; G.setEssential(id, on, ev); G.updateBestStreak();
     b.classList.toggle('done', on); setTimeout(rerender, 250);
   }));
   root.querySelector('[data-water]')?.addEventListener('click', (ev) => {

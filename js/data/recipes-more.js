@@ -4,7 +4,7 @@ const R = (o) => ({ fav: false, tags: [], feel: ['ok'], ...o });
 
 export const MORE_RECIPES = [
   R({
-    id: 'chicken_seekh', name: 'Chicken Seekh Kebabs', emoji: '🍢', bg: ['#c2410c', '#431407'],
+    id: 'chicken_seekh', name: 'Chicken Seekh Kebabs', emoji: '', bg: ['#c2410c', '#431407'],
     method: 'airfryer', meals: ['dinner', 'lunch'], mins: 20, cost: 12, kcal: 520, protein: 42,
     tags: ['desi', 'smoky', 'high-protein'], feel: ['ok', 'energetic'],
     desc: 'Spiced chicken mince pressed onto skewers and charred in the air fryer. Wrap in naan or eat with salad.',
@@ -17,7 +17,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'chicken_65', name: 'Air-Fryer Chicken 65', emoji: '🌶️', bg: ['#dc2626', '#450a0a'],
+    id: 'chicken_65', name: 'Air-Fryer Chicken 65', emoji: '', bg: ['#dc2626', '#450a0a'],
     method: 'airfryer', meals: ['snack', 'dinner'], mins: 18, cost: 12, kcal: 480, protein: 44,
     tags: ['spicy', 'crispy', 'desi'], feel: ['energetic'],
     desc: 'Restaurant-style spicy chicken bites with a crisp coating — no deep-frying.',
@@ -29,7 +29,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'fish_tikka', name: 'Tandoori Fish Tikka', emoji: '🐟', bg: ['#ea580c', '#7c2d12'],
+    id: 'fish_tikka', name: 'Tandoori Fish Tikka', emoji: '', bg: ['#ea580c', '#7c2d12'],
     method: 'airfryer', meals: ['dinner'], mins: 15, cost: 14, kcal: 330, protein: 38,
     tags: ['desi', 'light', 'high-protein'], feel: ['ok'],
     desc: 'Firm white fish in a tandoori yogurt marinade — light, quick and full of flavour.',
@@ -41,7 +41,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'omelette_roll', name: 'Masala Omelette Roll', emoji: '🌯', bg: ['#f59e0b', '#78350f'],
+    id: 'omelette_roll', name: 'Masala Omelette Roll', emoji: '', bg: ['#f59e0b', '#78350f'],
     method: 'airfryer', meals: ['breakfast'], mins: 12, cost: 5, kcal: 480, protein: 24,
     tags: ['desi', 'savory', 'street-food'], feel: ['ok', 'tired'],
     desc: 'Street-style egg roll: masala omelette baked onto a tortilla, rolled with onion and ketchup.',
@@ -54,7 +54,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'palak_paratha', name: 'Spinach & Cheese Paratha', emoji: '🥬', bg: ['#16a34a', '#14532d'],
+    id: 'palak_paratha', name: 'Spinach & Cheese Paratha', emoji: '', bg: ['#16a34a', '#14532d'],
     method: 'airfryer', meals: ['breakfast', 'lunch'], mins: 15, cost: 7, kcal: 560, protein: 20,
     tags: ['desi', 'crispy', 'cheesy'], feel: ['ok'],
     desc: 'Two frozen parathas sandwiching spinach and melted cheese — iron and calcium in a crispy package.',
@@ -67,7 +67,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'gobi_roast', name: 'Masala Roast Cauliflower', emoji: '🥦', bg: ['#ca8a04', '#422006'],
+    id: 'gobi_roast', name: 'Masala Roast Cauliflower', emoji: '', bg: ['#ca8a04', '#422006'],
     method: 'airfryer', meals: ['snack', 'dinner'], mins: 18, cost: 6, kcal: 240, protein: 9,
     tags: ['desi', 'crispy', 'light'], feel: ['ok'],
     desc: 'Cauliflower florets roasted crispy with cumin and chili. A side that disappears fast.',
@@ -79,7 +79,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'malai_tikka', name: 'Creamy Malai Chicken Tikka', emoji: '🍗', bg: ['#e7e5e4', '#57534e'],
+    id: 'malai_tikka', name: 'Creamy Malai Chicken Tikka', emoji: '', bg: ['#e7e5e4', '#57534e'],
     method: 'airfryer', meals: ['dinner'], mins: 20, cost: 16, kcal: 560, protein: 46,
     tags: ['desi', 'creamy', 'mild'], feel: ['ok', 'lowappetite'],
     desc: 'Mild, creamy chicken with cheese, yogurt and garlic — gentle on a low-appetite day.',
@@ -91,7 +91,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'keema_naan', name: 'Keema Cheese Naan', emoji: '🥙', bg: ['#9a3412', '#1c0a00'],
+    id: 'keema_naan', name: 'Keema Cheese Naan', emoji: '', bg: ['#9a3412', '#1c0a00'],
     method: 'airfryer', meals: ['lunch', 'dinner'], mins: 18, cost: 16, kcal: 780, protein: 42,
     tags: ['desi', 'cheesy', 'comfort'], feel: ['energetic'],
     desc: 'Spiced beef mince and cheese baked on naan until bubbling. Big, filling, easy calories.',
@@ -103,7 +103,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'peri_chicken', name: 'Peri-Peri Chicken & Wedges', emoji: '🍟', bg: ['#b91c1c', '#7c2d12'],
+    id: 'peri_chicken', name: 'Peri-Peri Chicken & Wedges', emoji: '', bg: ['#b91c1c', '#7c2d12'],
     method: 'airfryer', meals: ['dinner'], mins: 25, cost: 14, kcal: 720, protein: 42,
     tags: ['spicy', 'comfort', 'one-tray'], feel: ['ok', 'energetic'],
     desc: 'Nando’s-style night in: lemon-chili chicken and potato wedges in the same basket.',
@@ -115,7 +115,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'shawarma_pita', name: 'Chicken Shawarma Pita', emoji: '🥙', bg: ['#a16207', '#422006'],
+    id: 'shawarma_pita', name: 'Chicken Shawarma Pita', emoji: '', bg: ['#a16207', '#422006'],
     method: 'airfryer', meals: ['lunch'], mins: 16, cost: 13, kcal: 620, protein: 40,
     tags: ['street-food', 'creamy'], feel: ['ok'],
     desc: 'Cumin-garlic chicken in a warm pita with garlic yogurt, cucumber and tomato.',
@@ -128,7 +128,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'egg_bhurji_toast', name: 'Egg Bhurji on Toast', emoji: '🍳', bg: ['#facc15', '#713f12'],
+    id: 'egg_bhurji_toast', name: 'Egg Bhurji on Toast', emoji: '', bg: ['#facc15', '#713f12'],
     method: 'airfryer', meals: ['breakfast'], mins: 10, cost: 4, kcal: 430, protein: 22,
     tags: ['desi', 'savory'], feel: ['tired', 'ok'],
     desc: 'Desi scrambled eggs with onion, tomato and chili — baked in a mug, served on crunchy toast.',
@@ -140,7 +140,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'bombay_potatoes', name: 'Bombay Potato Bites', emoji: '🥔', bg: ['#d97706', '#451a03'],
+    id: 'bombay_potatoes', name: 'Bombay Potato Bites', emoji: '', bg: ['#d97706', '#451a03'],
     method: 'airfryer', meals: ['snack', 'dinner'], mins: 20, cost: 4, kcal: 300, protein: 6,
     tags: ['desi', 'crispy', 'comfort'], feel: ['ok'],
     desc: 'Crispy potato cubes tossed in cumin, chili and lemon. Side dish or snack.',
@@ -152,7 +152,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'fish_tacos', name: 'Crispy Fish Tacos', emoji: '🌮', bg: ['#0891b2', '#164e63'],
+    id: 'fish_tacos', name: 'Crispy Fish Tacos', emoji: '', bg: ['#0891b2', '#164e63'],
     method: 'airfryer', meals: ['lunch', 'dinner'], mins: 16, cost: 15, kcal: 560, protein: 34,
     tags: ['crispy', 'fresh'], feel: ['ok'],
     desc: 'Air-fried fish in warm tortillas with crunchy cabbage and a lemon-mayo sauce.',
@@ -164,7 +164,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'chicken_satay', name: 'Chicken Satay Skewers', emoji: '🥜', bg: ['#a16207', '#3f2a06'],
+    id: 'chicken_satay', name: 'Chicken Satay Skewers', emoji: '', bg: ['#a16207', '#3f2a06'],
     method: 'airfryer', meals: ['dinner', 'snack'], mins: 20, cost: 13, kcal: 590, protein: 44,
     tags: ['sweet', 'savory', 'high-protein'], feel: ['ok', 'energetic'],
     desc: 'Soy-honey chicken skewers with a quick peanut sauce. Calorie-dense and very moreish.',
@@ -176,7 +176,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'falafel_bites', name: 'Baked Chickpea Falafel', emoji: '🧆', bg: ['#65a30d', '#1a2e05'],
+    id: 'falafel_bites', name: 'Baked Chickpea Falafel', emoji: '', bg: ['#65a30d', '#1a2e05'],
     method: 'airfryer', meals: ['lunch', 'snack'], mins: 22, cost: 8, kcal: 420, protein: 17,
     tags: ['crispy', 'vegetarian'], feel: ['ok'],
     desc: 'Mashed chickpeas with herbs and cumin, shaped and air-fried. Stuff into pita with yogurt.',
@@ -188,7 +188,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'mango_parfait', name: 'Mango Yogurt Parfait', emoji: '🥭', bg: ['#f59e0b', '#9a3412'],
+    id: 'mango_parfait', name: 'Mango Yogurt Parfait', emoji: '', bg: ['#f59e0b', '#9a3412'],
     method: 'nocook', meals: ['breakfast', 'snack'], mins: 3, cost: 9, kcal: 420, protein: 20,
     tags: ['sweet', 'creamy'], feel: ['tired', 'lowappetite'],
     desc: 'Layers of thick yogurt, mango and granola. Tastes like dessert, eats like breakfast.',
@@ -196,7 +196,7 @@ export const MORE_RECIPES = [
     steps: [{ t: 'In a glass: yogurt, mango, granola, repeat. Drizzle honey. Eat straight away so it stays crunchy.' }],
   }),
   R({
-    id: 'date_balls', name: 'Date & Nut Energy Balls', emoji: '🟤', bg: ['#78350f', '#1c0a00'],
+    id: 'date_balls', name: 'Date & Nut Energy Balls', emoji: '', bg: ['#78350f', '#1c0a00'],
     method: 'nocook', meals: ['snack'], mins: 10, cost: 12, kcal: 380, protein: 10,
     tags: ['sweet', 'prep-ahead', 'grab-and-go'], feel: ['tired', 'lowappetite'],
     desc: 'Dates, nuts, oats and peanut butter rolled into bites. Make 10, keep in the fridge all week.',
@@ -208,7 +208,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'caesar_wrap', name: 'Chicken Caesar Wrap', emoji: '🥗', bg: ['#4d7c0f', '#1a2e05'],
+    id: 'caesar_wrap', name: 'Chicken Caesar Wrap', emoji: '', bg: ['#4d7c0f', '#1a2e05'],
     method: 'nocook', meals: ['lunch'], mins: 5, cost: 12, kcal: 610, protein: 38,
     tags: ['fresh', 'grab-and-go', 'high-protein'], feel: ['tired', 'ok'],
     desc: 'Ready chicken, lettuce, cheese and a quick lemon-mayo dressing. Zero cooking.',
@@ -219,7 +219,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'tuna_kachumber', name: 'Tuna Kachumber Bowl', emoji: '🥗', bg: ['#0e7490', '#082f49'],
+    id: 'tuna_kachumber', name: 'Tuna Kachumber Bowl', emoji: '', bg: ['#0e7490', '#082f49'],
     method: 'nocook', meals: ['lunch', 'dinner'], mins: 6, cost: 12, kcal: 430, protein: 34,
     tags: ['fresh', 'light', 'high-protein'], feel: ['tired', 'ok'],
     desc: 'Crunchy cucumber-tomato-onion salad with lemon and chili, topped with tuna. Add rice for more energy.',
@@ -230,7 +230,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'date_shake', name: 'Banana Date Milkshake', emoji: '🥛', bg: ['#a16207', '#422006'],
+    id: 'date_shake', name: 'Banana Date Milkshake', emoji: '', bg: ['#a16207', '#422006'],
     method: 'nocook', meals: ['snack', 'breakfast'], mins: 4, cost: 6, kcal: 480, protein: 15,
     tags: ['sweet', 'drinkable'], feel: ['tired', 'lowappetite'],
     desc: 'Sweet, thick and filling — dates and banana mashed into cold milk. A Ramadan classic.',
@@ -241,7 +241,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'stuffed_peppers', name: 'Stuffed Peppers', emoji: '🫑', bg: ['#15803d', '#052e16'],
+    id: 'stuffed_peppers', name: 'Stuffed Peppers', emoji: '', bg: ['#15803d', '#052e16'],
     method: 'airfryer', meals: ['dinner'], mins: 22, cost: 15, kcal: 620, protein: 32,
     tags: ['cheesy', 'comfort'], feel: ['ok'],
     desc: 'Peppers filled with spiced mince, rice and cheese. Looks impressive, takes 5 minutes of work.',
@@ -254,7 +254,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'sweet_potato_fries', name: 'Sweet Potato Fries & Dip', emoji: '🍠', bg: ['#ea580c', '#431407'],
+    id: 'sweet_potato_fries', name: 'Sweet Potato Fries & Dip', emoji: '', bg: ['#ea580c', '#431407'],
     method: 'airfryer', meals: ['snack'], mins: 20, cost: 5, kcal: 340, protein: 6,
     tags: ['crispy', 'sweet'], feel: ['ok', 'lowappetite'],
     desc: 'Crispy-edged sweet potato fries with a garlic yogurt dip.',
@@ -266,7 +266,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'mushroom_toastie', name: 'Mushroom & Cheese Toastie', emoji: '🍄', bg: ['#57534e', '#1c1917'],
+    id: 'mushroom_toastie', name: 'Mushroom & Cheese Toastie', emoji: '', bg: ['#57534e', '#1c1917'],
     method: 'airfryer', meals: ['breakfast', 'lunch'], mins: 12, cost: 7, kcal: 470, protein: 20,
     tags: ['cheesy', 'crispy'], feel: ['ok'],
     desc: 'Garlicky mushrooms and melted cheese pressed between crisp toast.',
@@ -278,7 +278,7 @@ export const MORE_RECIPES = [
     ],
   }),
   R({
-    id: 'green_chutney_chicken', name: 'Hariyali Chicken (Green Herb)', emoji: '🌿', bg: ['#15803d', '#14532d'],
+    id: 'green_chutney_chicken', name: 'Hariyali Chicken (Green Herb)', emoji: '', bg: ['#15803d', '#14532d'],
     method: 'airfryer', meals: ['dinner', 'lunch'], mins: 20, cost: 14, kcal: 500, protein: 45,
     tags: ['desi', 'fresh', 'high-protein'], feel: ['ok', 'energetic'],
     desc: 'Chicken in a bright coriander-mint-yogurt marinade. Fresh, tangy and not heavy.',

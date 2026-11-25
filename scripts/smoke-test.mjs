@@ -27,7 +27,7 @@ const test = async (name, fn) => {
 
 const { RECIPES } = await import('../js/data/recipes.js');
 const { ING } = await import('../js/data/ingredients.js');
-const { TIPS, STORIES, CHECKINS, scoreCheckin } = await import('../js/data/content.js');
+const { TIPS, CHECKINS, scoreCheckin } = await import('../js/data/content.js');
 const { FOODS } = await import('../js/data/foods.js');
 const { PHOTOS } = await import('../js/data/photos.js');
 
@@ -47,9 +47,9 @@ await test('photo files are referenced correctly', async () => {
   const { existsSync } = await import('node:fs');
   for (const [id, p] of Object.entries(PHOTOS)) assert.ok(existsSync(new URL('../' + p.src, import.meta.url)), id);
 });
-await test('tips and stories are well formed', () => {
+await test('tips are well formed', () => {
   assert.equal(new Set(TIPS.map((t) => t.id)).size, TIPS.length);
-  for (const s of STORIES) assert.ok(s.slides === 'dynamic' || s.slides.length > 0, s.id);
+  for (const t of TIPS) assert.ok(t.title && t.body && t.cat, t.id);
 });
 await test('food list values are plausible', () => {
   for (const f of FOODS) assert.ok(f.kcal100 >= 0 && f.kcal100 < 950 && f.portionG > 0, f.name);
@@ -138,6 +138,14 @@ await test('pending alerts stay under the iOS limit of 64', async () => {
   const repeating = 3; const timed = (reminderList().length - repeating) * 3; const prayer = Pr.upcomingAlerts(3, new Date()).length;
   assert.ok(repeating + timed + prayer <= 64, `${repeating} + ${timed} + ${prayer}`);
   assert.ok(reminderList().every((r) => !/\p{Extended_Pictographic}/u.test(r.title)), 'no emoji in titles');
+});
+
+await test('migration 2 → 3 drops retired coins, chests and quests', () => {
+  const v2 = { version: 2, profile: {}, game: { xp: 120, coins: 40, lootOpened: { a: 1 } }, days: { '2026-01-01': { quests: [{ id: 'q' }], readTips: ['x'], meals: [], checks: { breakfast: true } } } };
+  const out = S.migrate(v2);
+  assert.equal(out.version, 3); assert.equal(out.game.xp, 120);
+  assert.ok(!('coins' in out.game) && !('lootOpened' in out.game));
+  assert.ok(!('quests' in out.days['2026-01-01']) && out.days['2026-01-01'].checks.breakfast);
 });
 
 const { merge } = await import('../js/sync.js');

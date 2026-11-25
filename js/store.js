@@ -35,7 +35,7 @@ export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'n
   return keyToDate(k).toLocaleDateString(lang === 'en' ? 'en-GB' : lang === 'zh' ? 'zh-CN' : lang === 'ur' ? 'ur-PK' : lang, opts);
 }
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 export const loadIssues = [];   // surfaced to the UI after boot (e.g. recovered from corrupt data)
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -76,7 +76,7 @@ function defaults() {
     savedTips: [], likedTips: [],
     storiesSeen: {},              // storyId -> dayKey
     game: {
-      xp: 0, coins: 0, freezes: 1, badges: {}, lootOpened: {}, bestStreak: 0,
+      xp: 0, freezes: 1, badges: {}, bestStreak: 0,
       lastLevel: 1, titles: [], equippedTitle: null, personalBests: {},
     },
     pf: { week: 1, sessions: [] }, // pelvic floor
@@ -132,6 +132,13 @@ const MIGRATIONS = {
     s.weights = s.weights.filter((w) => w && Number.isFinite(+w.kg) && /^\d{4}-\d{2}-\d{2}$/.test(w.date)).map((w) => ({ date: w.date, kg: +w.kg }));
     if (s.game) for (const k of ['xp', 'coins', 'freezes', 'bestStreak']) s.game[k] = Number.isFinite(+s.game[k]) ? Math.max(0, +s.game[k]) : 0;
     s.version = 2;
+    return s;
+  },
+  // 2 → 3: coins, loot chests and daily quests were retired in 4.0/6.0.
+  2: (s) => {
+    if (s.game) { delete s.game.coins; delete s.game.lootOpened; }
+    for (const d of Object.values(s.days || {})) if (d && typeof d === 'object') { delete d.quests; delete d.readTips; delete d.tipsRead; }
+    s.version = 3;
     return s;
   },
 };
@@ -196,7 +203,7 @@ export function day(k = dayKey()) {
   if (!state.days[k]) {
     state.days[k] = {
       checks: {}, meals: [], waterMl: 0, coffee: [], sleep: { bed: null, wake: null },
-      energy: null, mood: null, appetite: null, notes: '', quests: null, xpToday: 0, sex: null,
+      energy: null, mood: null, appetite: null, notes: '', xpToday: 0, sex: null,
     };
   }
   return state.days[k];

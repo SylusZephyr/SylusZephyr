@@ -28,7 +28,7 @@ S.setPersistHook((json) => { Native.persist(json); Cloud.schedulePush(); });
 Native.initChrome();
 applyRemoteContent();
 window.addEventListener('revive:content', () => { if (applyRemoteContent()) render({ keepScroll: true }); });
-window.addEventListener('revive:remote-update', () => { Theme.apply(); if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', '🔄'); });
+window.addEventListener('revive:remote-update', () => { Theme.apply(); if (!document.querySelector('.sheet, .cookmode, .trainer')) render({ keepScroll: true }); UI.toast('Synced from your other device', ''); });
 
 const TABS = [
   { id: 'today', label: t('tab.today'), icon: UI.ICON.home, view: Today },
@@ -87,13 +87,12 @@ function countUp() {
 window.addEventListener('scroll', () => { lastScroll[location.hash] = window.scrollY; }, { passive: true });
 window.addEventListener('hashchange', () => { UI.closeAllSheets(); render(); });
 
-// End-of-day bookkeeping: auto-credit 'no coffee after cutoff' if true, finish quests.
+// End-of-day bookkeeping: auto-credit 'no coffee after cutoff' when it held all day.
 function closeDay(k) {
   const d = S.get().days[k];
   if (d && !d.checks.caffeine && !d.coffee.some((c) => isAfterCutoff(c)) && G.essentialsDone(k) > 0) {
     d.checks.caffeine = true; G.award('ess_caffeine', 10, null, { k, silent: true });
-  }
-  G.evaluateQuests(k, true, true); S.save();
+  } S.save();
 }
 // Close any past days not yet closed (app wasn't open at rollover).
 function closePastDays() {
@@ -115,16 +114,16 @@ function logError(err, where = 'global') {
   console.error(where, err);
 }
 function crashCard() {
-  return `<div class="card danger" style="margin-top:40px;text-align:center"><div style="font-size:42px">🛠️</div><h3 class="mt8">${t('error.screen')}</h3>
+  return `<div class="card danger" style="margin-top:40px;text-align:center"><div style="font-size:42px"></div><h3 class="mt8">${t('error.screen')}</h3>
     <p class="muted small mt8">${t('error.safe')}</p>
     <div class="grid2 mt16"><button class="btn" data-crash-home>Back to Today</button><button class="btn primary" data-crash-reload>Reload</button></div></div>`;
 }
 let errorToastShown = false;
-window.addEventListener('error', (e) => { logError(e.error || e.message, 'window'); if (!errorToastShown) { errorToastShown = true; UI.toast('Something went wrong — your data is safe', '🛠️'); } });
+window.addEventListener('error', (e) => { logError(e.error || e.message, 'window'); if (!errorToastShown) { errorToastShown = true; UI.toast('Something went wrong — your data is safe', ''); } });
 window.addEventListener('unhandledrejection', (e) => logError(e.reason, 'promise'));
-window.addEventListener('revive:storage-full', () => UI.toast('Phone storage is almost full — older details were trimmed', '💾'));
-if (S.loadIssues.includes('recovered-corrupt')) setTimeout(() => UI.toast('Saved data could not be read. A copy was kept and the app started fresh.', '⚠️'), 800);
-if (S.loadIssues.includes('storage-unavailable')) setTimeout(() => UI.toast('Private browsing blocks storage — progress will not be saved', '⚠️'), 800);
+window.addEventListener('revive:storage-full', () => UI.toast('Phone storage is almost full — older details were trimmed', ''));
+if (S.loadIssues.includes('recovered-corrupt')) setTimeout(() => UI.toast('Saved data could not be read. A copy was kept and the app started fresh.', ''), 800);
+if (S.loadIssues.includes('storage-unavailable')) setTimeout(() => UI.toast('Private browsing blocks storage — progress will not be saved', ''), 800);
 
 // Re-render when the day rolls over or the app comes back to foreground.
 let lastDay = S.dayKey();
@@ -132,9 +131,8 @@ function onForeground() {
   if (S.dayKey() !== lastDay) { closeDay(lastDay); lastDay = S.dayKey(); }
   closePastDays();
   const frozen = G.applyFreezeIfNeeded();
-  if (frozen) UI.toast('Streak freeze used for yesterday ❄️ — streak saved!', '🧊');
+  if (frozen) UI.toast('Streak freeze used for yesterday — streak saved!', '');
   G.updateBestStreak();
-  G.evaluateQuests();
   G.dailyOpen();
   render({ keepScroll: true });
   G.maybeWeeklyReview();
@@ -208,7 +206,7 @@ document.addEventListener('keydown', (e) => {
   if (pinSheet) { if (/^[0-9]$/.test(e.key)) pinSheet.querySelector(`[data-k="${e.key}"]`)?.click(); if (e.key === 'Backspace') pinSheet.querySelector('[data-del]')?.click(); }
   if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !document.querySelector('.sheet'))) { e.preventDefault(); import('./views/search.js').then((m) => m.open()); return; }
   if (e.key === 'Escape') {
-    const fs = document.querySelector('.celebrate [data-close], .story-viewer [data-x], .cookmode [data-x], .trainer [data-x]');
+    const fs = document.querySelector('.celebrate [data-close], .cookmode [data-x], .trainer [data-x]');
     if (fs) fs.click(); else UI.closeAllSheets();
     return;
   }
@@ -237,7 +235,7 @@ document.addEventListener('touchend', (e) => {
 // PC/Android install prompt (Edge/Chrome): keep the event so "Install" can trigger it.
 let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; window.__canInstall = true; if (location.hash.startsWith('#me')) render({ keepScroll: true }); });
-window.addEventListener('appinstalled', () => { deferredInstall = null; window.__canInstall = false; UI.toast('Revive installed on this PC', '🖥️'); });
+window.addEventListener('appinstalled', () => { deferredInstall = null; window.__canInstall = false; UI.toast('Revive installed on this PC', ''); });
 export async function promptInstall() {
   if (!deferredInstall) return false;
   deferredInstall.prompt(); const r = await deferredInstall.userChoice.catch(() => null); deferredInstall = null; window.__canInstall = false;
@@ -252,7 +250,7 @@ const IS_STANDALONE = window.navigator.standalone === true || window.matchMedia?
 const IS_IOS = /iPhone|iPad|iPod/.test(UA);
 function wechatGate() {
   UI.fullscreen(`<div class="lock" style="z-index:600;text-align:center">
-    <div class="logo">🧭</div><h2>Open in Safari</h2>
+    <div class="logo"></div><h2>Open in Safari</h2>
     <p class="muted" style="max-width:320px">WeChat’s browser can’t install Revive or keep your data safely.<br><br>Tap <b>···</b> (top right) → <b>Open in Browser / 在浏览器打开</b>, then in Safari: Share → <b>Add to Home Screen</b>.</p>
   </div>`);
 }
@@ -262,7 +260,7 @@ export function installHintNeeded() { return IS_IOS && !IS_STANDALONE && !IN_WEC
 function boot() {
   if (IN_WECHAT) { wechatGate(); return; }
   Lock.showLock(() => {
-    if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
+    if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.dailyOpen(); }
     render();
     if (S.get().onboarded) { setTimeout(() => G.maybeWeeklyReview(), 900); Progress.maybeMonthlyRecap(); }
   });
@@ -273,7 +271,7 @@ function boot() {
     Native.onNotificationTap((route) => { location.hash = route; });
     syncReminders();
     Native.onBackButton(() => {
-      const close = document.querySelector('.celebrate [data-close], .story-viewer [data-x], .cookmode [data-x], .trainer [data-x]');
+      const close = document.querySelector('.celebrate [data-close], .cookmode [data-x], .trainer [data-x]');
       if (close) { close.click(); return; }
       if (document.querySelector('.sheet')) { UI.closeAllSheets(); return; }
       if (document.querySelector('.lock')) { Native.exitApp(); return; }

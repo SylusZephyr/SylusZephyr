@@ -7,12 +7,12 @@ import { searchLocal } from '../nutrition.js';
 import { art } from './cook.js';
 
 const SCREENS = [
-  ['Today', '#today', '🏠', 'home essentials streak'], ['Cook', '#cook', '🍳', 'recipes suggest'], ['Meal plan', '#cook/plan', '📅', 'week plan'],
-  ['Shopping list', '#cook/shop', '🛒', 'groceries buy'], ['Pantry', '#cook/pantry', '🧺', 'kitchen ingredients'], ['Halal delivery', '#cook/delivery', '📦', 'meituan order takeaway'],
-  ['Train', '#train', '💪', 'pelvic floor kegel exercise'], ['Track', '#track', '📈', 'progress charts'], ['Sleep', '#track', '🌙', 'bedtime wake'],
-  ['Medical & follow-up', '#me/medical', '🩺', 'doctor labs tests questions'], ['Doctor summary', '#me/summary', '🖨️', 'report print pdf'],
-  ['Reminders', '#me/reminders', '⏰', 'notifications alerts calendar'], ['Account & sync', '#me/account', '☁️', 'login sign in google cloud'],
-  ['Badges', '#me/badges', '🏅', 'achievements'], ['Settings', '#me/settings', '⚙️', 'lock pin face privacy export'], ['Saved cards', '#me/saved', '🔖', 'bookmarks tips'],
+  ['Today', '#today', '', 'home essentials streak'], ['Cook', '#cook', '', 'recipes suggest'], ['Meal plan', '#cook/plan', '', 'week plan'],
+  ['Shopping list', '#cook/shop', '', 'groceries buy'], ['Pantry', '#cook/pantry', '', 'kitchen ingredients'], ['Halal delivery', '#cook/delivery', '', 'meituan order takeaway'],
+  ['Train', '#train', '', 'pelvic floor kegel exercise'], ['Track', '#track', '', 'progress charts'], ['Sleep', '#track', '', 'bedtime wake'],
+  ['Medical & follow-up', '#me/medical', '', 'doctor labs tests questions'], ['Doctor summary', '#me/summary', '', 'report print pdf'],
+  ['Reminders', '#me/reminders', '', 'notifications alerts calendar'], ['Account & sync', '#me/account', '', 'login sign in google cloud'],
+  ['Badges', '#me/badges', '', 'achievements'], ['Settings', '#me/settings', '', 'lock pin face privacy export'], ['Saved cards', '#me/saved', '', 'bookmarks tips'],
 ];
 
 const norm = (s) => (s || '').toLowerCase();
@@ -43,10 +43,10 @@ export function open() {
         const r = results(q.value);
         const sec = (title, html) => html ? `<div class="kicker mt12">${title}</div>${html}` : '';
         const html =
-          sec('Screens', r.screens.map(([n, h, e]) => `<button class="list-item" data-go="${h}"><div class="li-ico">${e}</div><div class="grow"><b>${UI.esc(n)}</b></div></button>`).join('')) +
+          sec('Screens', r.screens.map(([n, h, e]) => `<button class="list-item" data-go="${h}"><div class="li-ico">${UI.ICON.chev}</div><div class="grow"><b>${UI.esc(n)}</b></div></button>`).join('')) +
           sec('Recipes', r.recipes.map((x) => { const a = art(x); return `<button class="rwide" data-go="#cook/r/${x.id}"><div class="thumb ${a.cls}" style="${a.style};width:52px;height:52px;font-size:26px">${a.emoji}</div><div class="grow" style="min-width:0"><b class="ellipsis" style="display:block">${UI.esc(x.name)}</b><span class="muted small">${x.mins} min · ${x.kcal} kcal</span></div></button>`; }).join('')) +
-          sec('Foods', r.foods.map((f) => `<div class="list-item"><div class="li-ico">${f.e}</div><div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g · ${UI.esc(f.zh)}</div></div></div>`).join('')) +
-          sec('Tips', r.tips.map((t) => `<div class="list-item" style="align-items:flex-start"><div class="li-ico">${t.e}</div><div class="grow"><b>${UI.esc(t.title)}</b><div class="muted small">${UI.esc(t.body)}</div></div></div>`).join(''));
+          sec('Foods', r.foods.map((f) => `<div class="list-item"><div class="li-ico">${UI.ICON.meal}</div><div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g · ${UI.esc(f.zh)}</div></div></div>`).join('')) +
+          sec('Tips', r.tips.map((t) => `<div class="list-item" style="align-items:flex-start"><div class="li-ico">${UI.ICON.bookmark}</div><div class="grow"><b>${UI.esc(t.title)}</b><div class="muted small">${UI.esc(t.body)}</div></div></div>`).join(''));
         out.innerHTML = q.value.trim() ? (html || '<p class="muted small">Nothing found.</p>') : '<p class="muted small">Try “chicken”, “breakfast”, “sleep”, “鸡蛋” or “doctor”.</p>';
         out.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
       };

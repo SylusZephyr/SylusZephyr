@@ -148,7 +148,7 @@ function runSession(rerender) {
         clearInterval(iv); try { wake && wake.release(); } catch (e) {} close();
         const st = S.get(); const d = S.day();
         st.pf.sessions.push({ date: S.dayKey(), at: Date.now(), week: wk }); d.pf = (d.pf || 0) + 1; S.save();
-        G.award(`pf_${d.pf}`, 30, null); G.evaluateQuests(); G.checkBadges();
+        G.award(`pf_${d.pf}`, 30, null); G.checkBadges();
         UI.toast(d.pf >= 3 ? 'Three sessions today — daily target done' : `Session ${d.pf} of 3 done`);
         rerender();
       };
@@ -168,7 +168,7 @@ function controlSheet(rerender) {
   UI.openSheet(`<h2>Control practice</h2>
     <p class="muted small">Solo stop–start practice: build arousal to ~7/10, stop and breathe slowly until it drops to ~4, then resume. Aim for 3–4 cycles. See “Stop–start technique” in Learn.</p>
     <div class="field"><label>Cycles completed</label>${UI.scaleButtons('cyc', 5, null, ['1', '2', '3', '4', '5+'])}</div>
-    <div class="field"><label>How much control did you feel?</label>${UI.scaleButtons('ctl', 5, null, ['😣', '😕', '😐', '🙂', '😎'], true)}</div>
+    <div class="field"><label>How much control did you feel?</label>${UI.scaleButtons('ctl', 5, null, ['', '', '', '', ''], true)}</div>
     <button class="btn primary block mt16" data-save>Save (private)</button>`, {
     onMount: (sh, close) => {
       let cyc = null, ctl = null;

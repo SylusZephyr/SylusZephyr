@@ -107,16 +107,16 @@ export function insights() {
 function journalCard() {
   const st = S.get();
   const notes = Object.entries(st.days).filter(([, d]) => d.notes).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 5);
-  return `<div class="card"><div class="row between"><div class="kicker">📓 Journal</div><button class="btn sm" data-journal>${S.day().notes ? 'Edit today' : '+ Write'}</button></div>
-    ${notes.length ? notes.map(([k, d]) => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="tiny muted">${S.prettyDate(k)} ${d.mood != null ? ['😞', '😕', '😐', '🙂', '😄'][d.mood] : ''}</div><div class="small" style="white-space:pre-wrap;margin-top:4px">${UI.esc(d.notes)}</div></div>`).join('')
+  return `<div class="card"><div class="row between"><div class="kicker">Journal</div><button class="btn sm" data-journal>${S.day().notes ? 'Edit today' : '+ Write'}</button></div>
+    ${notes.length ? notes.map(([k, d]) => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="tiny muted">${S.prettyDate(k)} ${d.mood != null ? ['', '', '', '', ''][d.mood] : ''}</div><div class="small" style="white-space:pre-wrap;margin-top:4px">${UI.esc(d.notes)}</div></div>`).join('')
       : '<p class="muted small mt8">A line a day about what helped or got in the way. Patterns become obvious after a week.</p>'}</div>`;
 }
 
 function insightsCard() {
   const r = insights();
-  return `<div class="card cool glow"><div class="kicker">🔍 Your patterns</div>
+  return `<div class="card cool glow"><div class="kicker">Your patterns</div>
     ${r.need ? `<p class="muted small">Log energy & mood on ${r.need} more day${r.need === 1 ? '' : 's'} to unlock personal insights — what actually makes <i>you</i> feel better.</p>`
-      : r.list.length ? r.list.map((x) => `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span style="font-size:20px">${x.diff > 0 ? '📈' : '📉'}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
+      : r.list.length ? r.list.map((x) => `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span style="font-size:20px">${x.diff > 0 ? '' : ''}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
       : '<p class="muted small">No clear patterns yet. Keep logging — they usually appear after 1–2 weeks.</p>'}</div>`;
 }
 
@@ -127,12 +127,12 @@ function food() {
   const mealsPerDay = days.map((k) => new Set((st.days[k]?.meals || []).filter((m) => m.slot !== 'snack').map((m) => m.slot)).size);
   const today = S.day();
   return `
-  <div class="card"><div class="row between"><div class="kicker">Calories · 7 days</div><span class="small muted">target ${tg.kcal}</span></div>${C.barChart(kc, { goal: tg.kcal, color: '#ffb547' })}
+  <div class="card"><div class="row between"><div class="kicker">Calories · 7 days</div><span class="small muted">target ${tg.kcal}</span></div>${C.barChart(kc, { goal: tg.kcal, color: '#60a5fa' })}
     <p class="tiny muted">Target = estimated needs (${tg.tdee}) + ~300 kcal for slow gain. Build up gradually — no need to force it.</p></div>
-  <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein })}</div>
-  <div class="card"><div class="kicker">Main meals per day</div><div class="row" style="justify-content:space-around">${days.map((k, i) => `<div style="text-align:center"><div style="font-size:20px">${['😶', '🙂', '😋', '🔥'][mealsPerDay[i]]}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
+  <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein, color: '#4ade80' })}</div>
+  <div class="card"><div class="kicker">Main meals per day</div><div class="row" style="justify-content:space-around">${days.map((k, i) => `<div style="text-align:center"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
   <div class="section-title">Today’s meals <button class="link" data-logmeal>+ Log</button></div>
-  <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${P.SLOT_EMOJI[m.slot] || '🍽️'}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty"><span class="e">🍽️</span>No meals logged yet</div>'}</div>`;
+  <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${UI.ICON.meal}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty"><span class="e"></span>No meals logged yet</div>'}</div>`;
 }
 
 function sleep() {
@@ -152,8 +152,8 @@ function sleep() {
     <div class="grid3 mt12"><div class="macro"><b>${nights.length ? `${Math.floor(avgDur / 60)}h${Math.round(avgDur % 60)}` : '—'}</b><span>avg sleep</span></div>
     <div class="macro"><b>${avgDev != null ? `±${Math.round(avgDev)}m` : '—'}</b><span>wake drift</span></div>
     <div class="macro"><b>${onAnchor}/${nights.length}</b><span>on anchor</span></div></div></div>
-  ${t.reached && onAnchor >= 5 && S.minutesOf(st.profile.wakeAnchor) > 7 * 60 ? `<div class="card cool glow"><div class="kicker">Level up your sleep 🌅</div><h3>Ready for the next step?</h3><p class="muted small">You hit your bedtime and woke on-anchor ${onAnchor} times recently. Move everything 30 min earlier — wake ${S.prettyTime(S.fmtMin(S.minutesOf(st.profile.wakeAnchor) - 30))}.</p><button class="btn cool block mt12" data-earlier>Shift 30 min earlier</button></div>` : ''}
-  <button class="btn block" data-logsleep>🌙 Log last night</button>
+  ${t.reached && onAnchor >= 5 && S.minutesOf(st.profile.wakeAnchor) > 7 * 60 ? `<div class="card cool glow"><div class="kicker">Level up your sleep </div><h3>Ready for the next step?</h3><p class="muted small">You hit your bedtime and woke on-anchor ${onAnchor} times recently. Move everything 30 min earlier — wake ${S.prettyTime(S.fmtMin(S.minutesOf(st.profile.wakeAnchor) - 30))}.</p><button class="btn cool block mt12" data-earlier>Shift 30 min earlier</button></div>` : ''}
+  <button class="btn block" data-logsleep>Log last night</button>
   <div class="notice mt12">Wake drift = how far your wake-up time is from your anchor, on average. Get it under ±30 min first — that’s what fixes a random schedule.</div>`;
 }
 
@@ -170,14 +170,14 @@ function body() {
   <div class="card mt12"><div class="kicker">Weight · goal zone ${st.profile.goalKgMin}–${st.profile.goalKgMax} kg</div>${C.lineChart(pts, { band: [st.profile.goalKgMin, st.profile.goalKgMax], unit: '' })}
     ${etaLine()}
     <p class="small mt8" style="color:${rate == null ? 'var(--muted)' : rate > 0.4 ? 'var(--amber)' : rate >= 0.05 ? 'var(--green)' : 'var(--muted)'}">${rate == null ? 'Weigh in weekly to see your trend.' : `<span>${rate >= 0 ? '+' : '−'}${Math.abs(rate).toFixed(2)} kg/week</span> · <span>${rate > 0.4 ? 'faster than planned — fine, but no need to push' : rate >= 0.05 ? 'right on track (0.1–0.25 target)' : 'flat — add a daily shake'}</span>`}</p></div>
-  <button class="btn primary block" data-weigh>⚖️ Weigh in</button>
+  <button class="btn primary block" data-weigh>Weigh in</button>
   <div class="card mt12"><div class="kicker">History</div>${ws.length ? [...ws].reverse().map((w) => `<div class="list-item"><div class="grow"><b>${w.kg.toFixed(1)} kg</b><div class="muted small">${S.prettyDate(w.date)}</div></div><button class="icon-btn" data-delw="${w.date}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty">No weigh-ins</div>'}</div>`;
 }
 
 function etaLine() {
   const tr = weightTrend(); const goal = S.get().profile.goalKgMin;
   if (!tr) return '';
-  if (tr.eta === 'reached') return `<p class="small mt8" style="color:var(--green);font-weight:700">🎯 Trend is in your goal zone. Now hold it.</p>`;
+  if (tr.eta === 'reached') return `<p class="small mt8" style="color:var(--green);font-weight:700">Trend is in your goal zone. Now hold it.</p>`;
   if (!tr.eta) return `<p class="small mt8 muted">Trend ${tr.perWeek >= 0 ? '+' : ''}${tr.perWeek.toFixed(2)} kg/week — not climbing yet, so no goal date. One extra shake a day (≈+300 kcal) usually starts it moving.</p>`;
   return `<p class=\"small mt8\"><span>At ${tr.perWeek.toFixed(2)} kg/week you reach ${goal} kg by</span> <b>${tr.eta.toLocaleDateString(S.uiLocale(), { day: 'numeric', month: 'long', year: tr.eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b></p>`;
 }
@@ -185,7 +185,7 @@ function etaLine() {
 function sxCard() {
   const log = (S.get().sxLog || []).filter((x) => x.date >= S.addDays(S.dayKey(), -28));
   const n = log.length; const pct = (f) => n ? Math.round(log.filter(f).length / n * 100) : 0;
-  return `<div class="card"><div class="row between"><div><div class="kicker">🔒 Private log · 28 days</div><div class="tiny muted">${n} entries</div></div><button class="btn sm primary" data-sx>+ Log</button></div>
+  return `<div class="card"><div class="row between"><div><div class="kicker">Private log · 28 days</div><div class="tiny muted">${n} entries</div></div><button class="btn sm primary" data-sx>+ Log</button></div>
     ${n ? `<div class="grid3 mt12"><div class="macro"><b>${pct((x) => x.firm >= 3)}%</b><span>firm enough</span></div><div class="macro"><b>${pct((x) => x.kept === 2)}%</b><span>kept it</span></div><div class="macro"><b>${pct((x) => x.semen === 2)}%</b><span>dry</span></div></div>
     <div class="grid2 mt8"><div class="macro"><b>${pct((x) => x.time <= 1)}%</b><span>under 2 min</span></div><div class="macro"><b>${pct((x) => x.anxious)}%</b><span>felt pressure</span></div></div>` : '<p class="muted small mt8">Optional. Log after any sexual activity — it shows your doctor patterns (e.g. solo vs partner, dry orgasms) that questionnaires miss.</p>'}</div>`;
 }
@@ -201,7 +201,7 @@ function checkins() {
   ${block('mood', 'Mood & worry (PHQ-4)', (s) => s.total, { min: 0, max: 12, color: '#a78bfa' }, '0–2 normal · 3–5 mild · 6–8 moderate · 9–12 severe')}
   ${block('energy', 'Energy & cold', (s) => s.pct, { min: 0, max: 100, color: '#5aa9ff', unit: '%' }, 'Score out of 100')}
   ${sxCard()}
-  <a class="btn block" href="#me/summary">🖨️ Doctor summary</a>`;
+  <a class="btn block" href="#me/summary">Doctor summary</a>`;
 }
 
 function sleepSettings(rerender) {
@@ -217,7 +217,7 @@ function sleepSettings(rerender) {
       p.wakeAnchor = sh.querySelector('#ss-wake').value || p.wakeAnchor; p.currentBedtime = sh.querySelector('#ss-bed').value || p.currentBedtime;
       p.sleepNeedMin = +sh.querySelector('#ss-need').value; p.caffeineCutoff = sh.querySelector('#ss-cut').value || p.caffeineCutoff;
       if (sh.querySelector('#ss-restart').checked) p.bedShiftStartedOn = S.dayKey();
-      S.save(); close(); UI.toast('Sleep plan updated — re-import reminders in Me', '🌙'); rerender();
+      S.save(); close(); UI.toast('Sleep plan updated — re-import reminders in Me', ''); rerender();
     },
   });
 }
@@ -235,7 +235,7 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-earlier]')?.addEventListener('click', (ev) => {
     const p = st.profile; const t = P.sleepTargets();
     p.wakeAnchor = S.fmtMin(S.minutesOf(p.wakeAnchor) - 30); p.currentBedtime = t.bed; p.bedShiftStartedOn = S.dayKey();
-    S.save(); G.award('sleep_level_' + p.wakeAnchor, 60, ev); UI.toast('New anchor set — update your Calendar reminders', '🌅'); rerender();
+    S.save(); G.award('sleep_level_' + p.wakeAnchor, 60, ev); UI.toast('New anchor set — update your Calendar reminders', ''); rerender();
   });
   root.querySelector('[data-logsleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
   root.querySelector('[data-weigh]')?.addEventListener('click', () => Sh.weighSheet(rerender));

@@ -30,7 +30,7 @@ export function render() {
   x.fillStyle = glow; x.fillRect(0, 0, W, H);
 
   const lv = G.levelInfo(); const streak = G.streak(); const wk = weekStats(); const st = S.get();
-  x.fillStyle = '#eef1f8'; x.font = font(800, 54); x.fillText('🔥 Revive', 80, 140);
+  x.fillStyle = '#eef1f8'; x.font = font(800, 54); x.fillText('Revive', 80, 140);
   x.fillStyle = 'rgba(238,241,248,.65)'; x.font = font(600, 34); x.fillText(S.prettyDate(S.dayKey(), { day: 'numeric', month: 'long', year: 'numeric' }), 80, 196);
 
   // streak hero
@@ -47,7 +47,7 @@ export function render() {
   roundRect(x, 120, 760, Math.max(22, (W - 240) * lv.pct), 22, 11); x.fillStyle = g; x.fill();
 
   // week tiles
-  const tiles = [['✅', wk.ess, 'essentials done'], ['🍽️', wk.meals, 'main meals'], ['💪', wk.pf, 'training sessions']];
+  const tiles = [['', wk.ess, 'essentials done'], ['', wk.meals, 'main meals'], ['', wk.pf, 'training sessions']];
   const tw = (W - 160 - 40) / 3;
   tiles.forEach(([e, v, label], i) => {
     const tx = 80 + i * (tw + 20); roundRect(x, tx, 860, tw, 260, 32); x.fillStyle = 'rgba(255,255,255,.06)'; x.fill();

@@ -6,7 +6,8 @@
   "scripts": {
     "build:web": "node scripts/gen-sw.mjs && node scripts/build-web.mjs",
     "sync": "npm run build:web && npx cap sync ios",
-    "test": "node scripts/smoke-test.mjs"
+    "test": "node scripts/smoke-test.mjs",
+    "test:e2e": "node tests/e2e/run.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
@@ -26,6 +27,8 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",
-    "@capacitor/cli": "^8.6.0"
+    "@capacitor/cli": "^8.6.0",
+    "playwright": "1.63.0",
+    "axe-core": "4.14.0"
   }
 }

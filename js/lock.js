@@ -56,7 +56,7 @@ export function showLock(onUnlock) {
   if (!st.lock.enabled) { unlocked = true; onUnlock(); return; }
   let pin = '';
   const close = UI.fullscreen(`<div class="lock">
-      <div class="logo">🔥</div>
+      <img class="logo" src="icons/mark.svg" alt="" width="64" height="64">
       <h2>Revive is locked</h2>
       <div class="dots" id="pin-dots">${'<i></i>'.repeat(4)}</div>
       <div class="keypad">
@@ -106,7 +106,7 @@ export function setupSheet(onDone) {
               try { st.lock.credId = await registerFaceId(); st.lock.faceId = true; face = true; } catch (e) { st.lock.faceId = false; }
             }
             S.saveNow(); unlocked = true; close();
-            UI.toast(face ? 'Lock on: Face ID / Windows Hello + PIN' : 'Lock on: PIN', '🔒'); onDone && onDone();
+            UI.toast(face ? 'Lock on: Face ID / Windows Hello + PIN' : 'Lock on: PIN', ''); onDone && onDone();
           } else { first = null; pin = ''; msg.textContent = 'PINs did not match — start again.'; paint(); UI.haptic(60); }
         }
       }));

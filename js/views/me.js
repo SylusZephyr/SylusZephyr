@@ -52,7 +52,7 @@ function account() {
   const st = Cloud.status; const cfg = Cloud.getConfig();
   const head = `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Account & sync</h1><div class="sub">${st.user ? 'Signed in' : 'Optional — the app works fully without an account'}</div></div></div>`;
   if (!st.configured) return head + `
-    <div class="card glow"><div class="kicker">☁️ Cloud sync</div><h3>Connect your Revive cloud</h3>
+    <div class="card glow"><div class="kicker">Cloud sync</div><h3>Connect your Revive cloud</h3>
       <p class="muted small">Sync runs on your own private Supabase project, so your data never sits on anyone else’s server. Paste the two values from Supabase → Project Settings → API.</p>
       <div class="field"><label>Project URL</label><input id="cfg-url" placeholder="https://xxxx.supabase.co" autocomplete="off" autocapitalize="off"></div>
       <div class="field"><label>Anon public key</label><input id="cfg-key" placeholder="eyJhbGciOi…" autocomplete="off" autocapitalize="off"></div>
@@ -71,9 +71,9 @@ function account() {
     ${st.error ? `<div class="notice" style="color:var(--coral)">${UI.esc(st.error)}</div>` : ''}
     <button class="btn ghost block mt12 small" data-cfgclear>Disconnect cloud project</button>`;
   return head + `
-    <div class="card glow" style="text-align:center"><div style="font-size:46px">☁️</div><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
+    <div class="card glow" style="text-align:center"><div style="font-size:46px"></div><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
       <p class="muted small">${st.user.provider === 'google' ? 'Google account' : 'Email account'} · ${st.online ? (st.syncing ? 'Syncing…' : st.lastSync ? 'Last synced ' + ago(st.lastSync) : 'Connecting…') : 'Offline — changes will sync when you reconnect'}</p>
-      <div class="grid2 mt16"><button class="btn" data-syncnow>🔄 Sync now</button><button class="btn danger" data-signout>Sign out</button></div></div>
+      <div class="grid2 mt16"><button class="btn" data-syncnow>Sync now</button><button class="btn danger" data-signout>Sign out</button></div></div>
     ${st.error ? `<div class="notice" style="color:var(--coral)">${UI.esc(st.error)}</div>` : ''}
     <div class="notice">Changes sync automatically within a few seconds. Your app lock and PIN stay on each device and are never uploaded.</div>
     <button class="btn ghost danger block mt16 small" data-delacct>Delete my account and cloud data</button>`;
@@ -108,14 +108,14 @@ function main() {
   <button class="card" data-recap style="display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left"><span><b>Monthly recap</b><div class="small muted">${Progress.monthData(Progress.lastMonthKey()).label}</div></span><span class="chev">${UI.ICON.chev}</span></button>
   <a class="card" href="#me/badges" style="display:flex;align-items:center;justify-content:space-between;color:inherit;text-decoration:none"><span><b>Milestones</b><div class="small muted">${nb} of ${G.BADGES.length} reached</div></span><span class="chev">${UI.ICON.chev}</span></a>
   <div class="card tight">
-    ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', Cloud.status.user ? '☁️' : '👤', Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
-    ${item('me/medical', '🩺', 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
-    ${item('me/summary', '🖨️', 'Doctor summary', 'One-page report of your last 4 weeks')}
-    ${item('me/reminders', '⏰', 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
-    ${item('me/prayer', '🕌', 'Prayer times & Ramadan', Pr.settings().enabled ? `<span>${UI.esc(Pr.settings().cityName)}</span> · <span>${Pr.fasting() ? 'Fasting mode on' : Pr.next().label}</span> <span>${S.prettyTime(Pr.next().clock)}</span>` : 'Off · offline, no location needed')}
-    ${item('me/saved', '🔖', 'Library', `${TIPS.length} short reads · ${st.savedTips.length} saved`)}
-    ${Native.isNative || window.reviveDesktop ? '' : item('me/install', '📲', 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
-    ${item('me/settings', '⚙️', 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
+    ${!Cloud.getConfig() && !Cloud.status.user ? '' : item('me/account', UI.ICON.me, Cloud.status.user ? 'Account & sync' : 'Sign in & sync devices', Cloud.status.user ? `${UI.esc(Cloud.status.user.email || 'Signed in')} · ${Cloud.status.lastSync ? 'synced ' + ago(Cloud.status.lastSync) : 'syncing…'}` : 'Phone, PC and Android stay in step')}
+    ${item('me/medical', UI.ICON.doctor, 'Medical & follow-up', `${open} questions for your doctor · ${st.medical.labs.length} lab results`)}
+    ${item('me/summary', UI.ICON.list, 'Doctor summary', 'One-page report of your last 4 weeks')}
+    ${item('me/reminders', UI.ICON.clock, 'Reminders', Native.isNative ? (st.nativeReminders ? 'Notifications on' : 'Turn on daily notifications') : 'Add daily alerts to iPhone Calendar')}
+    ${item('me/prayer', UI.ICON.crescent, 'Prayer times & Ramadan', Pr.settings().enabled ? `<span>${UI.esc(Pr.settings().cityName)}</span> · <span>${Pr.fasting() ? 'Fasting mode on' : Pr.next().label}</span> <span>${S.prettyTime(Pr.next().clock)}</span>` : 'Off · offline, no location needed')}
+    ${item('me/saved', UI.ICON.bookmark, 'Library', `${TIPS.length} short reads · ${st.savedTips.length} saved`)}
+    ${Native.isNative || window.reviveDesktop ? '' : item('me/install', UI.ICON.share, 'Install on iPhone or PC', 'Home Screen · Windows app · offline')}
+    ${item('me/settings', UI.ICON.gear, 'Settings & privacy', st.lock.enabled ? 'Locked with ' + (st.lock.faceId ? 'Face ID + PIN' : 'PIN') : 'App lock off')}
   </div>
   <div class="card danger"><div class="kicker">Emergency (China)</div>
     <p class="small">Call <b>120</b> for chest pain or pressure, fainting, severe breathlessness, an erection lasting more than 4 hours, or thoughts of self-harm. Mental health hotline <b>12356</b>.</p></div>`;
@@ -127,19 +127,19 @@ function medical() {
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Medical</h1><div class="sub">Follow-up, results & clearance</div></div></div>
   <div class="card ${m.exerciseCleared ? '' : 'danger'}"><div class="kicker">Exercise clearance</div>
     <div class="seg mt8">${Object.entries(clr).map(([k, l]) => `<button class="${m.clearance === k ? 'on' : ''}" data-clr="${k}">${l.split(' ')[0]}</button>`).join('')}</div>
-    <p class="small muted mt8">${m.exerciseCleared ? '✅ Cleared. Activity unlocked in Train — still stop for any chest pain, dizziness or unusual breathlessness.' : 'Training stays gentle (walking + pelvic floor) until a doctor clears you for exercise.'}</p></div>
+    <p class="small muted mt8">${m.exerciseCleared ? 'Cleared. Activity unlocked in Train — still stop for any chest pain, dizziness or unusual breathlessness.' : 'Training stays gentle (walking + pelvic floor) until a doctor clears you for exercise.'}</p></div>
 
   <div class="section-title">Ask at your next visit <button class="link" data-addq>+ Add</button></div>
   <div class="card tight">${m.questions.map((q) => `<div class="check ${q.done ? 'done' : ''}"><button class="box" data-q="${q.id}" aria-label="Asked">${UI.ICON.check}</button><span class="label small" style="font-weight:500">${UI.esc(q.q)}</span><button class="faint" data-delq="${q.id}" aria-label="Delete" style="padding:6px">${UI.ICON.trash.replace('<svg', '<svg width="16" height="16"')}</button></div>`).join('')}</div>
 
   <div class="section-title">Visits <button class="link" data-addvisit>+ Add</button></div>
-  <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico">🩺</div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small" style="white-space:pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">No visits logged</div>'}</div>
+  <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico">${UI.ICON.doctor}</div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small" style="white-space:pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">No visits logged</div>'}</div>
 
   <div class="section-title">Lab results <button class="link" data-addlab>+ Add</button></div>
-  <div class="card tight">${m.labs.length ? [...m.labs].sort((a, b) => b.date.localeCompare(a.date)).map((l) => `<div class="list-item"><div class="li-ico">🧪</div><div class="grow"><b>${UI.esc(l.name)}: ${UI.esc(l.value)} ${UI.esc(l.unit)}</b><div class="muted small">${S.prettyDate(l.date)}${l.ref ? ` · typical ${UI.esc(l.ref)}` : ''}</div></div><button class="icon-btn" data-dellab="${l.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">Add results when you get them. Ranges are typical guides — labs differ, your doctor interprets them.</div>'}</div>
+  <div class="card tight">${m.labs.length ? [...m.labs].sort((a, b) => b.date.localeCompare(a.date)).map((l) => `<div class="list-item"><div class="li-ico">${UI.ICON.pulse}</div><div class="grow"><b>${UI.esc(l.name)}: ${UI.esc(l.value)} ${UI.esc(l.unit)}</b><div class="muted small">${S.prettyDate(l.date)}${l.ref ? ` · typical ${UI.esc(l.ref)}` : ''}</div></div><button class="icon-btn" data-dellab="${l.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">Add results when you get them. Ranges are typical guides — labs differ, your doctor interprets them.</div>'}</div>
 
   <div class="card"><div class="kicker">Supplements — what’s worth it</div>
-    <div class="small" style="line-height:1.6">✅ Vitamin D / B12 — if a test or diet suggests a need<br>⚠️ Iron — only if deficiency is confirmed<br>🥩 Zinc — from food (meat, eggs, nuts); avoid high doses<br>🥤 Protein powder — optional convenience<br>🚫 “Testosterone boosters” — avoid unverified products<br>🚫 Sildenafil/tadalafil — not without a doctor, especially with your exertion symptoms</div></div>
+    <div class="small" style="line-height:1.6">Vitamin D / B12 — if a test or diet suggests a need<br>Iron — only if deficiency is confirmed<br>Zinc — from food (meat, eggs, nuts); avoid high doses<br>Protein powder — optional convenience<br>“Testosterone boosters” — avoid unverified products<br>Sildenafil/tadalafil — not without a doctor, especially with your exertion symptoms</div></div>
   <div class="card danger"><div class="kicker">Get urgent help (120) for</div>${RED_FLAGS.map((r) => `<div class="small">• ${UI.esc(r)}</div>`).join('')}</div>`;
 }
 
@@ -174,7 +174,7 @@ function summary() {
     <h2>Weight</h2><table><tr>${ws.slice(-8).map((w) => `<th>${w.date}</th>`).join('')}</tr><tr>${ws.slice(-8).map((w) => `<td>${w.kg} kg</td>`).join('')}</tr></table>
     <h2>Weekly self-check scores</h2>
     <table><tr><th>Week of</th><th>Erection/confidence (0–100)</th><th>PHQ-4 (0–12)</th><th>Energy/cold (0–100)</th></tr>
-    ${weeks.map((w) => { const c = st.checkins[w]; return `<tr><td>${w}</td><td>${c.erection?.score?.pct ?? '—'}</td><td>${c.mood ? `${c.mood.score.total} (anx ${c.mood.score.anx}, dep ${c.mood.score.dep})` : '—'}</td><td>${c.energy?.score?.pct ?? '—'}${c.energy?.score?.redFlag ? ' ⚠ exertion symptoms' : ''}</td></tr>`; }).join('') || '<tr><td colspan="4">None yet</td></tr>'}</table>
+    ${weeks.map((w) => { const c = st.checkins[w]; return `<tr><td>${w}</td><td>${c.erection?.score?.pct ?? '—'}</td><td>${c.mood ? `${c.mood.score.total} (anx ${c.mood.score.anx}, dep ${c.mood.score.dep})` : '—'}</td><td>${c.energy?.score?.pct ?? '—'}${c.energy?.score?.redFlag ? ' exertion symptoms' : ''}</td></tr>`; }).join('') || '<tr><td colspan="4">None yet</td></tr>'}</table>
     <h2>Private symptom log (last 28 days)</h2>${(() => { const L = (st.sxLog || []).filter((x) => days.includes(x.date)); if (!L.length) return '<p>No entries</p>';
       const c = (f) => L.filter(f).length; const solo = L.filter((x) => x.type === 0), partner = L.filter((x) => x.type === 1);
       const firm = (a) => a.length ? Math.round(a.filter((x) => x.firm >= 3).length / a.length * 100) + '%' : '—';
@@ -187,7 +187,7 @@ function summary() {
     <h2>Lab results entered</h2>${st.medical.labs.length ? `<table>${st.medical.labs.map((l) => `<tr><td>${l.date}</td><td>${UI.esc(l.name)}</td><td>${UI.esc(l.value)} ${UI.esc(l.unit)}</td></tr>`).join('')}</table>` : '<p>None</p>'}
     <h2>Questions</h2><ol>${(st.medical.questions || []).filter((q) => !q.done).map((q) => `<li>${UI.esc(q.q)}</li>`).join('')}</ol>`;
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Doctor summary</h1><div class="sub">Show on your phone or print / save as PDF</div></div></div>
-  <div class="grid2 mb12"><button class="btn primary" data-print>🖨️ Print / PDF</button><button class="btn" data-sharesum>📤 Share text</button></div>
+  <div class="grid2 mb12"><button class="btn primary" data-print>Print / PDF</button><button class="btn" data-sharesum>Share text</button></div>
   <div class="card summary-doc" style="background:#fff;color:#111;font-size:13px;line-height:1.45">${html.replace(/<h2>/g, '<h3 style="margin-top:14px;border-bottom:1px solid #ccc;font-size:14px">').replace(/<\/h2>/g, '</h3>').replace(/<table>/g, '<table style="width:100%;border-collapse:collapse;font-size:12px" border="1" cellpadding="4">')}</div>
   <template id="print-html">${html}</template>`;
 }
@@ -201,7 +201,7 @@ function reminders() {
   <div class="notice">Times update by themselves as your bedtime shifts earlier. Turn individual reminders on or off above.</div>`;
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Reminders</h1><div class="sub">Free daily alerts via iPhone Calendar</div></div></div>
   <div class="card tight">${list.map((r) => `<div class="list-item"><div class="grow"><b>${UI.esc(r.title)}</b><div class="muted small">${S.prettyTime(r.time)} daily</div></div><button class="toggle ${r.on ? 'on' : ''}" data-rem="${r.id}" aria-label="toggle"></button></div>`).join('')}</div>
-  <button class="btn primary block" data-ics>📅 Add to iPhone Calendar</button>
+  <button class="btn primary block" data-ics>Add to iPhone Calendar</button>
   <button class="btn block mt8" data-icsshare>Didn’t open? Share the file instead</button>
   <div class="card mt12"><div class="kicker">How it works</div><div class="small" style="line-height:1.6">
     1. Tap the button above → Safari shows the calendar events → tap <b>Add All</b>.<br>
@@ -246,9 +246,9 @@ function prayer() {
   <div class="card"><div class="row between"><div class="kicker"><span>Today</span> · <span>${UI.esc(cfg.cityName)}</span></div><span class="small" style="font-weight:700"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
     ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span style="font-weight:800">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
     <p class="tiny muted mt8">If your local mosque’s timetable differs, follow the mosque.</p></div>
-  <div class="section-title" style="font-size:16px">Ramadan fasting mode</div>
+  <div class="section-title">Ramadan fasting mode</div>
   <div class="card">
-    <p class="small muted">${dtr === 0 ? `It’s Ramadan${hj ? ` (day ${hj.day})` : ''}. Ramadan Mubarak 🌙` : dtr ? `Ramadan starts in about <b>${dtr} days</b> (dates depend on the moon sighting).` : ''} Fasting mode moves your meals to suhoor and iftar, spreads water between iftar and dawn, and swaps the coffee rule for “none in the 6 h before bed”.</p>
+    <p class="small muted">${dtr === 0 ? `It’s Ramadan${hj ? ` (day ${hj.day})` : ''}. Ramadan Mubarak ` : dtr ? `Ramadan starts in about <b>${dtr} days</b> (dates depend on the moon sighting).` : ''} Fasting mode moves your meals to suhoor and iftar, spreads water between iftar and dawn, and swaps the coffee rule for “none in the 6 h before bed”.</p>
     <div class="seg mt12" id="pr-ram">${[['auto', 'Auto in Ramadan'], ['on', 'On now'], ['off', 'Off']].map(([v, l]) => `<button data-ram="${v}" class="${cfg.ramadan === v ? 'on' : ''}">${l}</button>`).join('')}</div>
     <div class="notice mt12">You’re still regaining weight and energy. Islam exempts people who are unwell from fasting. Ask your doctor first, and stop the fast if you feel faint, chest pain, a racing heart or confusion.</div>
   </div>
@@ -270,42 +270,42 @@ function settings() {
     ${tg('sounds', 'Sounds', 'Reward chimes', s.sounds)}
     ${tg('haptics', 'Vibration', 'Where supported', s.haptics)}
   </div>
-  <div class="section-title" style="font-size:16px">Language</div>
+  <div class="section-title">Language</div>
   <div class="card"><div class="seg lang-pick" data-no-tr>${LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${locale === l.code ? 'on' : ''}" lang="${l.code}">${l.native}</button>`).join('')}</div></div>
-  <div class="section-title" style="font-size:16px">Look</div>
+  <div class="section-title">Look</div>
   <div class="card">
     <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
       <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''}" style="cursor:pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" style="position:absolute;opacity:0;width:1px;height:1px" aria-label="Pick a custom accent colour"></label></div></div>
     <div class="field"><label>Background</label><div class="seg" id="bgseg">${Theme.BACKGROUNDS.map((b) => `<button data-bg="${b.id}" class="${Theme.current().bg === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
     <div class="field"><label>Text size</label><div class="seg" id="fsseg">${Theme.SIZES.map((b) => `<button data-fs="${b.id}" class="${Theme.current().size === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
   </div>
-  <div class="section-title" style="font-size:16px">Coffee</div>
+  <div class="section-title">Coffee</div>
   <div class="card">
     <div class="grid2"><div class="field" style="margin:0"><label>Your usual cup (mg caffeine)</label><input id="p-cup" type="number" min="5" max="400" step="5" value="${Caf.cupMg()}"></div>
     <div class="field" style="margin:0"><label>Coffee cutoff</label><input id="p-cut" type="time" value="${st.profile.caffeineCutoff}"></div></div>
     <p class="tiny muted mt8">Luckin / Starbucks Americano ≈ 150 mg (medium). Single espresso ≈ 75 mg. Used for the “caffeine in your body” estimate.</p>
   </div>
-  <div class="section-title" style="font-size:16px">Profile</div>
+  <div class="section-title">Profile</div>
   <div class="card">
     <div class="grid2"><div class="field" style="margin:0"><label>Name</label><input id="p-name" value="${UI.esc(st.profile.name)}"></div><div class="field" style="margin:0"><label>Age</label><input id="p-age" type="number" value="${st.profile.age}"></div></div>
     <div class="grid2"><div class="field"><label>Height (cm)</label><input id="p-h" type="number" value="${st.profile.heightCm}"></div><div class="field"><label>Water goal (ml)</label><input id="p-w" type="number" step="250" value="${st.profile.waterGoalMl}"></div></div>
     <div class="grid2"><div class="field"><label>Weekly food budget (¥)</label><input id="p-b" type="number" value="${st.profile.weeklyBudget}"></div><div class="field"><label>Start weight (kg)</label><input id="p-s" type="number" step="0.1" value="${st.profile.startKg}"></div></div>
     <button class="btn block mt12" data-saveprofile>Save profile</button>
   </div>
-  <div class="section-title" style="font-size:16px">Privacy</div>
+  <div class="section-title">Privacy</div>
   <div class="notice">${Cloud.status.user ? 'Your data lives on this device and syncs to your own private Supabase project while you’re signed in.' : 'Your data lives only on this device. Nothing is uploaded unless you sign in to sync. If you uninstall the app or clear site data, it’s gone — export a file now and then to be safe.'}</div>
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
-  <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">☁️</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
-  <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">📷</div><div class="grow"><b>Photo credits</b></div></a>
-  <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">🔒</div><div class="grow"><b>Privacy policy</b></div></a>
+  <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.me}</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
+  <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.share}</div><div class="grow"><b>Photo credits</b></div></a>
+  <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.lock}</div><div class="grow"><b>Privacy policy</b></div></a>
   <p class="tiny faint mt16" style="text-align:center">Revive 5.0 · not medical advice</p>`;
 }
 
 function install() {
   const canPc = !!window.__canInstall;
   return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Install Revive</h1><div class="sub">iPhone and Windows PC</div></div></div>
-  <div class="card"><div class="kicker">🖥️ Windows PC</div>
+  <div class="card"><div class="kicker">Windows PC</div>
     ${canPc ? '<button class="btn primary block mb12" data-installpc>Install on this PC</button>' : ''}
     <div class="small" style="line-height:1.8">
     1. Open <b>https://syluszephyr.github.io/SylusZephyr/</b> in <b>Microsoft Edge</b> or <b>Google Chrome</b>.<br>
@@ -313,11 +313,11 @@ function install() {
     3. Revive opens in its own window and appears in the <b>Start menu</b> — right-click it to <b>Pin to taskbar</b>.<br>
     4. Works offline. Lock with <b>Windows Hello</b> (face, fingerprint or PIN) in Settings.<br>
     Keyboard: <kbd>1</kbd>–<kbd>5</kbd> switch tabs · <kbd>Esc</kbd> closes · type your PIN on the lock screen.</div></div>
-  <div class="card"><div class="kicker">📱 iPhone</div><div class="small" style="line-height:1.8">
+  <div class="card"><div class="kicker">iPhone</div><div class="small" style="line-height:1.8">
     1. Open the same link in <b>Safari</b> (not WeChat’s browser).<br>
     2. Tap <b>Share</b> → <b>Add to Home Screen</b> → <b>Add</b>.<br>
     3. Always open Revive from the Home Screen icon.</div></div>
-  <div class="card"><div class="kicker">🔄 Phone ⇄ PC</div><p class="small muted" style="line-height:1.6">Each device keeps its own private data — nothing is uploaded, so they don’t sync automatically. To move your progress, use <b>Me → Settings → Export file</b> on one device and <b>Import file</b> on the other (AirDrop, WeChat File Transfer or a USB cable).</p></div>
+  <div class="card"><div class="kicker">Phone ⇄ PC</div><p class="small muted" style="line-height:1.6">Each device keeps its own private data — nothing is uploaded, so they don’t sync automatically. To move your progress, use <b>Me → Settings → Export file</b> on one device and <b>Import file</b> on the other (AirDrop, WeChat File Transfer or a USB cable).</p></div>
   <div class="notice">In China, github.io can be slow — load it once (VPN if needed). After that it works offline on both devices.</div>`;
 }
 
@@ -335,7 +335,7 @@ function addLab(rerender) {
       sh.querySelector('#l-save').onclick = (ev) => {
         const o = sel.value === 'other'; const def = o ? null : LABS[+sel.value];
         const name = o ? sh.querySelector('#l-other').value.trim() : def.name; const value = sh.querySelector('#l-val').value.trim();
-        if (!name || !value) { UI.toast('Fill test and value', '⚠️'); return; }
+        if (!name || !value) { UI.toast('Fill test and value', ''); return; }
         S.get().medical.labs.push({ id: S.uid(), name, value, unit: sh.querySelector('#l-unit').value, ref: def?.ref || '', date: sh.querySelector('#l-date').value || S.dayKey() });
         S.save(); G.award('lab_' + name, 20, ev); G.checkBadges(); close(); rerender();
       };
@@ -358,9 +358,8 @@ function addVisit(rerender) {
 export function bind(root, parts, { rerender }) {
   const st = S.get(); const sub = parts[0];
   if (!sub) {
-    root.querySelector('[data-sharecard]')?.addEventListener('click', async () => { try { await ShareCard.share(); G.award('share_card', 10, null, { silent: true }); } catch (e) { UI.toast('Could not create the image', '⚠️'); } });
+    root.querySelector('[data-sharecard]')?.addEventListener('click', async () => { try { await ShareCard.share(); G.award('share_card', 10, null, { silent: true }); } catch (e) { UI.toast('Could not create the image', ''); } });
     root.querySelector('[data-recap]')?.addEventListener('click', () => Progress.openRecap(Progress.lastMonthKey()));
-    root.querySelector('[data-buyfreeze]')?.addEventListener('click', () => { if (st.game.coins >= 100 && st.game.freezes < 3) { st.game.coins -= 100; st.game.freezes++; S.save(); UI.toast('Streak freeze bought', '❄️'); rerender(); } });
   }
   if (sub === 'medical') {
     const m = st.medical;
@@ -385,34 +384,34 @@ export function bind(root, parts, { rerender }) {
     const busy = (b, label) => { b.disabled = true; b.textContent = label; };
     root.querySelector('[data-cfgsave]')?.addEventListener('click', async () => {
       const url = root.querySelector('#cfg-url').value, key = root.querySelector('#cfg-key').value;
-      if (!/^https:\/\/.+/.test(url.trim()) || key.trim().length < 20) { UI.toast('Check the URL and key', '⚠️'); return; }
-      Cloud.saveConfig(url, key); await Cloud.init(); UI.toast('Cloud connected', '☁️'); rerender();
+      if (!/^https:\/\/.+/.test(url.trim()) || key.trim().length < 20) { UI.toast('Check the URL and key', ''); return; }
+      Cloud.saveConfig(url, key); await Cloud.init(); UI.toast('Cloud connected', ''); rerender();
     });
     root.querySelector('[data-cfgclear]')?.addEventListener('click', async () => { if (await UI.confirmSheet('Disconnect cloud?', 'This device stops syncing. Your local data stays.', 'Disconnect', true)) { Cloud.clearConfig(); location.reload(); } });
     root.querySelector('[data-sendcode]')?.addEventListener('click', async (e) => {
       authEmail = root.querySelector('#au-email').value.trim();
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(authEmail)) { UI.toast('Enter a valid email', '⚠️'); return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(authEmail)) { UI.toast('Enter a valid email', ''); return; }
       busy(e.currentTarget, 'Sending…');
-      try { await Cloud.sendEmailCode(authEmail); codeSent = true; UI.toast('Code sent — check your inbox', '📧'); } catch (err) { UI.toast(err.message || 'Could not send code', '⚠️'); }
+      try { await Cloud.sendEmailCode(authEmail); codeSent = true; UI.toast('Code sent — check your inbox', ''); } catch (err) { UI.toast(err.message || 'Could not send code', ''); }
       rerender();
     });
     root.querySelector('[data-verify]')?.addEventListener('click', async (e) => {
       const code = root.querySelector('#au-code').value; busy(e.currentTarget, 'Checking…');
-      try { await Cloud.verifyEmailCode(authEmail, code); codeSent = false; G.award('cloud_signin', 50, null); UI.toast('Signed in — syncing', '☁️'); } catch (err) { UI.toast(err.message || 'Wrong or expired code', '⚠️'); }
+      try { await Cloud.verifyEmailCode(authEmail, code); codeSent = false; G.award('cloud_signin', 50, null); UI.toast('Signed in — syncing', ''); } catch (err) { UI.toast(err.message || 'Wrong or expired code', ''); }
       rerender();
     });
     root.querySelector('[data-resend]')?.addEventListener('click', () => { codeSent = false; rerender(); });
-    root.querySelector('[data-google]')?.addEventListener('click', async () => { try { await Cloud.signInWithGoogle(); } catch (err) { UI.toast(err.message || 'Google sign-in failed', '⚠️'); } });
-    root.querySelector('[data-syncnow]')?.addEventListener('click', async () => { await Cloud.syncNow(); UI.toast('Synced', '🔄'); rerender(); });
+    root.querySelector('[data-google]')?.addEventListener('click', async () => { try { await Cloud.signInWithGoogle(); } catch (err) { UI.toast(err.message || 'Google sign-in failed', ''); } });
+    root.querySelector('[data-syncnow]')?.addEventListener('click', async () => { await Cloud.syncNow(); UI.toast('Synced', ''); rerender(); });
     root.querySelector('[data-delacct]')?.addEventListener('click', async () => {
       if (!(await UI.confirmSheet('Delete account?', 'Your cloud account and all synced data are permanently deleted. Data on this device stays unless you also delete it in Settings.', 'Delete account', true))) return;
-      try { await Cloud.deleteAccount(); UI.toast('Account deleted', '🗑️'); } catch (err) { UI.toast(err.message || 'Could not delete account', '⚠️'); }
+      try { await Cloud.deleteAccount(); UI.toast('Account deleted', ''); } catch (err) { UI.toast(err.message || 'Could not delete account', ''); }
       rerender();
     });
     root.querySelector('[data-signout]')?.addEventListener('click', async () => { if (await UI.confirmSheet('Sign out?', 'Your data stays on this device. It stops syncing until you sign in again.', 'Sign out', true)) { await Cloud.signOut(); rerender(); } });
   }
   if (sub === 'install') {
-    root.querySelector('[data-installpc]')?.addEventListener('click', async () => { const ok = await window.__promptInstall?.(); if (ok) UI.toast('Installed! Find Revive in your Start menu', '🖥️'); rerender(); });
+    root.querySelector('[data-installpc]')?.addEventListener('click', async () => { const ok = await window.__promptInstall?.(); if (ok) UI.toast('Installed! Find Revive in your Start menu', ''); rerender(); });
   }
   if (sub === 'summary') {
     root.querySelector('[data-print]').onclick = async () => {
@@ -425,25 +424,25 @@ export function bind(root, parts, { rerender }) {
       tmp.querySelectorAll('h1,h2,p,li,tr').forEach((el) => el.append('\n')); tmp.querySelectorAll('td,th').forEach((el) => el.append('  '));
       const text = tmp.textContent.replace(/\n\s*\n+/g, '\n').trim();
       if (await Native.shareText('Revive summary', text)) return;
-      try { if (navigator.share) await navigator.share({ title: 'Revive summary', text }); else { await navigator.clipboard.writeText(text); UI.toast('Summary copied', '📋'); } } catch (e) {}
+      try { if (navigator.share) await navigator.share({ title: 'Revive summary', text }); else { await navigator.clipboard.writeText(text); UI.toast('Summary copied', ''); } } catch (e) {}
     };
   }
   if (sub === 'reminders') {
     st.reminderPrefs = st.reminderPrefs || {};
     root.querySelectorAll('[data-rem]').forEach((b) => b.onclick = () => { const id = b.dataset.rem; const cur = b.classList.contains('on'); st.reminderPrefs[id] = !cur; S.save(); b.classList.toggle('on'); window.__syncReminders?.(true); });
     root.querySelector('[data-nativerem]')?.addEventListener('click', async () => {
-      if (st.nativeReminders) { st.nativeReminders = false; S.save(); await Native.cancelReminders(); UI.toast('Reminders off', '🔕'); rerender(); return; }
-      if (!(await Native.requestNotifications())) { UI.toast('Allow notifications in iPhone Settings → Revive', '⚠️'); return; }
-      st.nativeReminders = true; S.save(); const n = await window.__syncReminders?.(true); G.award('reminders_setup', 30, null); UI.toast(`${n || 0} daily reminders scheduled`, '⏰'); rerender();
+      if (st.nativeReminders) { st.nativeReminders = false; S.save(); await Native.cancelReminders(); UI.toast('Reminders off', ''); rerender(); return; }
+      if (!(await Native.requestNotifications())) { UI.toast('Allow notifications in iPhone Settings → Revive', ''); return; }
+      st.nativeReminders = true; S.save(); const n = await window.__syncReminders?.(true); G.award('reminders_setup', 30, null); UI.toast(`${n || 0} daily reminders scheduled`, ''); rerender();
     });
     if (Native.isNative) return;
     root.querySelector('[data-ics]').onclick = () => {
       const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
-      ICS.downloadICS(list); G.award('reminders_setup', 30, null); UI.toast('Opening Calendar…', '📅');
+      ICS.downloadICS(list); G.award('reminders_setup', 30, null); UI.toast('Opening Calendar…', '');
     };
     root.querySelector('[data-icsshare]').onclick = async () => {
       const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
-      try { if (!(await ICS.shareICS(list))) UI.toast('Sharing not supported — open Revive in Safari and try again', '⚠️'); else G.award('reminders_setup', 30, null); } catch (e) {}
+      try { if (!(await ICS.shareICS(list))) UI.toast('Sharing not supported — open Revive in Safari and try again', ''); else G.award('reminders_setup', 30, null); } catch (e) {}
     };
   }
   if (sub === 'saved') {
@@ -460,7 +459,7 @@ export function bind(root, parts, { rerender }) {
     root.querySelector('#pr-method').onchange = (e) => set({ method: e.target.value });
     root.querySelectorAll('[data-asr]').forEach((b) => b.onclick = () => set({ asr: b.dataset.asr }));
     root.querySelectorAll('[data-ram]').forEach((b) => b.onclick = () => set({ ramadan: b.dataset.ram }));
-    ['lat', 'lng', 'tz'].forEach((k) => { const el = root.querySelector('#pr-' + k); if (el) el.onchange = () => { const v = +el.value; const ok = k === 'lat' ? Math.abs(v) <= 66 : k === 'lng' ? Math.abs(v) <= 180 : Math.abs(v) <= 14; if (Number.isFinite(v) && ok) set({ [k]: v }); else { UI.toast('That value looks off', '⚠️'); el.value = Pr.settings()[k]; } }; });
+    ['lat', 'lng', 'tz'].forEach((k) => { const el = root.querySelector('#pr-' + k); if (el) el.onchange = () => { const v = +el.value; const ok = k === 'lat' ? Math.abs(v) <= 66 : k === 'lng' ? Math.abs(v) <= 180 : Math.abs(v) <= 14; if (Number.isFinite(v) && ok) set({ [k]: v }); else { UI.toast('That value looks off', ''); el.value = Pr.settings()[k]; } }; });
   }
   if (sub === 'settings') {
     root.querySelectorAll('[data-set]').forEach((b) => b.onclick = () => { const k = b.dataset.set; st.settings[k] = !st.settings[k]; S.save(); b.classList.toggle('on'); });
@@ -472,12 +471,12 @@ export function bind(root, parts, { rerender }) {
       const p = st.profile; p.name = root.querySelector('#p-name').value.trim(); p.age = +root.querySelector('#p-age').value || p.age;
       p.heightCm = +root.querySelector('#p-h').value || p.heightCm; p.waterGoalMl = +root.querySelector('#p-w').value || p.waterGoalMl;
       p.weeklyBudget = +root.querySelector('#p-b').value || p.weeklyBudget; p.startKg = +root.querySelector('#p-s').value || p.startKg;
-      S.save(); UI.toast('Profile saved', '✅'); rerender();
+      S.save(); UI.toast('Profile saved', ''); rerender();
     };
     root.querySelectorAll('[data-lang]').forEach((b) => b.onclick = () => { if (b.dataset.lang === locale) return; S.get().settings.locale = b.dataset.lang; S.saveNow(); setLocale(b.dataset.lang); location.reload(); });
     const cup = root.querySelector('#p-cup'); const cut = root.querySelector('#p-cut');
-    cup.onchange = () => { const v = Math.round(+cup.value); if (v >= 5 && v <= 400) { st.profile.cupMg = v; S.save(); UI.toast('Cup size saved', '☕'); } else cup.value = Caf.cupMg(); };
-    cut.onchange = () => { if (/^\d{2}:\d{2}$/.test(cut.value)) { st.profile.caffeineCutoff = cut.value; S.save(); UI.toast('Cutoff saved', '☕'); } };
+    cup.onchange = () => { const v = Math.round(+cup.value); if (v >= 5 && v <= 400) { st.profile.cupMg = v; S.save(); UI.toast('Cup size saved', ''); } else cup.value = Caf.cupMg(); };
+    cut.onchange = () => { if (/^\d{2}:\d{2}$/.test(cut.value)) { st.profile.caffeineCutoff = cut.value; S.save(); UI.toast('Cutoff saved', ''); } };
     root.querySelectorAll('[data-accent]').forEach((b) => b.onclick = () => { Theme.set({ accent: b.dataset.accent }); rerender(); });
     const ca = root.querySelector('[data-customaccent]');
     if (ca) { ca.oninput = () => Theme.set({ accent: 'custom', custom: ca.value }); ca.onchange = () => rerender(); }
@@ -490,8 +489,8 @@ export function bind(root, parts, { rerender }) {
     };
     root.querySelector('[data-import]').onchange = async (e) => {
       const f = e.target.files[0]; if (!f) return;
-      try { const txt = await f.text(); if (await UI.confirmSheet('Replace all data?', 'This overwrites everything in Revive with the file’s contents.', 'Import', true)) { S.importJSON(txt); UI.toast('Imported', '✅'); location.hash = 'today'; } }
-      catch (err) { UI.toast('That file could not be read', '⚠️'); }
+      try { const txt = await f.text(); if (await UI.confirmSheet('Replace all data?', 'This overwrites everything in Revive with the file’s contents.', 'Import', true)) { S.importJSON(txt); UI.toast('Imported', ''); location.hash = 'today'; } }
+      catch (err) { UI.toast('That file could not be read', ''); }
     };
     root.querySelector('[data-reset]').onclick = async () => {
       if (await UI.confirmSheet('Delete everything?', 'All your logs, progress, XP and settings will be erased from this phone. This cannot be undone.', 'Delete all', true)) { await Native.clearPersisted(); await Native.cancelReminders(); S.resetAll(); location.hash = ''; location.reload(); }
