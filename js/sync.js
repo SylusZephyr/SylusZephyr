@@ -2,7 +2,7 @@
 // Rules: days keep whichever copy has more activity; lists are unioned by a stable key;
 // counters take the max; profile/settings follow the copy edited most recently.
 
-const LOCAL_ONLY = ['lock', 'closedDays', 'remindersSyncedFor', 'nativeReminders'];
+const LOCAL_ONLY = ['lock', 'closedDays', 'remindersSyncedFor', 'nativeReminders', 'lastExportAt'];
 
 const activity = (d) => (d ? (d.xpToday || 0) + (d.meals?.length || 0) * 5 + Object.values(d.checks || {}).filter(Boolean).length * 3 + (d.waterMl || 0) / 250 : -1);
 

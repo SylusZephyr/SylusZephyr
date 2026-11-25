@@ -297,6 +297,7 @@ function settings() {
   </div>
   <div class="section-title">Privacy</div>
   <div class="notice">${Cloud.status.user ? 'Your data lives on this device and syncs to your own private Supabase project while you’re signed in.' : 'Your data lives only on this device. Nothing is uploaded unless you sign in to sync. If you uninstall the app or clear site data, it’s gone — export a file now and then to be safe.'}</div>
+  <p class="small muted mt12">Last backup file: <b>${st.lastExportAt ? S.prettyDate(S.dayKey(new Date(st.lastExportAt)), { day: 'numeric', month: 'long', year: 'numeric' }) : 'never'}</b></p>
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
   <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.me}</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
@@ -495,7 +496,8 @@ export function bind(root, parts, { rerender }) {
     root.querySelectorAll('[data-bg]').forEach((b) => b.onclick = () => { Theme.set({ bg: b.dataset.bg }); rerender(); });
     root.querySelectorAll('[data-fs]').forEach((b) => b.onclick = () => { Theme.set({ size: b.dataset.fs }); rerender(); });
     root.querySelector('[data-export]').onclick = async () => {
-      if (await Native.shareFile(`revive-${S.dayKey()}.json`, S.exportJSON(), 'Revive data')) return;
+      st.lastExportAt = Date.now(); S.save();
+      if (await Native.shareFile(`revive-${S.dayKey()}.json`, S.exportJSON(), 'Revive data')) { rerender(); return; }
       const blob = new Blob([S.exportJSON()], { type: 'application/json' }); const a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = `revive-${S.dayKey()}.json`; document.body.appendChild(a); a.click(); a.remove();
     };
