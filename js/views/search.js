@@ -7,12 +7,12 @@ import { searchLocal } from '../nutrition.js';
 import { art } from './cook.js';
 
 const SCREENS = [
-  ['Today', '#today', '🏠', 'home essentials streak'], ['Cook', '#cook', '🍳', 'recipes suggest'], ['Meal plan', '#cook/plan', '📅', 'week plan'],
-  ['Shopping list', '#cook/shop', '🛒', 'groceries buy'], ['Pantry', '#cook/pantry', '🧺', 'kitchen ingredients'], ['Halal delivery', '#cook/delivery', '📦', 'meituan order takeaway'],
-  ['Train', '#train', '💪', 'pelvic floor kegel exercise'], ['Track', '#track', '📈', 'progress charts'], ['Sleep', '#track', '🌙', 'bedtime wake'],
-  ['Medical & follow-up', '#me/medical', '🩺', 'doctor labs tests questions'], ['Doctor summary', '#me/summary', '🖨️', 'report print pdf'],
-  ['Reminders', '#me/reminders', '⏰', 'notifications alerts calendar'], ['Account & sync', '#me/account', '☁️', 'login sign in google cloud'],
-  ['Badges', '#me/badges', '🏅', 'achievements'], ['Settings', '#me/settings', '⚙️', 'lock pin face privacy export'], ['Saved cards', '#me/saved', '🔖', 'bookmarks tips'],
+  ['Today', '#today', '', 'home essentials streak'], ['Cook', '#cook', '', 'recipes suggest'], ['Meal plan', '#cook/plan', '', 'week plan'],
+  ['Shopping list', '#cook/shop', '', 'groceries buy'], ['Pantry', '#cook/pantry', '', 'kitchen ingredients'], ['Halal delivery', '#cook/delivery', '', 'meituan order takeaway'],
+  ['Train', '#train', '', 'pelvic floor kegel exercise'], ['Track', '#track', '', 'progress charts'], ['Sleep', '#track', '', 'bedtime wake'],
+  ['Medical & follow-up', '#me/medical', '', 'doctor labs tests questions'], ['Doctor summary', '#me/summary', '', 'report print pdf'],
+  ['Reminders', '#me/reminders', '', 'notifications alerts calendar'], ['Account & sync', '#me/account', '', 'login sign in google cloud'],
+  ['Badges', '#me/badges', '', 'achievements'], ['Settings', '#me/settings', '', 'lock pin face privacy export'], ['Saved cards', '#me/saved', '', 'bookmarks tips'],
 ];
 
 const norm = (s) => (s || '').toLowerCase();

@@ -5,13 +5,13 @@ import { tr } from './i18n.js';
 import { TIPS } from './data/content.js';
 
 export const ESSENTIALS = [
-  { id: 'breakfast', e: '🍳', label: 'Eat breakfast', xp: 20 },
-  { id: 'lunch', e: '🌯', label: 'Eat lunch', xp: 20 },
-  { id: 'dinner', e: '🍛', label: 'Eat dinner', xp: 20 },
-  { id: 'fluids', e: '💧', label: 'Drink fluids regularly (1.5 L+)', xp: 15 },
-  { id: 'sleep', e: '🌙', label: 'Follow your sleep plan', xp: 20 },
-  { id: 'outdoors', e: '🌞', label: 'A little time outdoors', xp: 10 },
-  { id: 'caffeine', e: '☕', label: 'No coffee after cutoff', xp: 10 },
+  { id: 'breakfast', e: '', label: 'Eat breakfast', xp: 20 },
+  { id: 'lunch', e: '', label: 'Eat lunch', xp: 20 },
+  { id: 'dinner', e: '', label: 'Eat dinner', xp: 20 },
+  { id: 'fluids', e: '', label: 'Drink fluids regularly (1.5 L+)', xp: 15 },
+  { id: 'sleep', e: '', label: 'Follow your sleep plan', xp: 20 },
+  { id: 'outdoors', e: '', label: 'A little time outdoors', xp: 10 },
+  { id: 'caffeine', e: '', label: 'No coffee after cutoff', xp: 10 },
 ];
 export const STREAK_THRESHOLD = 5;
 
@@ -119,22 +119,22 @@ export function updateBestStreak() { const st = S.get(); const s = streak(); if 
 function seeded(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; }; }
 
 export const QUEST_POOL = [
-  { id: 'q_water2', e: '💧', t: 'Hydro hero: drink 2 L today', xp: 40, check: (d) => d.waterMl >= 2000 },
-  { id: 'q_kegel', e: '💪', t: 'Complete 1 pelvic-floor session', xp: 35, check: (d) => (d.pf || 0) >= 1 },
-  { id: 'q_kegel2', e: '💪', t: 'Complete 2 pelvic-floor sessions', xp: 50, check: (d) => (d.pf || 0) >= 2 },
-  { id: 'q_cook', e: '👨‍🍳', t: 'Cook any recipe in Cook mode', xp: 45, check: (d) => (d.cookedCount || 0) >= 1 },
-  { id: 'q_shake', e: '🥤', t: 'Have a shake or extra snack', xp: 30, check: (d) => d.meals.some((m) => m.slot === 'snack') },
-  { id: 'q_brekkie', e: '⏱️', t: 'Breakfast within 2 h of waking', xp: 35, check: (d) => { if (!d.sleep.wake) return false; const b = d.meals.find((m) => m.slot === 'breakfast'); if (!b) return false; const diff = (S.minutesOf(b.time) - S.minutesOf(d.sleep.wake) + 1440) % 1440; return diff <= 120; } },
-  { id: 'q_coffee1', e: '☕', t: 'Max 1 coffee today', xp: 30, check: (d, endOfDay) => endOfDay && d.coffee.length <= 1 },
-  { id: 'q_nocoffee_pm', e: '🌗', t: 'Zero coffee after 2 pm', xp: 30, check: (d, endOfDay) => endOfDay && !d.coffee.some((c) => { const m = S.minutesOf(c); return m < 240 || m >= 14 * 60; }) },
-  { id: 'q_walk', e: '🚶', t: 'Take a gentle 10-min walk', xp: 35, check: (d) => (d.walkMin || 0) >= 10 },
-  { id: 'q_breath', e: '🌬️', t: 'Do a 2-min breathing session', xp: 25, check: (d) => (d.breath || 0) >= 1 },
-  { id: 'q_mood', e: '🙂', t: 'Log energy & mood', xp: 20, check: (d) => d.energy != null && d.mood != null },
-  { id: 'q_3meals', e: '🍽️', t: 'Log 3 meals', xp: 40, check: (d) => new Set(d.meals.map((m) => m.slot)).size >= 3 },
-  { id: 'q_protein', e: '🥚', t: 'Hit 90 g protein', xp: 40, check: (d) => d.meals.reduce((s, m) => s + (m.protein || 0), 0) >= 90 },
-  { id: 'q_kcal', e: '🔥', t: 'Eat 2,300+ kcal', xp: 45, check: (d) => d.meals.reduce((s, m) => s + (m.kcal || 0), 0) >= 2300 },
-  { id: 'q_read', e: '📚', t: 'Read 3 cards in your feed', xp: 15, check: (d) => (d.tipsRead || 0) >= 3 },
-  { id: 'q_wake', e: '⏰', t: 'Wake within 30 min of your anchor', xp: 40, check: (d) => { if (!d.sleep.wake) return false; const a = S.minutesOf(S.get().profile.wakeAnchor); const w = S.minutesOf(d.sleep.wake); const diff = Math.abs(((w - a + 720) % 1440) - 720); return diff <= 30; } },
+  { id: 'q_water2', e: '', t: 'Hydro hero: drink 2 L today', xp: 40, check: (d) => d.waterMl >= 2000 },
+  { id: 'q_kegel', e: '', t: 'Complete 1 pelvic-floor session', xp: 35, check: (d) => (d.pf || 0) >= 1 },
+  { id: 'q_kegel2', e: '', t: 'Complete 2 pelvic-floor sessions', xp: 50, check: (d) => (d.pf || 0) >= 2 },
+  { id: 'q_cook', e: '', t: 'Cook any recipe in Cook mode', xp: 45, check: (d) => (d.cookedCount || 0) >= 1 },
+  { id: 'q_shake', e: '', t: 'Have a shake or extra snack', xp: 30, check: (d) => d.meals.some((m) => m.slot === 'snack') },
+  { id: 'q_brekkie', e: '', t: 'Breakfast within 2 h of waking', xp: 35, check: (d) => { if (!d.sleep.wake) return false; const b = d.meals.find((m) => m.slot === 'breakfast'); if (!b) return false; const diff = (S.minutesOf(b.time) - S.minutesOf(d.sleep.wake) + 1440) % 1440; return diff <= 120; } },
+  { id: 'q_coffee1', e: '', t: 'Max 1 coffee today', xp: 30, check: (d, endOfDay) => endOfDay && d.coffee.length <= 1 },
+  { id: 'q_nocoffee_pm', e: '', t: 'Zero coffee after 2 pm', xp: 30, check: (d, endOfDay) => endOfDay && !d.coffee.some((c) => { const m = S.minutesOf(c); return m < 240 || m >= 14 * 60; }) },
+  { id: 'q_walk', e: '', t: 'Take a gentle 10-min walk', xp: 35, check: (d) => (d.walkMin || 0) >= 10 },
+  { id: 'q_breath', e: '', t: 'Do a 2-min breathing session', xp: 25, check: (d) => (d.breath || 0) >= 1 },
+  { id: 'q_mood', e: '', t: 'Log energy & mood', xp: 20, check: (d) => d.energy != null && d.mood != null },
+  { id: 'q_3meals', e: '', t: 'Log 3 meals', xp: 40, check: (d) => new Set(d.meals.map((m) => m.slot)).size >= 3 },
+  { id: 'q_protein', e: '', t: 'Hit 90 g protein', xp: 40, check: (d) => d.meals.reduce((s, m) => s + (m.protein || 0), 0) >= 90 },
+  { id: 'q_kcal', e: '', t: 'Eat 2,300+ kcal', xp: 45, check: (d) => d.meals.reduce((s, m) => s + (m.kcal || 0), 0) >= 2300 },
+  { id: 'q_read', e: '', t: 'Read 3 cards in your feed', xp: 15, check: (d) => (d.tipsRead || 0) >= 3 },
+  { id: 'q_wake', e: '', t: 'Wake within 30 min of your anchor', xp: 40, check: (d) => { if (!d.sleep.wake) return false; const a = S.minutesOf(S.get().profile.wakeAnchor); const w = S.minutesOf(d.sleep.wake); const diff = Math.abs(((w - a + 720) % 1440) - 720); return diff <= 30; } },
 ];
 
 export function todaysQuests(k = S.dayKey()) {
@@ -167,10 +167,10 @@ export function evaluateQuests(k = S.dayKey(), endOfDay = false, silent = false)
 
 // ---------- Loot chest ----------
 const LOOT_TABLE = [
-  { p: 0.58, rarity: 'COMMON', color: '#8b93a8', xp: 20, coins: 10, e: '🎁' },
-  { p: 0.27, rarity: 'RARE', color: '#5aa9ff', xp: 50, coins: 25, e: '💎' },
-  { p: 0.12, rarity: 'EPIC', color: '#a78bfa', xp: 100, coins: 50, freeze: 1, e: '🔮' },
-  { p: 0.03, rarity: 'LEGENDARY', color: '#ffb547', xp: 250, coins: 120, freeze: 1, e: '👑' },
+  { p: 0.58, rarity: 'COMMON', color: '#8b93a8', xp: 20, coins: 10, e: '' },
+  { p: 0.27, rarity: 'RARE', color: '#5aa9ff', xp: 50, coins: 25, e: '' },
+  { p: 0.12, rarity: 'EPIC', color: '#a78bfa', xp: 100, coins: 50, freeze: 1, e: '' },
+  { p: 0.03, rarity: 'LEGENDARY', color: '#ffb547', xp: 250, coins: 120, freeze: 1, e: '' },
 ];
 export function lootState(k = S.dayKey()) {
   const st = S.get(); const opened = st.game.lootOpened[k];
@@ -188,38 +188,38 @@ export async function openLoot(k = S.dayKey()) {
   S.save();
   UI.ding('loot');
   await UI.celebrate({ big: pick.e, rarity: pick.rarity, color: pick.color, title: `+${pick.xp} XP · +${pick.coins} coins`,
-    body: `${pick.freeze ? '❄️ +1 streak freeze<br>' : ''}<br><b>${tip.e} ${UI.esc(tip.title)}</b><br><span class="small">${UI.esc(tip.body)}</span>` });
+    body: `${pick.freeze ? '+1 streak freeze<br>' : ''}<br><b>${tip.e} ${UI.esc(tip.title)}</b><br><span class="small">${UI.esc(tip.body)}</span>` });
   award('loot', pick.xp, null, { k, silent: true });
 }
 
 // ---------- Badges ----------
 export const BADGES = [
-  { id: 'first_check', e: '✅', n: 'First step', d: 'Tick your first essential', c: (st) => Object.values(st.days).some((d) => Object.values(d.checks || {}).some(Boolean)) },
-  { id: 'streak3', e: '🔥', n: '3-day streak', d: '3 days of 5+ essentials', c: (st) => st.game.bestStreak >= 3 },
-  { id: 'streak7', e: '🌋', n: 'Week warrior', d: '7-day streak', c: (st) => st.game.bestStreak >= 7 },
-  { id: 'streak14', e: '⚡', n: 'Fortnight', d: '14-day streak', c: (st) => st.game.bestStreak >= 14 },
-  { id: 'streak30', e: '👑', n: 'Unstoppable', d: '30-day streak', c: (st) => st.game.bestStreak >= 30 },
-  { id: 'perfect', e: '💯', n: 'Flawless', d: 'All 7 essentials in a day', c: (st) => Object.values(st.days).some((d) => d.xpLog?.perfect_day) },
-  { id: 'chef1', e: '👨‍🍳', n: 'Chef', d: 'Cook a recipe in Cook mode', c: (st) => Object.values(st.cooked).reduce((a, b) => a + b, 0) >= 1 },
-  { id: 'chef10', e: '🧑‍🍳', n: 'Head chef', d: 'Cook 10 times', c: (st) => Object.values(st.cooked).reduce((a, b) => a + b, 0) >= 10 },
-  { id: 'chef_variety', e: '🌍', n: 'Explorer', d: 'Cook 5 different recipes', c: (st) => Object.keys(st.cooked).length >= 5 },
-  { id: 'hydro', e: '💧', n: 'Hydrated', d: 'Drink 2 L in a day', c: (st) => Object.values(st.days).some((d) => d.waterMl >= 2000) },
-  { id: 'hydro7', e: '🌊', n: 'Ocean', d: '2 L on 7 different days', c: (st) => Object.values(st.days).filter((d) => d.waterMl >= 2000).length >= 7 },
-  { id: 'pf1', e: '💪', n: 'Core starter', d: 'First pelvic-floor session', c: (st) => st.pf.sessions.length >= 1 },
-  { id: 'pf20', e: '🏋️', n: 'Iron core', d: '20 pelvic-floor sessions', c: (st) => st.pf.sessions.length >= 20 },
-  { id: 'pf60', e: '🦾', n: 'Control master', d: '60 pelvic-floor sessions', c: (st) => st.pf.sessions.length >= 60 },
-  { id: 'checkin', e: '📋', n: 'Self-aware', d: 'Complete a weekly check-in', c: (st) => Object.keys(st.checkins).length >= 1 },
-  { id: 'checkin4', e: '📊', n: 'Data driven', d: 'Check-ins in 4 different weeks', c: (st) => Object.keys(st.checkins).length >= 4 },
-  { id: 'weigh', e: '⚖️', n: 'On the scale', d: 'First weigh-in', c: (st) => st.weights.length >= 1 },
-  { id: 'gain1', e: '📈', n: '+1 kg', d: 'Gain 1 kg from start', c: (st) => st.weights.length && Math.max(...st.weights.map((w) => w.kg)) >= st.profile.startKg + 1 },
-  { id: 'gain4', e: '🏔️', n: 'Goal zone', d: 'Reach your goal weight', c: (st) => st.weights.some((w) => w.kg >= st.profile.goalKgMin) },
-  { id: 'doctor', e: '🩺', n: 'Proactive', d: 'Log a doctor visit', c: (st) => st.medical.visits.length >= 1 },
-  { id: 'lab', e: '🧪', n: 'Know your numbers', d: 'Log a lab result', c: (st) => st.medical.labs.length >= 1 },
-  { id: 'challenge1', e: '🎯', n: 'Challenge done', d: 'Finish a weekly challenge', c: (st) => Object.values(st.game.challenges || {}).some((c) => c.done) },
-  { id: 'challenge4', e: '🏆', n: 'Four for four', d: 'Finish 4 weekly challenges', c: (st) => Object.values(st.game.challenges || {}).filter((c) => c.done).length >= 4 },
-  { id: 'early', e: '🌅', n: 'Early bird', d: 'Asleep before 1 am', c: (st) => Object.values(st.days).some((d) => { const b = S.minutesOf(d.sleep?.bed); return b != null && (b >= 20 * 60 || b <= 60); }) },
-  { id: 'level5', e: '🎖️', n: 'Level 5', d: 'Reach level 5', c: (st) => levelFromXp(st.game.xp) >= 5 },
-  { id: 'level10', e: '🏅', n: 'Level 10', d: 'Reach level 10', c: (st) => levelFromXp(st.game.xp) >= 10 },
+  { id: 'first_check', e: '', n: 'First step', d: 'Tick your first essential', c: (st) => Object.values(st.days).some((d) => Object.values(d.checks || {}).some(Boolean)) },
+  { id: 'streak3', e: '', n: '3-day streak', d: '3 days of 5+ essentials', c: (st) => st.game.bestStreak >= 3 },
+  { id: 'streak7', e: '', n: 'Week warrior', d: '7-day streak', c: (st) => st.game.bestStreak >= 7 },
+  { id: 'streak14', e: '', n: 'Fortnight', d: '14-day streak', c: (st) => st.game.bestStreak >= 14 },
+  { id: 'streak30', e: '', n: 'Unstoppable', d: '30-day streak', c: (st) => st.game.bestStreak >= 30 },
+  { id: 'perfect', e: '', n: 'Flawless', d: 'All 7 essentials in a day', c: (st) => Object.values(st.days).some((d) => d.xpLog?.perfect_day) },
+  { id: 'chef1', e: '', n: 'Chef', d: 'Cook a recipe in Cook mode', c: (st) => Object.values(st.cooked).reduce((a, b) => a + b, 0) >= 1 },
+  { id: 'chef10', e: '', n: 'Head chef', d: 'Cook 10 times', c: (st) => Object.values(st.cooked).reduce((a, b) => a + b, 0) >= 10 },
+  { id: 'chef_variety', e: '', n: 'Explorer', d: 'Cook 5 different recipes', c: (st) => Object.keys(st.cooked).length >= 5 },
+  { id: 'hydro', e: '', n: 'Hydrated', d: 'Drink 2 L in a day', c: (st) => Object.values(st.days).some((d) => d.waterMl >= 2000) },
+  { id: 'hydro7', e: '', n: 'Ocean', d: '2 L on 7 different days', c: (st) => Object.values(st.days).filter((d) => d.waterMl >= 2000).length >= 7 },
+  { id: 'pf1', e: '', n: 'Core starter', d: 'First pelvic-floor session', c: (st) => st.pf.sessions.length >= 1 },
+  { id: 'pf20', e: '', n: 'Iron core', d: '20 pelvic-floor sessions', c: (st) => st.pf.sessions.length >= 20 },
+  { id: 'pf60', e: '', n: 'Control master', d: '60 pelvic-floor sessions', c: (st) => st.pf.sessions.length >= 60 },
+  { id: 'checkin', e: '', n: 'Self-aware', d: 'Complete a weekly check-in', c: (st) => Object.keys(st.checkins).length >= 1 },
+  { id: 'checkin4', e: '', n: 'Data driven', d: 'Check-ins in 4 different weeks', c: (st) => Object.keys(st.checkins).length >= 4 },
+  { id: 'weigh', e: '', n: 'On the scale', d: 'First weigh-in', c: (st) => st.weights.length >= 1 },
+  { id: 'gain1', e: '', n: '+1 kg', d: 'Gain 1 kg from start', c: (st) => st.weights.length && Math.max(...st.weights.map((w) => w.kg)) >= st.profile.startKg + 1 },
+  { id: 'gain4', e: '', n: 'Goal zone', d: 'Reach your goal weight', c: (st) => st.weights.some((w) => w.kg >= st.profile.goalKgMin) },
+  { id: 'doctor', e: '', n: 'Proactive', d: 'Log a doctor visit', c: (st) => st.medical.visits.length >= 1 },
+  { id: 'lab', e: '', n: 'Know your numbers', d: 'Log a lab result', c: (st) => st.medical.labs.length >= 1 },
+  { id: 'challenge1', e: '', n: 'Challenge done', d: 'Finish a weekly challenge', c: (st) => Object.values(st.game.challenges || {}).some((c) => c.done) },
+  { id: 'challenge4', e: '', n: 'Four for four', d: 'Finish 4 weekly challenges', c: (st) => Object.values(st.game.challenges || {}).filter((c) => c.done).length >= 4 },
+  { id: 'early', e: '', n: 'Early bird', d: 'Asleep before 1 am', c: (st) => Object.values(st.days).some((d) => { const b = S.minutesOf(d.sleep?.bed); return b != null && (b >= 20 * 60 || b <= 60); }) },
+  { id: 'level5', e: '', n: 'Level 5', d: 'Reach level 5', c: (st) => levelFromXp(st.game.xp) >= 5 },
+  { id: 'level10', e: '', n: 'Level 10', d: 'Reach level 10', c: (st) => levelFromXp(st.game.xp) >= 10 },
 ];
 export function checkBadges() {
   const st = S.get(); const fresh = [];

@@ -10,10 +10,10 @@ import { scanBarcode } from '../scanner.js';
 import { art } from './cook.js';
 
 const QUICK = [
-  { name: 'Light snack', kcal: 200, protein: 5, e: '🍪' },
-  { name: 'Small meal', kcal: 400, protein: 15, e: '🥪' },
-  { name: 'Normal meal', kcal: 650, protein: 30, e: '🍽️' },
-  { name: 'Big meal', kcal: 900, protein: 40, e: '🍱' },
+  { name: 'Light snack', kcal: 200, protein: 5, e: '' },
+  { name: 'Small meal', kcal: 400, protein: 15, e: '' },
+  { name: 'Normal meal', kcal: 650, protein: 30, e: '' },
+  { name: 'Big meal', kcal: 900, protein: 40, e: '' },
 ];
 
 export function logMeal(entry, ev) {
@@ -137,7 +137,7 @@ export function sleepSheet(onDone) {
       <div class="field"><label>Fell asleep</label><input type="time" id="sl-bed" value="${d.sleep.bed || st.profile.currentBedtime}"></div>
       <div class="field"><label>Woke up</label><input type="time" id="sl-wake" value="${d.sleep.wake || S.hm()}"></div>
     </div>
-    <div class="field"><label>Sleep quality</label>${UI.scaleButtons('q', 5, d.sleep.q ?? null, ['😫', '😕', '😐', '🙂', '😴'], true)}</div>
+    <div class="field"><label>Sleep quality</label>${UI.scaleButtons('q', 5, d.sleep.q ?? null, ['', '', '', '', ''], true)}</div>
     <label class="row mt12" style="gap:10px"><input type="checkbox" id="sl-me" ${d.sleep.morningErection ? 'checked' : ''} style="width:22px;height:22px"><span>Morning erection noticed <span class="muted small">(private)</span></span></label>
     <button class="btn primary block mt16" id="sl-save">Save</button>`, {
     onMount: (sh, close) => {
@@ -152,7 +152,7 @@ export function sleepSheet(onDone) {
         const diff = Math.abs(((w - a + 720 + 1440) % 1440) - 720);
         if (diff <= 45) G.setEssential('sleep', true, ev);
         S.save(); G.evaluateQuests(); close(); onDone && onDone();
-        UI.toast(diff <= 45 ? 'On-anchor wake-up! Sleep plan ✔' : 'Sleep logged', '🌙');
+        UI.toast(diff <= 45 ? 'On-anchor wake-up! Sleep plan ' : 'Sleep logged', '');
       };
     },
   });
@@ -182,7 +182,7 @@ export function breathing({ minutes = 2, onDone } = {}) {
       };
       const finish = () => {
         const d = S.day(); d.breath = (d.breath || 0) + 1; S.save();
-        G.award(`breath_${d.breath}`, 15, null); G.evaluateQuests(); UI.toast('Breathing done — nervous system calmer', '🌬️'); onDone && onDone();
+        G.award(`breath_${d.breath}`, 15, null); G.evaluateQuests(); UI.toast('Breathing done — nervous system calmer', ''); onDone && onDone();
       };
       setTimeout(() => { timer = setInterval(step, 1000); step(); }, 800);
       w.querySelector('[data-x]').onclick = () => { running = false; clearInterval(timer); close(); };
@@ -205,16 +205,16 @@ export function checkinSheet(type, onDone) {
       });
       wire();
       sh.querySelector('#ci-save').onclick = async (ev) => {
-        if (answers.filter((a) => a != null).length < def.qs.length) { UI.toast('Answer every question', '☝️'); return; }
+        if (answers.filter((a) => a != null).length < def.qs.length) { UI.toast('Answer every question', ''); return; }
         const score = scoreCheckin(type, answers);
         st.checkins[wk] = st.checkins[wk] || {}; st.checkins[wk][type] = { answers, score, at: Date.now() };
         S.save(); G.award(`checkin_${type}_${wk}`, 40, ev, { once: true }); G.checkBadges(); close();
         if (type === 'mood' && score.flag) {
-          UI.openSheet(`<h2>Thanks for being honest 💙</h2><p class="muted mt8">Your answers suggest worry or low mood has been bothering you a fair amount. That is common, and it is treatable — please mention it at your next doctor visit (it is already on your question list).</p>
-            <div class="card mt12"><div class="kicker">If you ever feel unsafe or in crisis</div>${CRISIS.map((c) => `<a class="list-item" href="tel:${c.num.replace(/[^0-9]/g, '')}"><div class="li-ico">📞</div><div class="grow"><b>${c.num}</b><div class="muted small">${UI.esc(c.name)}</div></div></a>`).join('')}</div>
+          UI.openSheet(`<h2>Thanks for being honest </h2><p class="muted mt8">Your answers suggest worry or low mood has been bothering you a fair amount. That is common, and it is treatable — please mention it at your next doctor visit (it is already on your question list).</p>
+            <div class="card mt12"><div class="kicker">If you ever feel unsafe or in crisis</div>${CRISIS.map((c) => `<a class="list-item" href="tel:${c.num.replace(/[^0-9]/g, '')}"><div class="li-ico"></div><div class="grow"><b>${c.num}</b><div class="muted small">${UI.esc(c.name)}</div></div></a>`).join('')}</div>
             <button class="btn block mt8" data-ok>OK</button>`, { onMount: (s2, c2) => s2.querySelector('[data-ok]').onclick = c2 });
         } else if (type === 'energy' && score.redFlag) {
-          UI.openSheet(`<h2>Exertion symptoms noted ⚠️</h2><p class="muted mt8">You reported dizziness, breathlessness or chest discomfort during effort this week. Please get this checked soon and avoid strenuous activity until you have. If you have chest pain or pressure now, fainting or severe breathlessness, call <b>120</b>.</p><button class="btn block mt16" data-ok>I understand</button>`, { onMount: (s2, c2) => s2.querySelector('[data-ok]').onclick = c2 });
+          UI.openSheet(`<h2>Exertion symptoms noted </h2><p class="muted mt8">You reported dizziness, breathlessness or chest discomfort during effort this week. Please get this checked soon and avoid strenuous activity until you have. If you have chest pain or pressure now, fainting or severe breathlessness, call <b>120</b>.</p><button class="btn block mt16" data-ok>I understand</button>`, { onMount: (s2, c2) => s2.querySelector('[data-ok]').onclick = c2 });
         } else UI.toast('Check-in saved', def.e);
         onDone && onDone();
       };
@@ -233,16 +233,16 @@ export const SX = {
 export function sxSheet(onDone) {
   const v = {};
   const row = (key, label) => `<div class="field"><label>${label}</label><div class="chips">${SX[key].map((a, i) => `<button class="chip" data-k="${key}" data-v="${i}">${a}</button>`).join('')}</div></div>`;
-  UI.openSheet(`<h2>🔒 Private log</h2><p class="muted small">Quick facts for your doctor. Stays on this phone. No judgement — data helps find causes.</p>
+  UI.openSheet(`<h2>Private log</h2><p class="muted small">Quick facts for your doctor. Stays on this phone. No judgement — data helps find causes.</p>
     ${row('type', 'Type')}${row('firm', 'Firmness at best')}${row('kept', 'Kept the erection?')}${row('time', 'Time to ejaculation')}${row('semen', 'Semen')}
     <label class="row mt12" style="gap:10px"><input type="checkbox" id="sx-anx" style="width:22px;height:22px"><span>I felt anxious / under pressure</span></label>
     <button class="btn primary block mt16" id="sx-save">Save</button>`, {
     onMount: (sh, close) => {
       sh.querySelectorAll('[data-k]').forEach((b) => b.onclick = () => { v[b.dataset.k] = +b.dataset.v; sh.querySelectorAll(`[data-k="${b.dataset.k}"]`).forEach((x) => x.classList.toggle('on', x === b)); UI.haptic(6); });
       sh.querySelector('#sx-save').onclick = (ev) => {
-        if (v.firm == null) { UI.toast('Pick firmness at least', '☝️'); return; }
+        if (v.firm == null) { UI.toast('Pick firmness at least', ''); return; }
         const st = S.get(); st.sxLog = st.sxLog || []; st.sxLog.push({ date: S.dayKey(), ...v, anxious: sh.querySelector('#sx-anx').checked });
-        S.save(); G.award('sx_' + st.sxLog.length, 10, ev); close(); UI.toast('Logged privately', '🔒'); onDone && onDone();
+        S.save(); G.award('sx_' + st.sxLog.length, 10, ev); close(); UI.toast('Logged privately', ''); onDone && onDone();
       };
     },
   });
@@ -250,15 +250,15 @@ export function sxSheet(onDone) {
 
 export function weighSheet(onDone) {
   const st = S.get(); const last = [...st.weights].sort((a, b) => a.date.localeCompare(b.date)).at(-1);
-  UI.openSheet(`<h2>⚖️ Weekly weigh-in</h2><p class="muted small">Same day each week, morning, after the toilet, before food.</p>
+  UI.openSheet(`<h2>Weekly weigh-in</h2><p class="muted small">Same day each week, morning, after the toilet, before food.</p>
     <div class="field"><label>Weight (kg)</label><input id="wkg" type="number" inputmode="decimal" step="0.1" value="${last ? last.kg : st.profile.startKg}"></div>
     <button class="btn primary block mt16" id="wsave">Save</button>`, {
     onMount: (sh, close) => sh.querySelector('#wsave').onclick = (ev) => {
-      const kg = parseFloat(sh.querySelector('#wkg').value); if (!kg || kg < 30 || kg > 200) { UI.toast('Enter a valid weight', '⚠️'); return; }
+      const kg = parseFloat(sh.querySelector('#wkg').value); if (!kg || kg < 30 || kg > 200) { UI.toast('Enter a valid weight', ''); return; }
       const k = S.dayKey(); st.weights = st.weights.filter((w) => w.date !== k); st.weights.push({ date: k, kg });
       S.save(); G.award(`weigh_${S.weekKey()}`, 30, ev); G.checkBadges(); close();
       const diff = last ? kg - last.kg : 0;
-      UI.toast(last ? `${diff >= 0 ? '+' : ''}${diff.toFixed(1)} kg since last time` : 'Weight saved', diff > 0 ? '📈' : '⚖️');
+      UI.toast(last ? `${diff >= 0 ? '+' : ''}${diff.toFixed(1)} kg since last time` : 'Weight saved', diff > 0 ? '' : '');
       onDone && onDone();
     },
   });
@@ -268,9 +268,9 @@ export function energySheet(onDone) {
   const d = S.day();
   let energy = d.energy, mood = d.mood, appetite = d.appetite;
   UI.openSheet(`<h2>How are you right now?</h2>
-    <div class="field"><label>Energy</label>${UI.scaleButtons('energy', 5, energy, ['🪫', '😮‍💨', '😐', '🙂', '⚡'], true)}</div>
-    <div class="field"><label>Mood</label>${UI.scaleButtons('mood', 5, mood, ['😞', '😕', '😐', '🙂', '😄'], true)}</div>
-    <div class="field"><label>Appetite</label>${UI.scaleButtons('appetite', 5, appetite, ['🚫', '🥄', '🍽️', '😋', '🤤'], true)}</div>
+    <div class="field"><label>Energy</label>${UI.scaleButtons('energy', 5, energy, ['', '', '', '', ''], true)}</div>
+    <div class="field"><label>Mood</label>${UI.scaleButtons('mood', 5, mood, ['', '', '', '', ''], true)}</div>
+    <div class="field"><label>Appetite</label>${UI.scaleButtons('appetite', 5, appetite, ['', '', '', '', ''], true)}</div>
     <div class="field"><label>Journal <span class="faint">(optional, private)</span></label><textarea id="en-note" rows="3" maxlength="600" placeholder="What helped today? What got in the way?">${UI.esc(d.notes || '')}</textarea></div>
     <button class="btn primary block mt16" id="en-save">Save</button>`, {
     onMount: (sh, close) => {
@@ -290,7 +290,7 @@ export function storyViewer(story, slides, onDone) {
   const DUR = 6000;
   UI.fullscreen(`<div class="story-viewer">
     <div class="bars">${slides.map(() => '<i><b></b></i>').join('')}</div>
-    <button class="close" data-x>✕</button>
+    <button class="close" data-x></button>
     <div class="slide" id="sv-slide"></div>
     <div class="tapzones"><div data-prev></div><div data-next></div></div>
   </div>`, {

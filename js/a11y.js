@@ -89,13 +89,28 @@ export function start() {
   const toasts = document.getElementById('toast-root');
   if (toasts) { toasts.setAttribute('role', 'status'); toasts.setAttribute('aria-live', 'polite'); }
   document.querySelector('nav.tabbar')?.setAttribute('aria-label', 'Main');
-  const run = () => { scheduled = false; stripEmoji(document.querySelector('#screen')); stripEmoji(document.querySelector('#overlay-root')); ['#app', '#overlay-root', '#toast-root'].forEach((q) => translateTree(document.querySelector(q))); enhance(document); document.querySelector('nav.tabbar')?.setAttribute('aria-label', 'Main'); document.querySelectorAll('.tab.active').forEach((t) => t.setAttribute('aria-current', 'page')); };
+  // Only the parts of the page that changed are processed — a toggle or a new sheet
+  // shouldn't make the whole screen be rescanned.
+  const pending = new Set();
+  const process = (node) => { stripEmoji(node); translateTree(node); enhance(node.parentElement && node.parentElement !== document.body ? node.parentElement : node); };
+  const run = () => {
+    scheduled = false;
+    const roots = [...pending].filter((n) => n.isConnected); pending.clear();
+    roots.filter((n) => !roots.some((o) => o !== n && o.contains(n))).forEach(process);
+    document.querySelector('nav.tabbar')?.setAttribute('aria-label', 'Main');
+    document.querySelectorAll('.tab.active').forEach((t) => t.setAttribute('aria-current', 'page'));
+  };
   new MutationObserver((muts) => {
-    // When a dialog closes, give focus back to whatever opened it.
-    for (const m of muts) for (const n of m.removedNodes) if (n.nodeType === 1 && n.querySelector?.('[role="dialog"]') && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
-    if (!scheduled) { scheduled = true; requestAnimationFrame(run); }
+    for (const m of muts) {
+      // When a dialog closes, give focus back to whatever opened it.
+      for (const n of m.removedNodes) if (n.nodeType === 1 && n.querySelector?.('[role="dialog"]') && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
+      if (m.type === 'childList') m.addedNodes.forEach((n) => pending.add(n.nodeType === 1 ? n : n.parentElement));
+      else pending.add(m.target);
+    }
+    pending.delete(null);
+    if (pending.size && !scheduled) { scheduled = true; requestAnimationFrame(run); }
   }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-  run();
+  [document.querySelector('#app'), document.querySelector('#overlay-root'), document.querySelector('#toast-root')].filter(Boolean).forEach(process);
 
   // Keep keyboard focus inside an open dialog
   document.addEventListener('keydown', (e) => {

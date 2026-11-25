@@ -187,7 +187,7 @@ export function fastingMealTimes(now = new Date()) {
   return { breakfast: S.fmtMin(t.fajr - 40), dinner: S.fmtMin(t.maghrib), lunch: S.fmtMin((t.isha ?? t.maghrib + 90) + 30), snack: S.fmtMin(t.maghrib + 150) };
 }
 export const FAST_LABEL = { breakfast: 'Suhoor', lunch: 'Late meal', dinner: 'Iftar', snack: 'Night snack / shake' };
-export const FAST_EMOJI = { breakfast: '🌌', lunch: '🍛', dinner: '🌙', snack: '🥤' };
+export const FAST_EMOJI = { breakfast: '', lunch: '', dinner: '', snack: '' };
 
 export function countdown(min) {
   if (min == null || !Number.isFinite(min)) return '';

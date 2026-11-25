@@ -1,7 +1,7 @@
 // Tiny dependency-free SVG charts.
 export function lineChart(points, { h = 140, color = '#ffb547', min, max, band, labels = true, unit = '', goal } = {}) {
   const W = 340; const H = h; const pl = 30, pr = 10, pt = 12, pb = 22;
-  if (!points.length) return `<div class="empty small"><span class="e">📉</span>No data yet</div>`;
+  if (!points.length) return `<div class="empty small"><span class="e"></span>No data yet</div>`;
   const ys = points.map((p) => p.y);
   let lo = min ?? Math.min(...ys, band ? band[0] : Infinity, goal ?? Infinity); let hi = max ?? Math.max(...ys, band ? band[1] : -Infinity, goal ?? -Infinity);
   if (lo === hi) { lo -= 1; hi += 1; }
@@ -42,7 +42,7 @@ export function barChart(bars, { h = 120, color = '#5aa9ff', max, goal } = {}) {
 // Sleep timeline: bars from bed to wake on a 18:00 → 14:00 axis.
 export function sleepChart(nights, { h = 160, target } = {}) {
   const W = 340; const H = h; const pl = 34, pr = 6, pt = 6, pb = 18;
-  if (!nights.length) return `<div class="empty small"><span class="e">🌙</span>Log a few nights to see your pattern</div>`;
+  if (!nights.length) return `<div class="empty small"><span class="e"></span>Log a few nights to see your pattern</div>`;
   const AX0 = 18 * 60; const SPAN = 20 * 60; // 18:00 → 14:00
   const toAx = (hhmm) => ((((hhmm - AX0) % 1440) + 1440) % 1440);
   const rowH = (H - pt - pb) / nights.length;

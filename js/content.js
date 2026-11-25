@@ -28,13 +28,13 @@ export function applyRemoteContent() {
   for (const row of items || []) {
     const d = { ...row.data, id: row.id };
     if (row.kind === 'recipe' && validRecipe(d)) {
-      upsert(RECIPES, { fav: false, tags: [], feel: ['ok'], emoji: '🍽️', bg: ['#334155', '#0f172a'], method: 'airfryer', mins: 15, cost: 10, desc: '', remote: true, ...d }, RECIPE); added++;
+      upsert(RECIPES, { fav: false, tags: [], feel: ['ok'], emoji: '', bg: ['#334155', '#0f172a'], method: 'airfryer', mins: 15, cost: 10, desc: '', remote: true, ...d }, RECIPE); added++;
     } else if (row.kind === 'tip' && validTip(d)) {
-      upsert(TIPS, { e: '💡', bg: ['#1e293b', '#020617'], cat: 'New', ...d }); added++;
+      upsert(TIPS, { e: '', bg: ['#1e293b', '#020617'], cat: 'New', ...d }); added++;
     } else if (row.kind === 'story' && validStory(d)) {
-      upsert(STORIES, { e: '✨', ...d }); added++;
+      upsert(STORIES, { e: '', ...d }); added++;
     } else if (row.kind === 'delivery' && isStr(d.name) && isNum(d.kcal)) {
-      upsert(DELIVERY, { emoji: '🥡', cost: 30, protein: 25, tip: '', zh: '', ...d }); added++;
+      upsert(DELIVERY, { emoji: '', cost: 30, protein: 25, tip: '', zh: '', ...d }); added++;
     }
   }
   return added;

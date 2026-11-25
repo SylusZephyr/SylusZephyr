@@ -9,13 +9,13 @@ export const SLEEP_SAFE_MG = 50;    // rough level under which sleep onset is ra
 export const DAILY_LIMIT_MG = 400;  // usual upper limit for healthy adults
 
 export const DRINKS = [
-  { id: 'americano', e: '☕', label: 'Americano', mg: 150 },
-  { id: 'latte', e: '🥛', label: 'Latte / coconut latte', mg: 150 },
-  { id: 'espresso', e: '⚡', label: 'Single espresso', mg: 75 },
-  { id: 'tea', e: '🍵', label: 'Black / green tea', mg: 40 },
-  { id: 'cola', e: '🥤', label: 'Cola (330 ml)', mg: 35 },
-  { id: 'energy', e: '🔋', label: 'Energy drink', mg: 80 },
-  { id: 'decaf', e: '🌙', label: 'Decaf', mg: 5 },
+  { id: 'americano', e: '', label: 'Americano', mg: 150 },
+  { id: 'latte', e: '', label: 'Latte / coconut latte', mg: 150 },
+  { id: 'espresso', e: '', label: 'Single espresso', mg: 75 },
+  { id: 'tea', e: '', label: 'Black / green tea', mg: 40 },
+  { id: 'cola', e: '', label: 'Cola (330 ml)', mg: 35 },
+  { id: 'energy', e: '', label: 'Energy drink', mg: 80 },
+  { id: 'decaf', e: '', label: 'Decaf', mg: 5 },
 ];
 
 // Minutes since the 4 AM rollover, so a 1 AM coffee lands after a 9 PM one.

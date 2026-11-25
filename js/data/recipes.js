@@ -6,7 +6,7 @@ const R = (o) => ({ fav: false, tags: [], feel: ['ok'], ...o });
 export const RECIPES = [
   // ───────────── BREAKFAST ─────────────
   R({
-    id: 'egg_paratha', name: 'Crispy Egg Paratha', emoji: '🫓', bg: ['#f59e0b', '#b45309'],
+    id: 'egg_paratha', name: 'Crispy Egg Paratha', emoji: '', bg: ['#f59e0b', '#b45309'],
     method: 'airfryer', meals: ['breakfast'], mins: 12, cost: 6, kcal: 520, protein: 20,
     tags: ['crispy', 'desi', 'savory'], feel: ['ok', 'energetic'],
     desc: 'Your favourite desi breakfast, made with frozen 手抓饼 — golden flaky outside, soft egg inside.',
@@ -20,7 +20,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'aloo_paratha_cheat', name: 'Cheat Aloo-Cheese Paratha', emoji: '🥔', bg: ['#eab308', '#a16207'],
+    id: 'aloo_paratha_cheat', name: 'Cheat Aloo-Cheese Paratha', emoji: '', bg: ['#eab308', '#a16207'],
     method: 'airfryer', meals: ['breakfast', 'dinner'], mins: 15, cost: 7, kcal: 610, protein: 16,
     tags: ['crispy', 'desi', 'comfort'], feel: ['ok', 'energetic'],
     desc: 'Microwave-free mash: air-fry a sliced potato, smash it with masala, sandwich it between two parathas.',
@@ -34,7 +34,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'egg_muffins', name: 'Masala Egg Muffins', emoji: '🧁', bg: ['#fb923c', '#c2410c'],
+    id: 'egg_muffins', name: 'Masala Egg Muffins', emoji: '', bg: ['#fb923c', '#c2410c'],
     method: 'airfryer', meals: ['breakfast', 'snack'], mins: 14, cost: 5, kcal: 280, protein: 19,
     tags: ['savory', 'desi', 'high-protein'], feel: ['ok'],
     desc: 'Desi omelette in muffin form. Use silicone cups or a small foil tray.',
@@ -47,7 +47,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'overnight_oats', name: 'Peanut Butter Banana Overnight Oats', emoji: '🥣', bg: ['#a78bfa', '#6d28d9'],
+    id: 'overnight_oats', name: 'Peanut Butter Banana Overnight Oats', emoji: '', bg: ['#a78bfa', '#6d28d9'],
     method: 'nocook', meals: ['breakfast', 'snack'], mins: 3, cost: 5, kcal: 560, protein: 22,
     tags: ['creamy', 'sweet', 'prep-ahead'], feel: ['tired', 'lowappetite', 'ok'],
     desc: 'Make it before bed in a jar, grab it when you wake. Zero cooking, one spoon.',
@@ -59,7 +59,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'yogurt_bowl', name: 'Honey Granola Yogurt Bowl', emoji: '🍯', bg: ['#fbbf24', '#d97706'],
+    id: 'yogurt_bowl', name: 'Honey Granola Yogurt Bowl', emoji: '', bg: ['#fbbf24', '#d97706'],
     method: 'nocook', meals: ['breakfast', 'snack'], mins: 2, cost: 6, kcal: 450, protein: 20,
     tags: ['creamy', 'crunchy', 'sweet'], feel: ['tired', 'lowappetite'],
     desc: 'Creamy + crunchy in 2 minutes. Add dates for iron and energy.',
@@ -67,7 +67,7 @@ export const RECIPES = [
     steps: [{ t: 'Yogurt in a bowl, granola on top, sliced banana/dates, drizzle honey. Done.' }],
   }),
   R({
-    id: 'naan_egg_cheese', name: 'Naan Egg & Cheese Melt', emoji: '🥯', bg: ['#f97316', '#9a3412'],
+    id: 'naan_egg_cheese', name: 'Naan Egg & Cheese Melt', emoji: '', bg: ['#f97316', '#9a3412'],
     method: 'airfryer', meals: ['breakfast', 'lunch'], mins: 10, cost: 7, kcal: 560, protein: 24,
     tags: ['crispy', 'savory'], feel: ['ok'],
     desc: 'Xinjiang naan gets super crispy in the air fryer. Egg cracked on top like a pizza.',
@@ -78,7 +78,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'french_toast', name: 'Air-Fryer French Toast Sticks', emoji: '🍞', bg: ['#fcd34d', '#b45309'],
+    id: 'french_toast', name: 'Air-Fryer French Toast Sticks', emoji: '', bg: ['#fcd34d', '#b45309'],
     method: 'airfryer', meals: ['breakfast', 'snack'], mins: 12, cost: 4, kcal: 480, protein: 18,
     tags: ['crispy', 'sweet'], feel: ['ok', 'energetic'],
     desc: 'Crispy edges, soft custardy inside. Dip in honey or peanut butter.',
@@ -92,7 +92,7 @@ export const RECIPES = [
 
   // ───────────── LUNCH (wraps & sandwiches) ─────────────
   R({
-    id: 'chicken_cheese_wrap', name: 'Chicken-Cheese Crunch Wrap', emoji: '🌯', bg: ['#ef4444', '#991b1b'],
+    id: 'chicken_cheese_wrap', name: 'Chicken-Cheese Crunch Wrap', emoji: '', bg: ['#ef4444', '#991b1b'],
     method: 'airfryer', meals: ['lunch', 'dinner'], mins: 10, cost: 12, kcal: 680, protein: 42,
     tags: ['crispy', 'cheesy', 'high-protein'], feel: ['ok', 'tired'],
     desc: 'Ready-cooked chicken + cheese folded into a tortilla and toasted golden. Your lunch default.',
@@ -104,7 +104,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'tikka_wrap', name: 'Chicken Tikka Wrap', emoji: '🔥', bg: ['#dc2626', '#7f1d1d'],
+    id: 'tikka_wrap', name: 'Chicken Tikka Wrap', emoji: '', bg: ['#dc2626', '#7f1d1d'],
     method: 'airfryer', meals: ['lunch', 'dinner'], mins: 20, cost: 14, kcal: 650, protein: 45,
     tags: ['spicy', 'desi', 'high-protein'], feel: ['ok', 'energetic'],
     desc: 'Yogurt-marinated chicken thigh with tikka masala, charred in the air fryer.',
@@ -117,7 +117,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'tuna_melt', name: 'Tuna Melt Toastie', emoji: '🥪', bg: ['#0ea5e9', '#075985'],
+    id: 'tuna_melt', name: 'Tuna Melt Toastie', emoji: '', bg: ['#0ea5e9', '#075985'],
     method: 'airfryer', meals: ['lunch'], mins: 8, cost: 10, kcal: 560, protein: 34,
     tags: ['cheesy', 'crispy', 'high-protein'], feel: ['tired', 'ok'],
     desc: 'Canned tuna + mayo + cheese between bread, crisped in 6 minutes.',
@@ -129,7 +129,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'kebab_naan', name: 'Seekh Kebab Naan Roll', emoji: '🍢', bg: ['#b91c1c', '#450a0a'],
+    id: 'kebab_naan', name: 'Seekh Kebab Naan Roll', emoji: '', bg: ['#b91c1c', '#450a0a'],
     method: 'airfryer', meals: ['lunch', 'dinner'], mins: 12, cost: 15, kcal: 720, protein: 38,
     tags: ['spicy', 'smoky', 'desi'], feel: ['ok', 'energetic'],
     desc: 'Frozen halal skewers from the 清真 counter, with onion and yogurt in warm naan.',
@@ -141,7 +141,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'egg_mayo_sandwich', name: 'Egg Mayo Sandwich (no stove)', emoji: '🥚', bg: ['#facc15', '#854d0e'],
+    id: 'egg_mayo_sandwich', name: 'Egg Mayo Sandwich (no stove)', emoji: '', bg: ['#facc15', '#854d0e'],
     method: 'airfryer', meals: ['lunch', 'snack'], mins: 16, cost: 5, kcal: 480, protein: 22,
     tags: ['creamy', 'prep-ahead'], feel: ['ok'],
     desc: 'Air-fryer "boiled" eggs — 15 minutes, no water. Make 6 and keep in the fridge.',
@@ -153,7 +153,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'chicken_pizza_naan', name: 'Chicken Tikka Naan Pizza', emoji: '🍕', bg: ['#f43f5e', '#881337'],
+    id: 'chicken_pizza_naan', name: 'Chicken Tikka Naan Pizza', emoji: '', bg: ['#f43f5e', '#881337'],
     method: 'airfryer', meals: ['lunch', 'dinner'], mins: 10, cost: 13, kcal: 740, protein: 40,
     tags: ['cheesy', 'crispy', 'comfort'], feel: ['ok', 'energetic'],
     desc: 'Naan base, ketchup-chili sauce, cooked chicken, lots of mozzarella.',
@@ -166,7 +166,7 @@ export const RECIPES = [
 
   // ───────────── DINNER (curry-style & mains) ─────────────
   R({
-    id: 'airfryer_chicken_curry', name: 'Shortcut Air-Fryer Chicken Curry', emoji: '🍛', bg: ['#ea580c', '#7c2d12'],
+    id: 'airfryer_chicken_curry', name: 'Shortcut Air-Fryer Chicken Curry', emoji: '', bg: ['#ea580c', '#7c2d12'],
     method: 'airfryer', meals: ['dinner'], mins: 22, cost: 16, kcal: 780, protein: 44,
     tags: ['desi', 'comfort', 'spicy'], feel: ['ok', 'energetic'],
     desc: 'Chicken roasted in a foil tray with tomato, onion, masala and yogurt — tastes like a karahi. Eat with naan or paratha.',
@@ -180,7 +180,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'tandoori_thighs', name: 'Tandoori Chicken Thighs', emoji: '🍗', bg: ['#dc2626', '#9a3412'],
+    id: 'tandoori_thighs', name: 'Tandoori Chicken Thighs', emoji: '', bg: ['#dc2626', '#9a3412'],
     method: 'airfryer', meals: ['dinner', 'lunch'], mins: 20, cost: 14, kcal: 520, protein: 46,
     tags: ['smoky', 'desi', 'high-protein'], feel: ['ok', 'energetic'],
     desc: 'Marinate in the bag in the morning, cook in 15 minutes at night.',
@@ -192,7 +192,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'chapli_patties', name: 'Chapli-Style Beef Patties', emoji: '🥩', bg: ['#9f1239', '#4c0519'],
+    id: 'chapli_patties', name: 'Chapli-Style Beef Patties', emoji: '', bg: ['#9f1239', '#4c0519'],
     method: 'airfryer', meals: ['dinner', 'lunch'], mins: 18, cost: 18, kcal: 690, protein: 38,
     tags: ['crispy', 'desi', 'spicy'], feel: ['energetic'],
     desc: 'Beef mince with onion, tomato, chili and cumin, pressed flat and air-fried crispy.',
@@ -205,7 +205,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'masala_fish', name: 'Crispy Masala Fish & Chips', emoji: '🐟', bg: ['#0284c7', '#0c4a6e'],
+    id: 'masala_fish', name: 'Crispy Masala Fish & Chips', emoji: '', bg: ['#0284c7', '#0c4a6e'],
     method: 'airfryer', meals: ['dinner'], mins: 20, cost: 15, kcal: 640, protein: 36,
     tags: ['crispy', 'desi'], feel: ['ok'],
     desc: 'Lahori-style spiced fish with frozen fries, all in one basket.',
@@ -217,7 +217,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'honey_salmon', name: 'Honey-Soy Salmon & Broccoli', emoji: '🍣', bg: ['#fb7185', '#9f1239'],
+    id: 'honey_salmon', name: 'Honey-Soy Salmon & Broccoli', emoji: '', bg: ['#fb7185', '#9f1239'],
     method: 'airfryer', meals: ['dinner'], mins: 14, cost: 28, kcal: 560, protein: 34,
     tags: ['omega-3', 'light'], feel: ['ok'],
     desc: 'Omega-3 rich. Salmon and broccoli cook together in 10 minutes.',
@@ -229,7 +229,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'lamb_skewers_rice', name: 'Cumin Lamb Bites + Rice', emoji: '🍖', bg: ['#a16207', '#422006'],
+    id: 'lamb_skewers_rice', name: 'Cumin Lamb Bites + Rice', emoji: '', bg: ['#a16207', '#422006'],
     method: 'airfryer', meals: ['dinner'], mins: 18, cost: 25, kcal: 760, protein: 40,
     tags: ['spicy', 'smoky', 'iron-rich'], feel: ['energetic'],
     desc: 'Xinjiang-style 孜然羊肉 — iron-rich and full of flavour.',
@@ -241,7 +241,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'chickpea_chaat', name: 'Crispy Chana Chaat Bowl', emoji: '🫘', bg: ['#65a30d', '#365314'],
+    id: 'chickpea_chaat', name: 'Crispy Chana Chaat Bowl', emoji: '', bg: ['#65a30d', '#365314'],
     method: 'airfryer', meals: ['lunch', 'snack', 'dinner'], mins: 15, cost: 8, kcal: 470, protein: 18,
     tags: ['crispy', 'desi', 'tangy'], feel: ['ok'],
     desc: 'Air-fried chickpeas + potato with yogurt, onion, tomato, lemon and chili.',
@@ -253,7 +253,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'tray_bake', name: 'One-Tray Chicken & Potato Roast', emoji: '🥘', bg: ['#d97706', '#78350f'],
+    id: 'tray_bake', name: 'One-Tray Chicken & Potato Roast', emoji: '', bg: ['#d97706', '#78350f'],
     method: 'airfryer', meals: ['dinner'], mins: 25, cost: 14, kcal: 720, protein: 42,
     tags: ['comfort', 'one-tray'], feel: ['ok'],
     desc: 'Everything in one basket: chicken, potato, onion, pepper. Only the basket to wash.',
@@ -264,7 +264,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'paneer_tikka', name: 'Tofu / Paneer Tikka', emoji: '🧈', bg: ['#f59e0b', '#92400e'],
+    id: 'paneer_tikka', name: 'Tofu / Paneer Tikka', emoji: '', bg: ['#f59e0b', '#92400e'],
     method: 'airfryer', meals: ['dinner', 'snack'], mins: 18, cost: 7, kcal: 420, protein: 26,
     tags: ['desi', 'smoky'], feel: ['ok'],
     desc: 'Firm 老豆腐 takes tikka marinade beautifully — cheap protein.',
@@ -275,7 +275,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'sweet_potato_loaded', name: 'Loaded Sweet Potato', emoji: '🍠', bg: ['#ea580c', '#431407'],
+    id: 'sweet_potato_loaded', name: 'Loaded Sweet Potato', emoji: '', bg: ['#ea580c', '#431407'],
     method: 'airfryer', meals: ['dinner', 'lunch'], mins: 35, cost: 10, kcal: 610, protein: 30,
     tags: ['comfort', 'creamy'], feel: ['tired'],
     desc: 'Put it in, forget about it. Top with chicken, cheese and yogurt.',
@@ -289,7 +289,7 @@ export const RECIPES = [
 
   // ───────────── SNACKS & SHAKES (no blender needed) ─────────────
   R({
-    id: 'shaker_smoothie', name: 'Banana PB "Smoothie" (no blender)', emoji: '🥤', bg: ['#a855f7', '#581c87'],
+    id: 'shaker_smoothie', name: 'Banana PB "Smoothie" (no blender)', emoji: '', bg: ['#a855f7', '#581c87'],
     method: 'nocook', meals: ['snack', 'breakfast'], mins: 3, cost: 5, kcal: 450, protein: 18,
     tags: ['creamy', 'sweet', 'drinkable'], feel: ['tired', 'lowappetite'],
     desc: 'Mash a very ripe banana in a bottle, add milk, oats, peanut butter — shake hard. Drinkable calories when you are not hungry.',
@@ -302,15 +302,15 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'protein_milk_dates', name: 'Protein Milk + Dates + Nuts', emoji: '🌴', bg: ['#92400e', '#451a03'],
+    id: 'protein_milk_dates', name: 'Protein Milk + Dates + Nuts', emoji: '', bg: ['#92400e', '#451a03'],
     method: 'nocook', meals: ['snack'], mins: 0, cost: 8, kcal: 380, protein: 20,
     tags: ['grab-and-go'], feel: ['tired', 'lowappetite'],
     desc: 'The zero-effort energy snack. Keep these three in your bag.',
     ing: [{ id: 'protein_milk', q: '1 bottle' }, { id: 'dates', q: '4' }, { id: 'nuts', q: '1 pack' }],
-    steps: [{ t: 'Open. Eat. That counts as a meal opportunity ✔.' }],
+    steps: [{ t: 'Open. Eat. That counts as a meal opportunity .' }],
   }),
   R({
-    id: 'masala_fries', name: 'Masala Fries + Egg', emoji: '🍟', bg: ['#facc15', '#a16207'],
+    id: 'masala_fries', name: 'Masala Fries + Egg', emoji: '', bg: ['#facc15', '#a16207'],
     method: 'airfryer', meals: ['snack', 'lunch'], mins: 15, cost: 5, kcal: 520, protein: 14,
     tags: ['crispy', 'desi', 'comfort'], feel: ['ok', 'tired'],
     desc: 'Frozen fries + chaat masala vibes. Add an air-fryer egg for protein.',
@@ -321,7 +321,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'wings', name: 'Crispy Spicy Wings', emoji: '🍗', bg: ['#ef4444', '#7f1d1d'],
+    id: 'wings', name: 'Crispy Spicy Wings', emoji: '', bg: ['#ef4444', '#7f1d1d'],
     method: 'airfryer', meals: ['snack', 'dinner'], mins: 22, cost: 16, kcal: 600, protein: 40,
     tags: ['crispy', 'spicy'], feel: ['energetic'],
     desc: 'Halal wings, cumin-chili crust, no oil needed.',
@@ -333,7 +333,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'samosa_plate', name: 'Samosa / Spring Roll Plate', emoji: '🥟', bg: ['#d97706', '#78350f'],
+    id: 'samosa_plate', name: 'Samosa / Spring Roll Plate', emoji: '', bg: ['#d97706', '#78350f'],
     method: 'airfryer', meals: ['snack'], mins: 12, cost: 8, kcal: 420, protein: 12,
     tags: ['crispy', 'desi', 'comfort'], feel: ['tired', 'ok'],
     desc: 'Frozen and ready. Serve with yogurt-mint or ketchup.',
@@ -341,7 +341,7 @@ export const RECIPES = [
     steps: [{ t: 'Air fry from frozen 190°C, shake halfway.', timer: 600 }],
   }),
   R({
-    id: 'apple_pb', name: 'Apple + Peanut Butter + Cheese', emoji: '🍎', bg: ['#dc2626', '#14532d'],
+    id: 'apple_pb', name: 'Apple + Peanut Butter + Cheese', emoji: '', bg: ['#dc2626', '#14532d'],
     method: 'nocook', meals: ['snack'], mins: 2, cost: 5, kcal: 380, protein: 14,
     tags: ['crunchy', 'grab-and-go'], feel: ['tired', 'lowappetite'],
     desc: 'Crunchy, sweet, salty. Two minutes.',
@@ -349,7 +349,7 @@ export const RECIPES = [
     steps: [{ t: 'Slice apple, dip in peanut butter. Cheese on the side.' }],
   }),
   R({
-    id: 'choc_banana_oats', name: 'Chocolate Banana Baked Oats', emoji: '🍫', bg: ['#7c2d12', '#1c0a00'],
+    id: 'choc_banana_oats', name: 'Chocolate Banana Baked Oats', emoji: '', bg: ['#7c2d12', '#1c0a00'],
     method: 'airfryer', meals: ['breakfast', 'snack'], mins: 15, cost: 6, kcal: 520, protein: 20,
     tags: ['sweet', 'comfort'], feel: ['ok', 'lowappetite'],
     desc: 'Tastes like a brownie, it is actually oats, egg and banana.',
@@ -361,7 +361,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'avocado_egg_toast', name: 'Avocado Egg Toast', emoji: '🥑', bg: ['#16a34a', '#14532d'],
+    id: 'avocado_egg_toast', name: 'Avocado Egg Toast', emoji: '', bg: ['#16a34a', '#14532d'],
     method: 'airfryer', meals: ['breakfast', 'lunch'], mins: 10, cost: 9, kcal: 470, protein: 18,
     tags: ['creamy', 'crispy'], feel: ['ok'],
     desc: 'Crispy toast, smashed avocado, chili flakes and an air-fryer egg.',
@@ -372,7 +372,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'nugget_wrap', name: 'Lazy Nugget Wrap', emoji: '🌮', bg: ['#f59e0b', '#7c2d12'],
+    id: 'nugget_wrap', name: 'Lazy Nugget Wrap', emoji: '', bg: ['#f59e0b', '#7c2d12'],
     method: 'airfryer', meals: ['lunch', 'dinner', 'snack'], mins: 12, cost: 8, kcal: 620, protein: 28,
     tags: ['crispy', 'comfort'], feel: ['tired'],
     desc: 'For the days when you can barely move: frozen nuggets, tortilla, sauce. 3 actions.',
@@ -385,7 +385,7 @@ export const RECIPES = [
   }),
   // ───────────── v1.1 additions ─────────────
   R({
-    id: 'shawarma_bowl', name: 'Chicken Shawarma Rice Bowl', emoji: '🥙', bg: ['#ca8a04', '#713f12'],
+    id: 'shawarma_bowl', name: 'Chicken Shawarma Rice Bowl', emoji: '', bg: ['#ca8a04', '#713f12'],
     method: 'airfryer', meals: ['lunch', 'dinner'], mins: 18, cost: 15, kcal: 760, protein: 46,
     tags: ['high-protein', 'creamy', 'savory'], feel: ['ok', 'energetic'],
     desc: 'Cumin-garlic chicken over rice with cucumber, tomato and a garlicky yogurt sauce.',
@@ -398,7 +398,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'aloo_tikki', name: 'Crispy Aloo Tikki + Yogurt', emoji: '🥔', bg: ['#a16207', '#422006'],
+    id: 'aloo_tikki', name: 'Crispy Aloo Tikki + Yogurt', emoji: '', bg: ['#a16207', '#422006'],
     method: 'airfryer', meals: ['snack', 'lunch'], mins: 25, cost: 4, kcal: 420, protein: 12,
     tags: ['crispy', 'desi', 'comfort'], feel: ['ok'],
     desc: 'Golden potato patties — crunchy outside, soft inside. Classic chaat flavours.',
@@ -411,7 +411,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'mango_lassi', name: 'Mango Lassi Shake', emoji: '🥭', bg: ['#f59e0b', '#c2410c'],
+    id: 'mango_lassi', name: 'Mango Lassi Shake', emoji: '', bg: ['#f59e0b', '#c2410c'],
     method: 'nocook', meals: ['snack', 'breakfast'], mins: 3, cost: 7, kcal: 420, protein: 16,
     tags: ['creamy', 'sweet', 'drinkable', 'desi'], feel: ['tired', 'lowappetite'],
     desc: 'Mash ripe mango into yogurt and milk, shake hard. Tastes like home.',
@@ -423,7 +423,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'hummus_wrap', name: 'No-Cook Hummus Chicken Wrap', emoji: '🫔', bg: ['#65a30d', '#1a2e05'],
+    id: 'hummus_wrap', name: 'No-Cook Hummus Chicken Wrap', emoji: '', bg: ['#65a30d', '#1a2e05'],
     method: 'nocook', meals: ['lunch', 'snack'], mins: 6, cost: 12, kcal: 640, protein: 38,
     tags: ['creamy', 'high-protein', 'grab-and-go'], feel: ['tired', 'ok'],
     desc: 'Smash chickpeas with lemon & yogurt into a quick hummus, add ready chicken. No heat at all.',
@@ -435,7 +435,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'kofta_tray', name: 'Beef Kofta & Veg Tray', emoji: '🍢', bg: ['#b45309', '#3f1d03'],
+    id: 'kofta_tray', name: 'Beef Kofta & Veg Tray', emoji: '', bg: ['#b45309', '#3f1d03'],
     method: 'airfryer', meals: ['dinner'], mins: 20, cost: 17, kcal: 700, protein: 40,
     tags: ['desi', 'smoky', 'iron-rich'], feel: ['energetic', 'ok'],
     desc: 'Spiced mince fingers with peppers and onion — iron and zinc rich. Eat with naan.',
@@ -448,7 +448,7 @@ export const RECIPES = [
     ],
   }),
   R({
-    id: 'pb_banana_toast', name: 'PB Banana Honey Toast', emoji: '🍌', bg: ['#ca8a04', '#422006'],
+    id: 'pb_banana_toast', name: 'PB Banana Honey Toast', emoji: '', bg: ['#ca8a04', '#422006'],
     method: 'airfryer', meals: ['breakfast', 'snack'], mins: 5, cost: 3, kcal: 430, protein: 14,
     tags: ['sweet', 'crunchy'], feel: ['tired', 'lowappetite', 'ok'],
     desc: 'Toast in the air fryer, peanut butter, banana, honey. Five minutes, 430 kcal.',
@@ -462,14 +462,14 @@ export const RECIPES = [
 
 // Halal delivery ideas for Meituan 美团 / Ele.me 饿了么. Tip: search with 清真 and filter by rating.
 export const DELIVERY = [
-  { id: 'd_lamian', name: 'Lanzhou beef noodles', zh: '兰州牛肉拉面 (加蛋加肉)', emoji: '🍜', cost: 25, kcal: 750, protein: 35, tip: 'Ask for 加肉 (extra beef) + 加蛋 (egg) for protein.' },
-  { id: 'd_dapanji', name: 'Xinjiang big-plate chicken', zh: '新疆大盘鸡 + 皮带面', emoji: '🍗', cost: 45, kcal: 900, protein: 50, tip: 'Closest thing to chicken curry. Usually feeds 2 — save half for tomorrow.' },
-  { id: 'd_polo', name: 'Uyghur polo (pilaf)', zh: '新疆手抓饭', emoji: '🍚', cost: 35, kcal: 850, protein: 30, tip: 'Lamb pilau with carrots — very close to desi pulao.' },
-  { id: 'd_samsa', name: 'Baked samsa', zh: '烤包子', emoji: '🥟', cost: 20, kcal: 600, protein: 22, tip: 'Lamb-filled baked pastry. Order 3 + yogurt (酸奶).' },
-  { id: 'd_kebab', name: 'Lamb skewers + naan', zh: '红柳烤肉 / 羊肉串 + 馕', emoji: '🍢', cost: 40, kcal: 800, protein: 45, tip: 'Pick 清真 BBQ shops. Ask for less salt.' },
-  { id: 'd_laghman', name: 'Laghman (hand-pulled noodles)', zh: '新疆拌面 (过油肉)', emoji: '🍝', cost: 30, kcal: 820, protein: 32, tip: 'Saucy noodles with meat & veg — big portion.' },
-  { id: 'd_indian', name: 'Indian / Pakistani restaurant', zh: '印度餐厅 (咖喱鸡 + 馕)', emoji: '🍛', cost: 70, kcal: 1000, protein: 45, tip: 'Big cities have halal Indian places on Meituan. Chicken karahi/curry + naan.' },
-  { id: 'd_shawarma', name: 'Shawarma / Turkish', zh: '土耳其烤肉卷 / 沙威玛', emoji: '🌯', cost: 35, kcal: 700, protein: 35, tip: 'Basically your favourite wrap — order 2 and keep one.' },
+  { id: 'd_lamian', name: 'Lanzhou beef noodles', zh: '兰州牛肉拉面 (加蛋加肉)', emoji: '', cost: 25, kcal: 750, protein: 35, tip: 'Ask for 加肉 (extra beef) + 加蛋 (egg) for protein.' },
+  { id: 'd_dapanji', name: 'Xinjiang big-plate chicken', zh: '新疆大盘鸡 + 皮带面', emoji: '', cost: 45, kcal: 900, protein: 50, tip: 'Closest thing to chicken curry. Usually feeds 2 — save half for tomorrow.' },
+  { id: 'd_polo', name: 'Uyghur polo (pilaf)', zh: '新疆手抓饭', emoji: '', cost: 35, kcal: 850, protein: 30, tip: 'Lamb pilau with carrots — very close to desi pulao.' },
+  { id: 'd_samsa', name: 'Baked samsa', zh: '烤包子', emoji: '', cost: 20, kcal: 600, protein: 22, tip: 'Lamb-filled baked pastry. Order 3 + yogurt (酸奶).' },
+  { id: 'd_kebab', name: 'Lamb skewers + naan', zh: '红柳烤肉 / 羊肉串 + 馕', emoji: '', cost: 40, kcal: 800, protein: 45, tip: 'Pick 清真 BBQ shops. Ask for less salt.' },
+  { id: 'd_laghman', name: 'Laghman (hand-pulled noodles)', zh: '新疆拌面 (过油肉)', emoji: '', cost: 30, kcal: 820, protein: 32, tip: 'Saucy noodles with meat & veg — big portion.' },
+  { id: 'd_indian', name: 'Indian / Pakistani restaurant', zh: '印度餐厅 (咖喱鸡 + 馕)', emoji: '', cost: 70, kcal: 1000, protein: 45, tip: 'Big cities have halal Indian places on Meituan. Chicken karahi/curry + naan.' },
+  { id: 'd_shawarma', name: 'Shawarma / Turkish', zh: '土耳其烤肉卷 / 沙威玛', emoji: '', cost: 35, kcal: 700, protein: 35, tip: 'Basically your favourite wrap — order 2 and keep one.' },
 ];
 
 import { MORE_RECIPES } from './recipes-more.js';
@@ -481,15 +481,15 @@ export const RECIPE = Object.fromEntries(RECIPES.map((r) => [r.id, r]));
 
 // Small variations on familiar meals ("same but different").
 const VARIATIONS = {
-  egg_paratha: ['🧀 Cheese melt: add a slice in the last minute', '🌶️ Green chili + coriander in the egg', '🍗 Add torn ready-chicken for +15 g protein', '🍅 Tomato-onion masala egg'],
-  overnight_oats: ['🥭 Mango + cardamom', '🍫 Cocoa + banana', '🌴 Chopped dates + nuts', '🍎 Apple + cinnamon + honey'],
-  chicken_cheese_wrap: ['🔥 Chili sauce + jalapeño', '🥒 Cucumber-yogurt (raita style)', '🧄 Garlic mayo', '🍟 Stuff a few fries inside'],
-  tikka_wrap: ['🧀 Add cheese and toast it closed', '🥗 Lettuce + lemon onions', '🫓 Use paratha instead of tortilla'],
-  airfryer_chicken_curry: ['🥔 Add potato cubes (aloo chicken)', '🥥 Splash of coconut milk for creamy korma style', '🫑 Peppers + onion (jalfrezi style)', '🥬 Frozen spinach (palak style)'],
-  tandoori_thighs: ['🍋 Extra lemon + chaat masala', '🔥 More chili (Lahori style)', '🧄 Garlic-heavy marinade'],
-  tray_bake: ['🍠 Swap potato for sweet potato', '🥦 Add broccoli for the last 5 min', '🌶️ Cumin-chili (Xinjiang style)'],
-  shaker_smoothie: ['🍫 Add cocoa powder', '🌴 Mash in 2 dates', '☕ Decaf coffee (before cutoff only if regular)', '💪 Scoop of protein powder'],
-  tuna_melt: ['🌽 Add sweet corn', '🧅 Red onion + chili', '🥒 Pickles on the side'],
-  kebab_naan: ['🧀 Melt cheese on the naan first', '🥗 Lettuce + tomato + lemon', '🌶️ Chili-yogurt sauce'],
+  egg_paratha: ['Cheese melt: add a slice in the last minute', 'Green chili + coriander in the egg', 'Add torn ready-chicken for +15 g protein', 'Tomato-onion masala egg'],
+  overnight_oats: ['Mango + cardamom', 'Cocoa + banana', 'Chopped dates + nuts', 'Apple + cinnamon + honey'],
+  chicken_cheese_wrap: ['Chili sauce + jalapeño', 'Cucumber-yogurt (raita style)', 'Garlic mayo', 'Stuff a few fries inside'],
+  tikka_wrap: ['Add cheese and toast it closed', 'Lettuce + lemon onions', 'Use paratha instead of tortilla'],
+  airfryer_chicken_curry: ['Add potato cubes (aloo chicken)', 'Splash of coconut milk for creamy korma style', 'Peppers + onion (jalfrezi style)', 'Frozen spinach (palak style)'],
+  tandoori_thighs: ['Extra lemon + chaat masala', 'More chili (Lahori style)', 'Garlic-heavy marinade'],
+  tray_bake: ['Swap potato for sweet potato', 'Add broccoli for the last 5 min', 'Cumin-chili (Xinjiang style)'],
+  shaker_smoothie: ['Add cocoa powder', 'Mash in 2 dates', 'Decaf coffee (before cutoff only if regular)', 'Scoop of protein powder'],
+  tuna_melt: ['Add sweet corn', 'Red onion + chili', 'Pickles on the side'],
+  kebab_naan: ['Melt cheese on the naan first', 'Lettuce + tomato + lemon', 'Chili-yogurt sauce'],
 };
 for (const [id, v] of Object.entries(VARIATIONS)) if (RECIPE[id]) RECIPE[id].vars = v;
