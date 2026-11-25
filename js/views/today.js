@@ -103,7 +103,7 @@ function challengeCard() {
   return `<section class="card challenge ${c.done ? 'done' : ''}">
     <div class="row between"><div class="kicker" style="margin:0">This week’s challenge</div><span class="small muted">${c.done ? 'Complete' : c.daysLeft ? `${c.daysLeft} day${c.daysLeft === 1 ? '' : 's'} left` : 'Last day'}</span></div>
     <h3 class="mt8">${UI.esc(c.t)}</h3>
-    <div class="segbar mt12" aria-label="${c.value} of ${c.goal}">${Array.from({ length: c.goal }, (_, i) => `<i class="${i < c.value ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="segbar mt12" role="img" aria-label="${c.value} of ${c.goal}">${Array.from({ length: c.goal }, (_, i) => `<i class="${i < c.value ? 'on' : ''}"></i>`).join('')}</div>
     <div class="row between mt8 small"><span class="muted">${c.done ? 'Earned 150 XP and a streak freeze' : UI.esc(c.why)}</span><b style="white-space:nowrap;margin-left:12px">${c.value} / ${c.goal}</b></div>
   </section>`;
 }

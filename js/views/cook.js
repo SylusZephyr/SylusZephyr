@@ -102,7 +102,7 @@ function main() {
   ${filt.feel === 'tired' ? '<a class="btn block mt8" href="#cook/delivery">Too tired? Order halal delivery</a>' : ''}
   ${planTeaser()}`}
 
-  <div class="chips scroll mb12 ${filt.q ? 'mt16' : ''}" role="tablist">${CATS.map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}" role="tab" aria-selected="${filt.cat === id}">${l}</button>`).join('')}</div>
+  <div class="chips scroll mb12 ${filt.q ? 'mt16' : ''}">${CATS.map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
   <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1">No recipes match. Try another filter.</div>'}</div>
 
   <a class="list-row mt16" href="#cook/delivery"><span class="ico">${UI.ICON.bag}</span><span class="grow"><b>Halal delivery picks</b><span class="small muted">Meituan and Ele.me orders that still hit your protein</span></span><span class="chev">${UI.ICON.chev}</span></a>`;
