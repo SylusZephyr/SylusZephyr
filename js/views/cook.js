@@ -237,7 +237,7 @@ function cookMode(r, rerender) {
         stop(); try { wake && wake.release(); } catch (e) {} close();
         const st = S.get(); st.cooked[r.id] = (st.cooked[r.id] || 0) + 1;
         const d = S.day(); d.cookedCount = (d.cookedCount || 0) + 1; S.save();
-        G.award(`cook_${r.id}`, 40, null); G.evaluateQuests(); G.checkBadges();
+        G.award(`cook_${r.id}`, 40, null); G.checkBadges();
         const times = st.cooked[r.id];
         if (await UI.confirmSheet('Done', `${times > 1 ? `That’s ${times} times you’ve made this. ` : ''}Log it as ${P.SLOT_LABEL[P.currentSlot()].toLowerCase()}? ${r.kcal} kcal · ${r.protein} g protein.`, 'Log meal')) {
           Sh.logMeal({ slot: P.currentSlot(), name: r.name, recipeId: r.id, kcal: r.kcal, protein: r.protein });

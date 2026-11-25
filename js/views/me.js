@@ -360,7 +360,6 @@ export function bind(root, parts, { rerender }) {
   if (!sub) {
     root.querySelector('[data-sharecard]')?.addEventListener('click', async () => { try { await ShareCard.share(); G.award('share_card', 10, null, { silent: true }); } catch (e) { UI.toast('Could not create the image', ''); } });
     root.querySelector('[data-recap]')?.addEventListener('click', () => Progress.openRecap(Progress.lastMonthKey()));
-    root.querySelector('[data-buyfreeze]')?.addEventListener('click', () => { if (st.game.coins >= 100 && st.game.freezes < 3) { st.game.coins -= 100; st.game.freezes++; S.save(); UI.toast('Streak freeze bought', ''); rerender(); } });
   }
   if (sub === 'medical') {
     const m = st.medical;

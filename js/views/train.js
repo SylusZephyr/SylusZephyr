@@ -148,7 +148,7 @@ function runSession(rerender) {
         clearInterval(iv); try { wake && wake.release(); } catch (e) {} close();
         const st = S.get(); const d = S.day();
         st.pf.sessions.push({ date: S.dayKey(), at: Date.now(), week: wk }); d.pf = (d.pf || 0) + 1; S.save();
-        G.award(`pf_${d.pf}`, 30, null); G.evaluateQuests(); G.checkBadges();
+        G.award(`pf_${d.pf}`, 30, null); G.checkBadges();
         UI.toast(d.pf >= 3 ? 'Three sessions today — daily target done' : `Session ${d.pf} of 3 done`);
         rerender();
       };

@@ -64,16 +64,16 @@ export function enhance(root = document) {
   // Progress bars
   root.querySelectorAll('.lvlbar').forEach((bar) => {
     const w = parseFloat(bar.querySelector('i')?.style.width) || 0;
-    const ctx = bar.closest('.card, .hero-level, .hero-today'); const name = textOf(ctx?.querySelector('b, .kicker, h3')) || 'Progress';
+    const ctx = bar.closest('.card'); const name = textOf(ctx?.querySelector('b, .kicker, h3')) || 'Progress';
     bar.setAttribute('aria-label', name.slice(0, 60));
     bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', '100'); bar.setAttribute('aria-valuenow', String(Math.round(w)));
   });
 
   // Decorative emoji next to text shouldn't be read twice
-  root.querySelectorAll('.emoji, .q-ico, .li-ico, .n-e, .ob-badge, .chest, .big').forEach((e) => e.setAttribute('aria-hidden', 'true'));
+  root.querySelectorAll('.li-ico, .big').forEach((e) => e.setAttribute('aria-hidden', 'true'));
 
   // Dialogs
-  root.querySelectorAll('.sheet, .celebrate .box, .story-viewer, .cookmode, .trainer, .lock').forEach((d) => {
+  root.querySelectorAll('.sheet, .celebrate .box, .cookmode, .trainer, .lock').forEach((d) => {
     if (d.getAttribute('role') === 'dialog') return;
     d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true');
     const title = textOf(d.querySelector('h1, h2, h3')); if (title) d.setAttribute('aria-label', title);

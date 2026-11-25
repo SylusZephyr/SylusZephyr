@@ -31,7 +31,7 @@ h1, h2, h3 { letter-spacing: -0.022em; font-weight: 650; }
 .num, .score-big, .macro b { font-variant-numeric: tabular-nums; }
 
 /* ---- Surfaces: flat, hairline, no glow ---- */
-.card, .card.glow, .card.cool, .card.danger, .winddown-banner, .prayer-card, .prayer-card.fasting, .caf-card {
+.card, .card.glow, .card.cool, .card.danger, .prayer-card, .prayer-card.fasting, .caf-card {
   background: var(--surface); border: 1px solid var(--line); box-shadow: none; border-radius: var(--radius);
 }
 .card::before, .card.glow::before { display: none !important; }
@@ -50,7 +50,7 @@ h1, h2, h3 { letter-spacing: -0.022em; font-weight: 650; }
 .macro { background: var(--surface2); border-radius: 12px; }
 .macro b { font-weight: 650; }
 .macro span { color: var(--muted); }
-.pill, .pill.amber, .pill.green, .pill.blue, .pill.coral, .pill.purple { background: var(--surface2); color: var(--muted); font-weight: 600; }
+.pill, .pill.amber, .pill.green, .pill.blue, .pill.coral { background: var(--surface2); color: var(--muted); font-weight: 600; }
 .pill.coral { color: var(--coral); }
 .pill.green { color: var(--green); }
 
@@ -82,11 +82,9 @@ input, select, textarea { background: var(--surface2); border-radius: 10px; }
 /* ---- Motion: calm ---- */
 .screen > * { animation: none !important; }
 .screen { animation: fadeOnly .18s ease; }
-.flame, .chest, .ob-badge.big { animation: none !important; }
 
 /* ---- Feedback ---- */
 .toast { background: #24262c; border: 1px solid var(--line2); font-weight: 500; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
-.xp-pop, .combo { display: none !important; }
 .celebrate { background: rgba(0, 0, 0, 0.6); }
 .celebrate .box { background: var(--surface); border: 1px solid var(--line2); border-radius: 20px; box-shadow: none; }
 .celebrate .big { font-size: 40px; }
@@ -100,8 +98,6 @@ input, select, textarea { background: var(--surface2); border-radius: 10px; }
 .check { border-radius: 12px; }
 .check .box { border-radius: 50%; }
 .check.done .box { background: var(--green); }
-.check .xp { display: none; }
-.check .emoji { display: none; }
 
 /* ---- Recipe illustrations: quiet tinted tiles instead of loud gradients ---- */
 .rwide { background: var(--surface); }
@@ -152,9 +148,6 @@ input, select, textarea { background: var(--surface2); border-radius: 10px; }
 .ess-list .check { padding: 10px 2px; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; margin: 0; }
 .ess-list .check:last-child { border-bottom: 0; }
 .ess-list .label { font-weight: 500; }
-.ess-head { display: flex; align-items: baseline; justify-content: space-between; }
-.ess-head b { font-size: 15px; font-weight: 600; }
-.ess-head span { font-size: 13px; color: var(--muted); }
 
 .prayer-row .pr { background: transparent; padding: 6px 0; }
 .prayer-row .pr.next { background: var(--surface2); box-shadow: none; }
@@ -172,8 +165,7 @@ input, select, textarea { background: var(--surface2); border-radius: 10px; }
 .rcard .hero.mono-tile .mono { font-size: 34px; }
 .rcard .hero .fav svg { width: 16px; height: 16px; }
 
-/* Onboarding: calm, typographic */
-.ob-ambient, .ob-badge { display: none !important; }
+/* Onboarding: calm { display: none !important; }
 .screen.onboard > * { animation: none !important; }
 .screen.onboard h1 { font-size: 30px; }
 .prayer-row .pr.faint { opacity: 1; }

@@ -87,13 +87,12 @@ function countUp() {
 window.addEventListener('scroll', () => { lastScroll[location.hash] = window.scrollY; }, { passive: true });
 window.addEventListener('hashchange', () => { UI.closeAllSheets(); render(); });
 
-// End-of-day bookkeeping: auto-credit 'no coffee after cutoff' if true, finish quests.
+// End-of-day bookkeeping: auto-credit 'no coffee after cutoff' when it held all day.
 function closeDay(k) {
   const d = S.get().days[k];
   if (d && !d.checks.caffeine && !d.coffee.some((c) => isAfterCutoff(c)) && G.essentialsDone(k) > 0) {
     d.checks.caffeine = true; G.award('ess_caffeine', 10, null, { k, silent: true });
-  }
-  G.evaluateQuests(k, true, true); S.save();
+  } S.save();
 }
 // Close any past days not yet closed (app wasn't open at rollover).
 function closePastDays() {
@@ -134,7 +133,6 @@ function onForeground() {
   const frozen = G.applyFreezeIfNeeded();
   if (frozen) UI.toast('Streak freeze used for yesterday — streak saved!', '');
   G.updateBestStreak();
-  G.evaluateQuests();
   G.dailyOpen();
   render({ keepScroll: true });
   G.maybeWeeklyReview();
@@ -208,7 +206,7 @@ document.addEventListener('keydown', (e) => {
   if (pinSheet) { if (/^[0-9]$/.test(e.key)) pinSheet.querySelector(`[data-k="${e.key}"]`)?.click(); if (e.key === 'Backspace') pinSheet.querySelector('[data-del]')?.click(); }
   if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !document.querySelector('.sheet'))) { e.preventDefault(); import('./views/search.js').then((m) => m.open()); return; }
   if (e.key === 'Escape') {
-    const fs = document.querySelector('.celebrate [data-close], .story-viewer [data-x], .cookmode [data-x], .trainer [data-x]');
+    const fs = document.querySelector('.celebrate [data-close], .cookmode [data-x], .trainer [data-x]');
     if (fs) fs.click(); else UI.closeAllSheets();
     return;
   }
@@ -262,7 +260,7 @@ export function installHintNeeded() { return IS_IOS && !IS_STANDALONE && !IN_WEC
 function boot() {
   if (IN_WECHAT) { wechatGate(); return; }
   Lock.showLock(() => {
-    if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.evaluateQuests(); G.dailyOpen(); }
+    if (S.get().onboarded) { closePastDays(); G.applyFreezeIfNeeded(); G.updateBestStreak(); G.dailyOpen(); }
     render();
     if (S.get().onboarded) { setTimeout(() => G.maybeWeeklyReview(), 900); Progress.maybeMonthlyRecap(); }
   });
@@ -273,7 +271,7 @@ function boot() {
     Native.onNotificationTap((route) => { location.hash = route; });
     syncReminders();
     Native.onBackButton(() => {
-      const close = document.querySelector('.celebrate [data-close], .story-viewer [data-x], .cookmode [data-x], .trainer [data-x]');
+      const close = document.querySelector('.celebrate [data-close], .cookmode [data-x], .trainer [data-x]');
       if (close) { close.click(); return; }
       if (document.querySelector('.sheet')) { UI.closeAllSheets(); return; }
       if (document.querySelector('.lock')) { Native.exitApp(); return; }

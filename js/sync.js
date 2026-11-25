@@ -69,11 +69,9 @@ export function merge(local, remote) {
   out.game = {
     ...newer.game,
     xp: Math.max(lg.xp || 0, rg.xp || 0),
-    coins: Math.max(lg.coins || 0, rg.coins || 0),
     freezes: Math.max(lg.freezes || 0, rg.freezes || 0),
     bestStreak: Math.max(lg.bestStreak || 0, rg.bestStreak || 0),
     badges: { ...rg.badges, ...lg.badges },
-    lootOpened: { ...rg.lootOpened, ...lg.lootOpened },
     frozen: { ...rg.frozen, ...lg.frozen },
     challenges: { ...rg.challenges, ...lg.challenges },
     moments: { ...rg.moments, ...lg.moments },

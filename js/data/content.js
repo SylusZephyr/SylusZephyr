@@ -53,62 +53,6 @@ export const TIPS = [
 ];
 
 // Stories: tap-through educational slides (Instagram-style).
-export const STORIES = [
-  { id: 's_today', e: '', label: 'Today', slides: 'dynamic' },
-  {
-    id: 's_sleep', e: '', label: 'Sleep', slides: [
-      { e: '', title: 'Your sleep plan', body: 'Step 1: Lock one wake-up time — every day, even weekends.' },
-      { e: '', title: 'Light in, light out', body: 'Morning: get outside 10 minutes. Night: dim lights and screens after your wind-down starts.' },
-      { e: '', title: 'Coffee curfew', body: 'Last coffee before your cutoff (2 pm by default). Revive warns you after that.' },
-      { e: '', title: 'Shift slowly', body: 'Bedtime moves 15 minutes earlier every 3 days. Small enough that your body does not fight it.' },
-    ],
-  },
-  {
-    id: 's_food', e: '', label: 'Fuel', slides: [
-      { e: '', title: '3 meals + 1 shake', body: 'Breakfast within 1–2 hours of waking. Lunch 4–5 hours later. Dinner in the evening. A shake whenever you need more energy.' },
-      { e: '', title: 'Frozen paratha = 手抓饼', body: 'Find it in the frozen aisle of any supermarket or Hema. 5 minutes at 200°C in the air fryer, no oil.' },
-      { e: '', title: 'Halal shopping', body: 'Look for 清真 labels. Halal butchers and Xinjiang shops sell chicken, lamb, beef and naan. Taobao/Hema search: 清真鸡腿.' },
-      { e: '', title: 'Too tired? Order.', body: 'On Meituan search 清真 — Lanzhou noodles with extra beef and egg still count as a solid meal.' },
-    ],
-  },
-  {
-    id: 's_pf', e: '', label: 'Training', slides: [
-      { e: '', title: 'Find the muscle', body: 'Imagine stopping the flow of urine and holding in gas at the same time. That lift-and-squeeze is your pelvic floor. (Do not actually practise while peeing.)' },
-      { e: '', title: 'Squeeze, then fully relax', body: 'The relax part is just as important as the squeeze — especially for ejaculation control.' },
-      { e: '', title: 'Keep breathing', body: 'Never hold your breath. Keep stomach, buttocks and thighs loose.' },
-      { e: '', title: '3 short sessions a day', body: 'Lying down at first, then sitting, then standing as you progress. Results usually take 6–12 weeks.' },
-    ],
-  },
-  {
-    id: 's_mind', e: '', label: 'Mind', slides: [
-      { e: '', title: 'Not a test', body: 'Intimacy is not an exam. Pressure to "perform" is one of the strongest erection killers.' },
-      { e: '', title: 'Ride the wave', body: 'Arousal is like a wave. Learning to notice where you are on the 1–10 scale is the core skill behind ejaculation control.' },
-      { e: '', title: 'Talk about it', body: 'Sexual health is health. Doctors and urologists discuss this every day — it is normal to bring it up.' },
-    ],
-  },
-  {
-    id: 's_habits', e: '', label: 'Habits', slides: [
-      { e: '', title: 'Never miss twice', body: 'One missed day is noise. Two is a pattern. Streak freezes exist for exactly this.' },
-      { e: '', title: 'Make it obvious', body: 'Shake ingredients on the counter. Water bottle by the bed. Paratha at the front of the freezer.' },
-      { e: '', title: 'Make it easy', body: 'Pick the 5-minute recipe on hard days. A small win keeps the streak — and the momentum.' },
-      { e: '', title: 'Make it rewarding', body: 'Tick, collect, open the chest. Your brain learns that taking care of yourself pays off today.' },
-    ],
-  },
-  {
-    id: 's_calm', e: '', label: 'Calm', slides: [
-      { e: '', title: '60-second reset', body: 'Two short inhales through the nose, one long exhale through the mouth. Three rounds.' },
-      { e: '', title: '5-4-3-2-1', body: 'Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste. It pulls you out of spiralling thoughts.' },
-      { e: '', title: 'Worry window', body: 'Write worries down in the afternoon with one next step each. At night, remind yourself: it is already on paper.' },
-    ],
-  },
-  {
-    id: 's_doc', e: '', label: 'Doctor', slides: [
-      { e: '', title: 'Your follow-up visit', body: 'Last time was brief. Use the checklist in Me → Medical to make the next visit count.' },
-      { e: '', title: 'Ask for these tests', body: 'Blood count & ferritin, thyroid (TSH), morning testosterone, glucose/HbA1c, vitamin D and B12, kidney function. Plus a heart check for the exertion symptoms.' },
-      { e: '', title: 'Show your data', body: 'Me → Doctor summary builds a one-page report from your check-ins, sleep, meals and weight. Show it on your phone.' },
-    ],
-  },
-];
 
 // Weekly check-ins (original questions, 1–5 scale; higher = better unless noted).
 export const CHECKINS = {

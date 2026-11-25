@@ -1,8 +1,7 @@
-// XP, levels, streaks, quests, loot chests, badges.
+// XP, levels, streaks, streak freezes and milestones.
 import * as S from './store.js';
 import * as UI from './ui.js';
 import { tr } from './i18n.js';
-import { TIPS } from './data/content.js';
 
 export const ESSENTIALS = [
   { id: 'breakfast', e: '', label: 'Eat breakfast', xp: 20 },
@@ -26,27 +25,17 @@ export function levelInfo(xp = S.get().game.xp) {
   return { level: L, into: xp - lo, need: hi - lo, pct: (xp - lo) / (hi - lo), title: TITLES[Math.min(TITLES.length - 1, Math.floor((L - 1) / 2))] };
 }
 
-let comboCount = 0; let comboTimer = null;
-export function combo() { return comboCount; }
-
 // Award XP once per (day, key). Returns amount awarded (0 if already awarded).
 export function award(key, amount, ev, { once = true, k = S.dayKey(), silent = false } = {}) {
   const st = S.get(); const d = S.day(k);
   d.xpLog = d.xpLog || {};
   if (once && d.xpLog[key]) return 0;
-  if (!silent && k === S.dayKey()) { comboCount++; clearTimeout(comboTimer); comboTimer = setTimeout(() => { comboCount = 0; }, 90_000); }
-  const mult = silent ? 1 : comboCount >= 5 ? 2 : comboCount >= 3 ? 1.5 : 1;
-  const amt = Math.round(amount * mult);
+  const amt = Math.round(amount);
   const before = levelInfo(st.game.xp).level;
-  st.game.xp += amt; st.game.coins += Math.max(1, Math.round(amt / 10));
+  st.game.xp += amt;
   d.xpLog[key] = amt; d.xpToday = (d.xpToday || 0) + amt;
   S.save();
-  if (!silent) {
-    const rect = ev?.target?.getBoundingClientRect?.();
-    const x = ev?.clientX || (rect ? rect.left + 30 : undefined);
-    const y = ev?.clientY || (rect ? rect.top : undefined);
-    UI.haptic(10);
-  }
+  if (!silent) UI.haptic(10);
   const after = levelInfo(st.game.xp).level;
   if (after > before) {
     st.game.lastLevel = after; S.save();
@@ -114,83 +103,6 @@ export function applyFreezeIfNeeded() {
   return null;
 }
 export function updateBestStreak() { const st = S.get(); const s = streak(); if (s > st.game.bestStreak) { st.game.bestStreak = s; S.save(); } return s; }
-
-// ---------- Daily quests ----------
-function seeded(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; }; }
-
-export const QUEST_POOL = [
-  { id: 'q_water2', e: '', t: 'Hydro hero: drink 2 L today', xp: 40, check: (d) => d.waterMl >= 2000 },
-  { id: 'q_kegel', e: '', t: 'Complete 1 pelvic-floor session', xp: 35, check: (d) => (d.pf || 0) >= 1 },
-  { id: 'q_kegel2', e: '', t: 'Complete 2 pelvic-floor sessions', xp: 50, check: (d) => (d.pf || 0) >= 2 },
-  { id: 'q_cook', e: '', t: 'Cook any recipe in Cook mode', xp: 45, check: (d) => (d.cookedCount || 0) >= 1 },
-  { id: 'q_shake', e: '', t: 'Have a shake or extra snack', xp: 30, check: (d) => d.meals.some((m) => m.slot === 'snack') },
-  { id: 'q_brekkie', e: '', t: 'Breakfast within 2 h of waking', xp: 35, check: (d) => { if (!d.sleep.wake) return false; const b = d.meals.find((m) => m.slot === 'breakfast'); if (!b) return false; const diff = (S.minutesOf(b.time) - S.minutesOf(d.sleep.wake) + 1440) % 1440; return diff <= 120; } },
-  { id: 'q_coffee1', e: '', t: 'Max 1 coffee today', xp: 30, check: (d, endOfDay) => endOfDay && d.coffee.length <= 1 },
-  { id: 'q_nocoffee_pm', e: '', t: 'Zero coffee after 2 pm', xp: 30, check: (d, endOfDay) => endOfDay && !d.coffee.some((c) => { const m = S.minutesOf(c); return m < 240 || m >= 14 * 60; }) },
-  { id: 'q_walk', e: '', t: 'Take a gentle 10-min walk', xp: 35, check: (d) => (d.walkMin || 0) >= 10 },
-  { id: 'q_breath', e: '', t: 'Do a 2-min breathing session', xp: 25, check: (d) => (d.breath || 0) >= 1 },
-  { id: 'q_mood', e: '', t: 'Log energy & mood', xp: 20, check: (d) => d.energy != null && d.mood != null },
-  { id: 'q_3meals', e: '', t: 'Log 3 meals', xp: 40, check: (d) => new Set(d.meals.map((m) => m.slot)).size >= 3 },
-  { id: 'q_protein', e: '', t: 'Hit 90 g protein', xp: 40, check: (d) => d.meals.reduce((s, m) => s + (m.protein || 0), 0) >= 90 },
-  { id: 'q_kcal', e: '', t: 'Eat 2,300+ kcal', xp: 45, check: (d) => d.meals.reduce((s, m) => s + (m.kcal || 0), 0) >= 2300 },
-  { id: 'q_read', e: '', t: 'Read 3 cards in your feed', xp: 15, check: (d) => (d.tipsRead || 0) >= 3 },
-  { id: 'q_wake', e: '', t: 'Wake within 30 min of your anchor', xp: 40, check: (d) => { if (!d.sleep.wake) return false; const a = S.minutesOf(S.get().profile.wakeAnchor); const w = S.minutesOf(d.sleep.wake); const diff = Math.abs(((w - a + 720) % 1440) - 720); return diff <= 30; } },
-];
-
-export function todaysQuests(k = S.dayKey()) {
-  const d = S.day(k);
-  if (!d.quests) {
-    const rnd = seeded(k); const pool = [...QUEST_POOL];
-    const picks = [];
-    while (picks.length < 3 && pool.length) picks.push(pool.splice(Math.floor(rnd() * pool.length), 1)[0].id);
-    d.quests = picks.map((id) => ({ id, done: false })); S.save();
-  }
-  return d.quests.map((q) => ({ ...QUEST_POOL.find((p) => p.id === q.id), done: q.done }));
-}
-export function evaluateQuests(k = S.dayKey(), endOfDay = false, silent = false) {
-  const d = S.day(k); todaysQuests(k);
-  let any = false;
-  d.quests.forEach((q) => {
-    const def = QUEST_POOL.find((p) => p.id === q.id);
-    if (!q.done && def && def.check(d, endOfDay || k !== S.dayKey())) {
-      q.done = true; any = true;
-      award(`quest_${q.id}`, def.xp, null, { k, silent });
-
-    }
-  });
-  if (any && d.quests.every((q) => q.done)) {
-    award('all_quests', 60, null, { k, silent: true });
-    S.get().game.coins += 30;
-  }
-  S.save();
-}
-
-// ---------- Loot chest ----------
-const LOOT_TABLE = [
-  { p: 0.58, rarity: 'COMMON', color: '#8b93a8', xp: 20, coins: 10, e: '' },
-  { p: 0.27, rarity: 'RARE', color: '#5aa9ff', xp: 50, coins: 25, e: '' },
-  { p: 0.12, rarity: 'EPIC', color: '#a78bfa', xp: 100, coins: 50, freeze: 1, e: '' },
-  { p: 0.03, rarity: 'LEGENDARY', color: '#ffb547', xp: 250, coins: 120, freeze: 1, e: '' },
-];
-export function lootState(k = S.dayKey()) {
-  const st = S.get(); const opened = st.game.lootOpened[k];
-  const n = essentialsDone(k);
-  return { opened: !!opened, result: opened, unlocked: n >= 3, need: Math.max(0, 3 - n) };
-}
-export async function openLoot(k = S.dayKey()) {
-  const st = S.get(); const ls = lootState(k);
-  if (ls.opened || !ls.unlocked) return;
-  let r = Math.random(); let pick = LOOT_TABLE[0];
-  for (const row of LOOT_TABLE) { if (r < row.p) { pick = row; break; } r -= row.p; }
-  const tip = TIPS[Math.floor(Math.random() * TIPS.length)];
-  st.game.lootOpened[k] = { rarity: pick.rarity, xp: pick.xp, coins: pick.coins, tip: tip.id };
-  st.game.coins += pick.coins; if (pick.freeze) st.game.freezes = Math.min(3, st.game.freezes + pick.freeze);
-  S.save();
-  UI.ding('loot');
-  await UI.celebrate({ big: pick.e, rarity: pick.rarity, color: pick.color, title: `+${pick.xp} XP · +${pick.coins} coins`,
-    body: `${pick.freeze ? '+1 streak freeze<br>' : ''}<br><b>${tip.e} ${UI.esc(tip.title)}</b><br><span class="small">${UI.esc(tip.body)}</span>` });
-  award('loot', pick.xp, null, { k, silent: true });
-}
 
 // ---------- Badges ----------
 export const BADGES = [

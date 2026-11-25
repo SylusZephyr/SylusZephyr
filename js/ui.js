@@ -60,7 +60,7 @@ export const ICON = {
 // this pass swaps known ones for line icons and drops the rest, so the look stays consistent.
 const EMOJI = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u20E3|\p{Emoji_Modifier}|\u200D(?:\p{Extended_Pictographic}))*\s?/gu;
 const ICON_FOR = { '🩺': 'doctor', '🖨️': 'list', '⏰': 'clock', '🕌': 'crescent', '🔖': 'bookmark', '📲': 'share', '⚙️': 'gear', '👤': 'me', '☁️': 'me', '🔒': 'lock', '📷': 'share', '💧': 'drop', '☕': 'cup', '🌙': 'moon', '🍽️': 'meal', '🍳': 'meal', '🌯': 'meal', '🍛': 'meal', '🥤': 'cup', '🧪': 'pulse', '⚖️': 'scale', '🔍': 'search', '🛒': 'cart', '🧺': 'pantry', '✏️': 'edit', '🗑️': 'trash', '📤': 'share', '❤️': 'heartFill', '🤍': 'heart' };
-const SKIP = '.thumb, .hero, .hero-lg, .rcard .hero, .dthumb, .tipcard .big, input, textarea, .emoji-scale, .sx-keep, .celebrate .big, .lock';
+const SKIP = '.thumb, .hero, .hero-lg, .rcard .hero, .dthumb, input, textarea, .celebrate .big, .lock';
 export function stripEmoji(root) {
   if (!root) return;
   root.querySelectorAll('.li-ico, .q-ico, .icon-btn').forEach((el) => {

@@ -21,7 +21,7 @@ export function logMeal(entry, ev) {
   d.meals.push({ id: S.uid(), time: S.hm(), ...entry });
   if (['breakfast', 'lunch', 'dinner'].includes(entry.slot)) G.setEssential(entry.slot, true, ev);
   G.award(`meal_${d.meals.length}`, 10, ev, { silent: ['breakfast', 'lunch', 'dinner'].includes(entry.slot) });
-  S.save(); G.evaluateQuests();
+  S.save();
 }
 
 // Distinct recent entries across all days, newest first — the fastest way to log a repeat meal.
@@ -151,7 +151,7 @@ export function sleepSheet(onDone) {
         const a = S.minutesOf(st.profile.wakeAnchor); const w = S.minutesOf(d.sleep.wake);
         const diff = Math.abs(((w - a + 720 + 1440) % 1440) - 720);
         if (diff <= 45) G.setEssential('sleep', true, ev);
-        S.save(); G.evaluateQuests(); close(); onDone && onDone();
+        S.save(); close(); onDone && onDone();
         UI.toast(diff <= 45 ? 'On-anchor wake-up! Sleep plan ' : 'Sleep logged', '');
       };
     },
@@ -182,7 +182,7 @@ export function breathing({ minutes = 2, onDone } = {}) {
       };
       const finish = () => {
         const d = S.day(); d.breath = (d.breath || 0) + 1; S.save();
-        G.award(`breath_${d.breath}`, 15, null); G.evaluateQuests(); UI.toast('Breathing done — nervous system calmer', ''); onDone && onDone();
+        G.award(`breath_${d.breath}`, 15, null); UI.toast('Breathing done — nervous system calmer', ''); onDone && onDone();
       };
       setTimeout(() => { timer = setInterval(step, 1000); step(); }, 800);
       w.querySelector('[data-x]').onclick = () => { running = false; clearInterval(timer); close(); };
@@ -279,39 +279,9 @@ export function energySheet(onDone) {
         if (n === 'energy') energy = v; if (n === 'mood') mood = v; if (n === 'appetite') appetite = v;
         b.parentElement.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); UI.haptic(6);
       });
-      sh.querySelector('#en-save').onclick = (ev) => { d.energy = energy; d.mood = mood; d.appetite = appetite; const note = sh.querySelector('#en-note').value.trim(); if (note && note !== d.notes) G.award('journal', 10, null, { silent: true }); d.notes = note; S.save(); G.award('energy_log', 10, ev); G.evaluateQuests(); close(); onDone && onDone(); };
+      sh.querySelector('#en-save').onclick = (ev) => { d.energy = energy; d.mood = mood; d.appetite = appetite; const note = sh.querySelector('#en-note').value.trim(); if (note && note !== d.notes) G.award('journal', 10, null, { silent: true }); d.notes = note; S.save(); G.award('energy_log', 10, ev); close(); onDone && onDone(); };
     },
   });
 }
 
 // Story viewer
-export function storyViewer(story, slides, onDone) {
-  let i = 0; let timer = null;
-  const DUR = 6000;
-  UI.fullscreen(`<div class="story-viewer">
-    <div class="bars">${slides.map(() => '<i><b></b></i>').join('')}</div>
-    <button class="close" data-x></button>
-    <div class="slide" id="sv-slide"></div>
-    <div class="tapzones"><div data-prev></div><div data-next></div></div>
-  </div>`, {
-    onMount: (w, close) => {
-      const bars = [...w.querySelectorAll('.bars i')]; const slideEl = w.querySelector('#sv-slide'); const sv = w.querySelector('.story-viewer');
-      const show = () => {
-        const s = slides[i];
-        sv.style.background = `linear-gradient(160deg, ${s.bg?.[0] || '#1e1b4b'}, ${s.bg?.[1] || '#000'})`;
-        slideEl.innerHTML = `<div class="big">${s.e}</div><h2>${UI.esc(s.title)}</h2><p>${s.body}</p>${s.cta ? `<a class="btn primary mt8" href="${s.cta.href}" data-cta>${UI.esc(s.cta.label)}</a>` : ''}`;
-        bars.forEach((b, j) => { b.className = j < i ? 'done' : j === i ? 'cur' : ''; b.style.setProperty('--dur', DUR + 'ms'); });
-        const cur = bars[i].querySelector('b'); cur.style.animation = 'none'; void cur.offsetWidth; cur.style.animation = '';
-        clearTimeout(timer); timer = setTimeout(next, DUR);
-        const cta = slideEl.querySelector('[data-cta]'); if (cta) cta.addEventListener('click', () => { clearTimeout(timer); close(); });
-      };
-      const next = () => { if (i < slides.length - 1) { i++; show(); } else { clearTimeout(timer); close(); onDone && onDone(); } };
-      const prev = () => { if (i > 0) { i--; show(); } };
-      w.querySelector('[data-next]').onclick = next; w.querySelector('[data-prev]').onclick = prev;
-      w.querySelector('[data-x]').onclick = () => { clearTimeout(timer); close(); onDone && onDone(); };
-      let sy = null; sv.addEventListener('touchstart', (e) => { sy = e.touches[0].clientY; }, { passive: true });
-      sv.addEventListener('touchend', (e) => { if (sy != null && e.changedTouches[0].clientY - sy > 100) { clearTimeout(timer); close(); onDone && onDone(); } sy = null; });
-      show();
-    },
-  });
-}
