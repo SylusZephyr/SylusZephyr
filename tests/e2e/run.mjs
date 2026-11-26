@@ -87,7 +87,7 @@ await test('Last night and the usual meal log in one tap from Today, with undo',
   assert.equal(await p.evaluate(() => window.__revive.S.day().sleep.wake), '10:00');
   assert.equal(await p.evaluate(() => window.__revive.S.day().checks.sleep), true);
   await p.click('.undo-btn'); await p.waitForTimeout(200);
-  assert.equal(await p.evaluate(() => window.__revive.S.day().sleep.wake), undefined);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().sleep.wake), null);
   assert.equal(await p.evaluate(() => window.__revive.S.day().checks.sleep), false);
   await clear(p);
   assert.match(await p.textContent('.nx-row[data-key="nx-breakfast"]'), /Egg paratha/);
