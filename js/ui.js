@@ -135,6 +135,14 @@ export function undoToast(msg, onUndo, ms = 5000) {
   setTimeout(finish, ms);
 }
 
+/**
+ * The one empty state: an icon, a short title, one line on what to do, and at most one action.
+ * @param {{ icon?: string, title: string, body?: string, action?: string, attr?: string }} o
+ */
+export function emptyState({ icon = 'list', title, body = '', action = '', attr = '' }) {
+  return `<div class="empty-state"><span class="es-ico">${ICON[icon] || ICON.list}</span><b>${esc(title)}</b>${body ? `<p class="small muted">${esc(body)}</p>` : ''}${action ? `<button class="btn sm mt8" ${attr}>${esc(action)}</button>` : ''}</div>`;
+}
+
 // ---------- overlays ----------
 let sheetStack = [];
 /**

@@ -133,7 +133,7 @@ function food() {
   <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein, color: '#4ade80' })}</div>
   <div class="card"><div class="kicker">Main meals per day</div><div class="row jc-around">${days.map((k, i) => `<div class="tc"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
   <div class="section-title">Today’s meals <button class="link" data-logmeal>+ Log</button></div>
-  <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${UI.ICON.meal}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty"><span class="e"></span>No meals logged yet</div>'}</div>`;
+  <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${UI.ICON.meal}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : UI.emptyState({ icon: 'meal', title: 'No meals logged today', body: 'Log what you eat and calories and protein add up here.', action: 'Log a meal', attr: 'data-logmeal' })}</div>`;
 }
 
 function sleep() {
@@ -172,7 +172,7 @@ function body() {
     ${etaLine()}
     <p class="small mt8" style="color:${rate == null ? 'var(--muted)' : rate > 0.4 ? 'var(--amber)' : rate >= 0.05 ? 'var(--green)' : 'var(--muted)'}">${rate == null ? 'Weigh in weekly to see your trend.' : `<span>${rate >= 0 ? '+' : '−'}${Math.abs(rate).toFixed(2)} kg/week</span> · <span>${rate > 0.4 ? 'faster than planned — fine, but no need to push' : rate >= 0.05 ? 'right on track (0.1–0.25 target)' : 'flat — add a daily shake'}</span>`}</p></div>
   <button class="btn primary block" data-weigh>Weigh in</button>
-  <div class="card mt12"><div class="kicker">History</div>${ws.length ? [...ws].reverse().map((w) => `<div class="list-item"><div class="grow"><b>${w.kg.toFixed(1)} kg</b><div class="muted small">${S.prettyDate(w.date)}</div></div><button class="icon-btn" data-delw="${w.date}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty">No weigh-ins</div>'}</div>`;
+  <div class="card mt12"><div class="kicker">History</div>${ws.length ? [...ws].reverse().map((w) => `<div class="list-item"><div class="grow"><b>${w.kg.toFixed(1)} kg</b><div class="muted small">${S.prettyDate(w.date)}</div></div><button class="icon-btn" data-delw="${w.date}">${UI.ICON.trash}</button></div>`).join('') : UI.emptyState({ icon: 'scale', title: 'No weigh-ins yet', body: 'Weigh in once a week, same time of day, to see your trend.' })}</div>`;
 }
 
 function etaLine() {
@@ -227,7 +227,7 @@ function sleepSettings(rerender) {
 export function bind(root, _, { rerender }) {
   const st = S.get();
   root.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { tab = b.dataset.tab; rerender(); });
-  root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
+  root.querySelectorAll('[data-logmeal]').forEach((b) => b.addEventListener('click', () => Sh.mealSheet(rerender)));
   root.querySelectorAll('[data-delmeal]').forEach((b) => b.onclick = () => {
     const d = S.day(); const idx = d.meals.findIndex((m) => m.id === b.dataset.delmeal); if (idx < 0) return;
     const [removed] = d.meals.splice(idx, 1); d.removedMeals = [...(d.removedMeals || []), removed.id]; S.save(); rerender();
