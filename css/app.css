@@ -607,9 +607,11 @@ textarea { background: var(--surface2); border-radius: var(--r-md); }
 .summary-foot { display: flex; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: var(--fs-sm); color: var(--muted); }
 .summary-foot b { color: var(--text); font-weight: 600; }
 
-.next-list .nx { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); width: 100%; text-align: left; }
-.next-list .nx:last-child { border-bottom: 0; padding-bottom: 2px; }
-.next-list .nx:first-child { padding-top: 2px; }
+.next-list .nx-row { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+.next-list .nx-row:last-child { border-bottom: 0; }
+.next-list .nx { display: flex; align-items: center; gap: 12px; padding: 12px 0; flex: 1; min-width: 0; text-align: start; }
+.next-list .nx-row:last-child .nx { padding-bottom: 2px; }
+.next-list .nx-row:first-child .nx { padding-top: 2px; }
 .nx .ico { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); flex: 0 0 auto; }
 .nx .ico svg { width: 18px; height: 18px; }
 .nx.now .ico { background: var(--text); color: #0b0c0e; }
