@@ -45,7 +45,8 @@ export function upNext(now = new Date()) {
     if (d.checks[slot]) continue;
     const at = S.minutesOf(mt[slot]); const late = dm(m) - dm(at);
     if (late > 180) continue; // missed — don't nag hours later
-    add({ id: slot, at, icon: I.meal, t: P.SLOT_LABEL[slot], s: late >= 0 ? 'Due now — tap to log' : planToday(slot) ? UI.esc(planToday(slot).name) : 'Tap to log', act: 'meal:' + slot, now: late >= 0 });
+    const usual = Sh.usualMeal(slot);
+    add({ id: slot, at, icon: I.meal, t: P.SLOT_LABEL[slot], s: usual ? `<span>${UI.esc(usual.name)}</span> <span>again?</span>` : late >= 0 ? 'Due now — tap to log' : planToday(slot) ? UI.esc(planToday(slot).name) : 'Tap to log', act: 'meal:' + slot, now: late >= 0, quick: usual ? slot : null });
   }
   if (!fasting) {
     const cut = S.minutesOf(st.profile.caffeineCutoff);
@@ -183,7 +184,7 @@ export function render(_, { night }) {
 
   <section class="card">
     <div class="kicker mb8">Up next</div>
-    <div class="next-list">${next.map((x) => `<button class="nx ${x.now || x.soon ? 'now' : ''}" data-act="${x.act}"><span class="ico">${x.icon}</span><span class="grow"><div class="t">${x.t}</div><div class="s">${x.s}</div></span><span class="when">${x.anytime ? 'Today' : x.now ? 'Now' : S.prettyTime(S.fmtMin(x.at))}</span></button>`).join('') || '<p class="small muted">Nothing else scheduled today.</p>'}</div>
+    <div class="next-list">${next.map((x) => `<div class="nx-row" data-key="nx-${x.id}"><button class="nx ${x.now || x.soon ? 'now' : ''}" data-act="${x.act}"><span class="ico">${x.icon}</span><span class="grow"><div class="t">${x.t}</div><div class="s">${x.s}</div></span>${x.quick ? '' : `<span class="when">${x.anytime ? 'Today' : x.now ? 'Now' : S.prettyTime(S.fmtMin(x.at))}</span>`}</button>${x.quick ? `<button class="btn sm primary nx-quick" data-usual="${x.quick}">Log</button>` : ''}</div>`).join('') || '<p class="small muted">Nothing else scheduled today.</p>'}</div>
   </section>
   </div><div class="t-col">
   ${challengeCard()}
@@ -239,6 +240,17 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-sleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
   root.querySelector('[data-breath]')?.addEventListener('click', () => Sh.breathing({ onDone: rerender }));
   root.querySelector('[data-weekly]')?.addEventListener('click', () => weeklySheet(rerender));
+  // One tap logs the usual meal for that slot, with undo.
+  root.querySelectorAll('[data-usual]').forEach((b) => b.addEventListener('click', (ev) => {
+    const entry = Sh.usualMeal(b.dataset.usual); if (!entry) return;
+    Sh.logMeal(entry, ev); UI.haptic(12); rerender();
+    UI.undoToast('Logged', () => {
+      const d = S.day(); const i = d.meals.findLastIndex((m) => m.slot === entry.slot && m.name === entry.name);
+      if (i >= 0) { const [m] = d.meals.splice(i, 1); d.removedMeals = [...(d.removedMeals || []), m.id]; }
+      if (!d.meals.some((m) => m.slot === entry.slot)) G.setEssential(entry.slot, false);
+      S.save(); rerender();
+    });
+  }));
   root.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => {
     const a = b.dataset.act;
     if (a === 'sleep') Sh.sleepSheet(rerender);

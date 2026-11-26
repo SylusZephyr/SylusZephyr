@@ -73,6 +73,24 @@ await test('Today: water with undo, essentials, meal and drink logging', async (
   assert.ok(await p.$('.caf-card'), 'caffeine card shows after a drink');
 });
 
+await test('Usual meal logs in one tap from Today, with undo', async (p) => {
+  await p.clock.install({ time: new Date('2026-11-24T10:40:00') });
+  await p.goto(BASE); await p.waitForFunction(() => window.__revive);
+  await p.evaluate(() => {
+    const S = window.__revive.S; const st = S.get(); Object.assign(st, { onboarded: true }); st.game.reviewed = S.weekKey(); st.game.recapSeen = '9999-01';
+    for (const back of [1, 2, 4]) S.day(S.addDays(S.dayKey(), -back)).meals.push({ id: 'm' + back, slot: 'breakfast', name: 'Egg paratha', kcal: 520, protein: 20, time: '10:30' });
+    S.saveNow();
+  });
+  await p.reload(); await p.waitForSelector('#screen'); await clear(p);
+  assert.match(await p.textContent('.nx-row[data-key="nx-breakfast"]'), /Egg paratha/);
+  await p.click('[data-usual="breakfast"]'); await p.waitForTimeout(200);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().meals.length), 1);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().checks.breakfast), true);
+  await p.click('.undo-btn'); await p.waitForTimeout(200);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().meals.length), 0);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().checks.breakfast), false);
+});
+
 await test('Re-rendering updates in place: nodes, focus and handlers survive', async (p) => {
   await ready(p);
   const before = await p.evaluate(() => { window.__keep = document.querySelector('#screen .card'); return !!window.__keep; });

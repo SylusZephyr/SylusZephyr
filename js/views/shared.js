@@ -25,6 +25,24 @@ export function logMeal(entry, ev) {
   S.save();
 }
 
+// The meal someone usually has in a slot: the same entry on at least 2 of the last 14 days.
+// Today offers it as a one-tap log ("Egg paratha again?").
+export function usualMeal(slot, today = S.dayKey()) {
+  const st = S.get(); const counts = new Map();
+  for (let i = 1; i <= 14; i++) {
+    const d = st.days[S.addDays(today, -i)]; if (!d) continue;
+    const seenToday = new Set();
+    for (const m of d.meals || []) {
+      if (m.slot !== slot || !m.name) continue; const key = m.name.toLowerCase(); if (seenToday.has(key)) continue; seenToday.add(key);
+      const c = counts.get(key) || { n: 0, last: m }; c.n++; counts.set(key, c);
+    }
+  }
+  const best = [...counts.values()].filter((c) => c.n >= 2).sort((a, b) => b.n - a.n)[0];
+  if (!best) return null;
+  const { name, kcal, protein, recipeId, grams } = best.last;
+  return { name, kcal, protein, recipeId, grams, slot };
+}
+
 // Distinct recent entries across all days, newest first — the fastest way to log a repeat meal.
 function recentEntries(limit = 8) {
   const st = S.get(); const seen = new Set(); const out = [];
