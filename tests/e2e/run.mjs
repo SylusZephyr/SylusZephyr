@@ -127,6 +127,25 @@ await test('Train: guided session starts and closes', async (p) => {
   await p.click('.trainer [data-x]'); assert.equal(await p.$('.trainer'), null);
 });
 
+await test('Train: timing follows the clock and pauses when the app is hidden', async (p) => {
+  await p.clock.install({ time: new Date('2026-11-24T12:00:00') });
+  await ready(p); await go(p, 'train'); await p.click('[data-pf]'); await p.waitForSelector('.trainer');
+  const left = () => p.textContent('#tr-left');
+  const start = await left();
+  await p.clock.runFor(3000);
+  const after3 = await left(); assert.notEqual(after3, start, 'counts down');
+  // Leave the app: the session pauses and the time left stays put
+  await p.evaluate(() => { Object.defineProperty(document, 'hidden', { value: true, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  const paused = await left();
+  await p.clock.runFor(20000);
+  assert.equal(await left(), paused, 'no time passes while hidden');
+  assert.match(await p.textContent('#tr-label'), /Paused/);
+  await p.evaluate(() => { Object.defineProperty(document, 'hidden', { value: false, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await p.click('.trainer [data-p]'); await p.clock.runFor(2000);
+  assert.notEqual(await left(), paused, 'resumes after play');
+  await p.click('.trainer [data-x]');
+});
+
 await test('Track and Me screens render', async (p) => {
   await ready(p);
   for (const h of ['track', 'me', 'me/medical', 'me/summary', 'me/settings', 'me/prayer', 'me/saved', 'me/badges', 'cook/plan', 'cook/shop', 'cook/pantry', 'cook/delivery']) {

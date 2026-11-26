@@ -121,7 +121,11 @@ function runSession(rerender) {
   seq.push({ kind: 'intro', s: 5, label: 'Reverse Kegels', sub: 'Gently let the pelvic floor drop & lengthen — like starting to pee. No straining.' });
   for (let i = 0; i < ph.reverse; i++) { seq.push({ kind: 'reverse', s: 3, label: 'Drop & lengthen', sub: `${i + 1}/${ph.reverse}` }); seq.push({ kind: 'relax', s: 3, label: 'Rest', sub: 'Breathe' }); }
   const total = seq.reduce((a, b) => a + b.s, 0);
+  // Progress is computed from the clock, not by counting timer ticks: timers drift and are throttled
+  // when the screen locks or the app is backgrounded. Leaving the app pauses the session.
+  const ends = []; seq.reduce((acc, x) => { ends.push(acc + x.s); return acc + x.s; }, 0);
   let idx = 0; let left = seq[0].s; let elapsed = 0; let iv = null; let paused = false;
+  let t0 = performance.now(); let pausedAt = null;
 
   UI.fullscreen(`<div class="trainer">
     <div class="row between w100"><button class="icon-btn" data-x>${UI.ICON.close}</button><div class="muted small" id="tr-left"></div><button class="icon-btn" data-p>${UI.ICON.pause}</button></div>
@@ -132,10 +136,13 @@ function runSession(rerender) {
   </div>`, {
     onMount: (w, close) => {
       const orb = w.querySelector('#orb');
-      let wake = null; try { navigator.wakeLock?.request('screen').then((l) => { wake = l; }).catch(() => {}); } catch (e) {}
+      let wake = null;
+      const lockScreen = () => { try { navigator.wakeLock?.request('screen').then((l) => { wake = l; }).catch(() => {}); } catch (e) {} };
+      const releaseScreen = () => { try { wake && wake.release(); } catch (e) {} wake = null; };
+      lockScreen();
       const paint = () => {
         const s = seq[idx];
-        w.querySelector('#tr-label').textContent = s.label; w.querySelector('#tr-sub').textContent = s.sub;
+        w.querySelector('#tr-label').textContent = paused ? 'Paused' : s.label; w.querySelector('#tr-sub').textContent = paused ? 'Tap play to continue' : s.sub;
         w.querySelector('#tr-count').textContent = String(left);
         w.querySelector('#tr-bar').style.width = `${(elapsed / total) * 100}%`;
         w.querySelector('#tr-left').textContent = `${Math.floor((total - elapsed) / 60)}:${S.pad((total - elapsed) % 60)} left`;
@@ -145,8 +152,9 @@ function runSession(rerender) {
         orb.className = 'orb ' + (s.kind === 'squeeze' ? 'small' : s.kind === 'reverse' ? 'big cool' : s.kind === 'relax' ? '' : 'cool');
         if (s.kind === 'squeeze') { UI.haptic(20); UI.ding('tick'); } else if (s.kind === 'relax') UI.haptic(6);
       };
+      const stop = () => { clearInterval(iv); releaseScreen(); document.removeEventListener('visibilitychange', onVisibility); };
       const finish = async () => {
-        clearInterval(iv); try { wake && wake.release(); } catch (e) {} close();
+        stop(); close();
         const st = S.get(); const d = S.day();
         st.pf.sessions.push({ date: S.dayKey(), at: Date.now(), week: wk }); d.pf = (d.pf || 0) + 1; S.save();
         G.award(`pf_${d.pf}`, 30, null); G.checkBadges();
@@ -154,13 +162,28 @@ function runSession(rerender) {
         rerender();
       };
       const tick = () => {
-        if (paused) return; left--; elapsed++;
-        if (left <= 0) { idx++; if (idx >= seq.length) return finish(); left = seq[idx].s; enter(); }
+        if (paused) return;
+        const e = Math.floor((performance.now() - t0) / 1000);
+        if (e >= total) return finish();
+        if (e === elapsed && iv) return;
+        elapsed = e;
+        const i = ends.findIndex((end) => e < end);
+        left = ends[i] - e;
+        if (i !== idx) { idx = i; enter(); }
         paint();
       };
-      w.querySelector('[data-x]').onclick = () => { clearInterval(iv); try { wake && wake.release(); } catch (e) {} close(); };
-      w.querySelector('[data-p]').onclick = (e) => { paused = !paused; /** @type {HTMLElement} */ (e.currentTarget).innerHTML = paused ? UI.ICON.play : UI.ICON.pause; };
-      enter(); paint(); iv = setInterval(tick, 1000);
+      const setPaused = (on) => {
+        if (on === paused) return;
+        paused = on;
+        if (on) pausedAt = performance.now(); else { t0 += performance.now() - pausedAt; pausedAt = null; }
+        w.querySelector('[data-p]').innerHTML = paused ? UI.ICON.play : UI.ICON.pause;
+        paint();
+      };
+      const onVisibility = () => { if (document.hidden) { setPaused(true); releaseScreen(); } else lockScreen(); };
+      document.addEventListener('visibilitychange', onVisibility);
+      w.querySelector('[data-x]').onclick = () => { stop(); close(); };
+      w.querySelector('[data-p]').onclick = () => setPaused(!paused);
+      enter(); paint(); iv = setInterval(tick, 250);
     },
   });
 }
