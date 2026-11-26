@@ -3,13 +3,13 @@ import * as UI from '../ui.js';
 import * as G from '../gamify.js';
 import * as Sh from './shared.js';
 import * as Region from '../region.js';
-import { PF_PHASES, PF_EDU, pfPhase, RED_FLAGS } from '../data/content.js';
+import { PF_PHASES, PF_EDU, pfPhase } from '../data/content.js';
 
 export function pfWeek() {
   const st = S.get(); const ss = st.pf.sessions;
   if (st.pf.manualWeek) return st.pf.manualWeek;
   if (!ss.length) return 1;
-  const first = ss[0].date; const days = Math.round((S.keyToDate(S.dayKey()) - S.keyToDate(first)) / 86400000);
+  const first = ss[0].date; const days = S.daysBetween(first, S.dayKey());
   return Math.min(12, Math.floor(days / 7) + 1);
 }
 
@@ -136,7 +136,7 @@ function runSession(rerender) {
       const paint = () => {
         const s = seq[idx];
         w.querySelector('#tr-label').textContent = s.label; w.querySelector('#tr-sub').textContent = s.sub;
-        w.querySelector('#tr-count').textContent = left;
+        w.querySelector('#tr-count').textContent = String(left);
         w.querySelector('#tr-bar').style.width = `${(elapsed / total) * 100}%`;
         w.querySelector('#tr-left').textContent = `${Math.floor((total - elapsed) / 60)}:${S.pad((total - elapsed) % 60)} left`;
       };
@@ -159,7 +159,7 @@ function runSession(rerender) {
         paint();
       };
       w.querySelector('[data-x]').onclick = () => { clearInterval(iv); try { wake && wake.release(); } catch (e) {} close(); };
-      w.querySelector('[data-p]').onclick = (e) => { paused = !paused; e.currentTarget.innerHTML = paused ? UI.ICON.play : UI.ICON.pause; };
+      w.querySelector('[data-p]').onclick = (e) => { paused = !paused; /** @type {HTMLElement} */ (e.currentTarget).innerHTML = paused ? UI.ICON.play : UI.ICON.pause; };
       enter(); paint(); iv = setInterval(tick, 1000);
     },
   });

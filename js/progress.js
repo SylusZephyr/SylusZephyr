@@ -34,7 +34,7 @@ export function thisWeek(wk = S.weekKey()) {
   }
   const def = CHALLENGES.find((c) => c.id === rec.id) || CHALLENGES[0];
   const value = Math.min(def.goal, def.m(wk));
-  const dayIdx = Math.min(6, Math.round((S.keyToDate(S.dayKey()) - S.keyToDate(wk)) / 864e5));
+  const dayIdx = Math.min(6, S.daysBetween(wk, S.dayKey()));
   return { ...def, wk, value, pct: value / def.goal, done: rec.done, daysLeft: 6 - dayIdx };
 }
 
@@ -89,7 +89,7 @@ function showMoment(m) {
       <div class="m-inner"><div class="m-kicker">${UI.esc(m.kicker)}</div>
       <div class="m-big">${UI.esc(m.big)}</div><h2>${UI.esc(m.title)}</h2><p>${UI.esc(m.body)}</p></div>
       <button class="btn primary block" data-close>Continue</button></div>`, {
-      onMount: (w, close) => { const b = w.querySelector('[data-close]'); b.focus({ focusVisible: false }); b.onclick = () => { w.querySelector('.moment').classList.add('out'); setTimeout(() => { close(); resolve(); }, 220); }; },
+      onMount: (w, close) => { const b = w.querySelector('[data-close]'); b.focus(/** @type {FocusOptions} */ ({ preventScroll: true })); b.onclick = () => { w.querySelector('.moment').classList.add('out'); setTimeout(() => { close(); resolve(); }, 220); }; },
     });
   });
 }

@@ -23,13 +23,15 @@ env:
 
 jobs:
   checks:
-    name: Checks (unit tests + offline cache list)
+    name: Checks (lint, types, unit tests, offline cache list)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with: { node-version: '${{ env.NODE_VERSION }}', cache: npm }
       - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
       - run: npm test
       - name: Offline cache list is up to date
         run: |

@@ -1,4 +1,5 @@
 // Tiny dependency-free SVG charts.
+/** @param {{ y: number, label?: string }[]} points @param {{ h?: number, color?: string, min?: number, max?: number, band?: number[], labels?: boolean, unit?: string, goal?: number }} [opts] */
 export function lineChart(points, { h = 140, color = '#ffb547', min, max, band, labels = true, unit = '', goal } = {}) {
   const W = 340; const H = h; const pl = 30, pr = 10, pt = 12, pb = 22;
   if (!points.length) return `<div class="empty small"><span class="e"></span>No data yet</div>`;
@@ -26,6 +27,7 @@ export function lineChart(points, { h = 140, color = '#ffb547', min, max, band, 
 }
 const fmt = (v) => (Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 10) / 10);
 
+/** @param {{ y: number, label?: string, color?: string, dim?: boolean }[]} bars @param {{ h?: number, color?: string, max?: number, goal?: number }} [opts] */
 export function barChart(bars, { h = 120, color = '#5aa9ff', max, goal } = {}) {
   const W = 340; const H = h; const pb = 20, pt = 8;
   if (!bars.length) return '';
@@ -40,6 +42,7 @@ export function barChart(bars, { h = 120, color = '#5aa9ff', max, goal } = {}) {
 }
 
 // Sleep timeline: bars from bed to wake on a 18:00 → 14:00 axis.
+/** @param {{ bed: number, wake: number, label: string }[]} nights @param {{ h?: number, target?: { bed: number, wake: number } }} [opts] */
 export function sleepChart(nights, { h = 160, target } = {}) {
   const W = 340; const H = h; const pl = 34, pr = 6, pt = 6, pb = 18;
   if (!nights.length) return `<div class="empty small"><span class="e"></span>Log a few nights to see your pattern</div>`;

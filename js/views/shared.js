@@ -2,7 +2,7 @@
 import * as S from '../store.js';
 import * as UI from '../ui.js';
 import * as G from '../gamify.js';
-import { RECIPES, RECIPE, DELIVERY } from '../data/recipes.js';
+import { RECIPE, DELIVERY } from '../data/recipes.js';
 import { CHECKINS, scoreCheckin } from '../data/content.js';
 import * as Region from '../region.js';
 import { currentSlot, SLOT_LABEL, SLOT_EMOJI } from '../plan.js';
@@ -108,7 +108,7 @@ export function mealSheet(onDone, preset = {}) {
           const mount = () => {
             res.innerHTML = draw();
             res.querySelectorAll('[data-mult]').forEach((b) => b.onclick = () => { grams = f.portionG * +b.dataset.mult; mount(); });
-            res.querySelector('#food-g').onchange = (e) => { grams = Math.max(1, +e.target.value || f.portionG); mount(); };
+            res.querySelector('#food-g').onchange = (e) => { grams = Math.max(1, +(/** @type {HTMLInputElement} */ (e.target)).value || f.portionG); mount(); };
             res.querySelector('[data-back]').onclick = () => paint(false);
             res.querySelector('[data-logfood]').onclick = (ev) => {
               const n = forPortion(f, grams);
@@ -160,6 +160,7 @@ export function sleepSheet(onDone) {
 }
 
 // Breathing session: in 4, hold 2 (optional), out 6.
+/** @param {{ minutes?: number, onDone?: () => void }} [opts] */
 export function breathing({ minutes = 2, onDone } = {}) {
   const total = minutes * 60; let t = 0; let timer = null; let running = true;
   const phases = [{ n: 'Breathe in', s: 4, cls: 'big' }, { n: 'Breathe out', s: 6, cls: 'small' }];

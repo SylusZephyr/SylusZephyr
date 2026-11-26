@@ -35,7 +35,7 @@ export async function registerFaceId() {
     },
   });
   if (!cred) throw new Error('No credential');
-  return b64(cred.rawId);
+  return b64(/** @type {PublicKeyCredential} */ (cred).rawId);
 }
 
 export async function verifyFaceId(credId) {
@@ -79,7 +79,7 @@ export function showLock(onUnlock) {
         }
       }));
       w.querySelector('[data-del]').addEventListener('click', () => { pin = pin.slice(0, -1); paint(); });
-      const fb = w.querySelector('[data-face]'); if (fb) { fb.svgSize = 1; fb.addEventListener('click', tryFace); fb.querySelector('svg').style.width = '30px'; }
+      const fb = w.querySelector('[data-face]'); if (fb) { fb.addEventListener('click', tryFace); fb.querySelector('svg').style.width = '30px'; }
       if (st.lock.faceId && st.lock.credId) setTimeout(tryFace, 350);
     },
   });
@@ -94,7 +94,7 @@ export function setupSheet(onDone) {
     <div class="row mt16" style="justify-content:center"><div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button data-k="${n}">${n}</button>`).join('')}<button class="empty"></button><button data-k="0">0</button><button data-del style="font-size:18px">⌫</button></div></div>`, {
     onMount: (sh, close) => {
       const dots = sh.querySelector('#sdots'); const msg = sh.querySelector('#pin-msg');
-      const paint = () => [...dots.children].forEach((d, i) => { d.style.background = i < pin.length ? 'var(--amber)' : 'transparent'; d.style.borderColor = i < pin.length ? 'var(--amber)' : 'var(--muted)'; });
+      const paint = () => /** @type {HTMLElement[]} */ ([...dots.children]).forEach((d, i) => { d.style.background = i < pin.length ? 'var(--amber)' : 'transparent'; d.style.borderColor = i < pin.length ? 'var(--amber)' : 'var(--muted)'; });
       sh.querySelectorAll('[data-k]').forEach((b) => b.addEventListener('click', async () => {
         if (pin.length >= 4) return; pin += b.dataset.k; paint();
         if (pin.length === 4) {

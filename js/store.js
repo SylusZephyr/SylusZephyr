@@ -11,6 +11,8 @@ export function dayKey(d = new Date()) {
   if (x.getHours() < DAY_ROLLOVER_HOUR) x.setDate(x.getDate() - 1);
   return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
 }
+/** Whole days from day key `a` to day key `b` (b - a), DST-safe. */
+export function daysBetween(a, b) { return Math.round((keyToDate(b).getTime() - keyToDate(a).getTime()) / 86400000); }
 export function keyToDate(k) { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); }
 export function addDays(k, n) { const d = keyToDate(k); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 export function weekKey(k = dayKey()) {
@@ -32,6 +34,7 @@ export function prettyTime(hhmm) {
 export const uiLocale = () => { const l = (typeof document !== 'undefined' && document.documentElement.lang) || 'en'; return l === 'en' ? 'en-GB' : l === 'zh' ? 'zh-CN' : l === 'ur' ? 'ur-PK' : l; };
 // Creating a date formatter is expensive; screens format hundreds of dates, so reuse them.
 const fmtCache = new Map();
+/** @param {string} k day key (YYYY-MM-DD) @param {Intl.DateTimeFormatOptions} [opts] */
 export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'numeric' }) {
   const loc = uiLocale(); const key = loc + JSON.stringify(opts);
   let f = fmtCache.get(key); if (!f) { f = new Intl.DateTimeFormat(loc, opts); fmtCache.set(key, f); }

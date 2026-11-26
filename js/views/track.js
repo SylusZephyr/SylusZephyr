@@ -18,9 +18,8 @@ export function render() {
 function lastNDays(n) { const out = []; for (let i = n - 1; i >= 0; i--) out.push(S.addDays(S.dayKey(), -i)); return out; }
 
 function overview() {
-  const st = S.get(); const days = lastNDays(35); const wk = P.programWeek();
+  const st = S.get(); const wk = P.programWeek();
   const prog = P.PROGRAM[Math.min(3, wk - 1)];
-  const firstWd = (S.keyToDate(days[0]).getDay() + 6) % 7;
   const avg7 = lastNDays(7).reduce((s, k) => s + G.essentialsDone(k), 0) / 7;
   return `
   <div class="card"><div class="stats">
@@ -63,8 +62,8 @@ export function weightTrend(ws = S.get().weights, goal = S.get().profile.goalKgM
   const sorted = [...ws].sort((a, b) => a.date.localeCompare(b.date));
   if (sorted.length < 2) return null;
   const lastDate = S.keyToDate(sorted.at(-1).date);
-  const recent = sorted.filter((w) => (lastDate - S.keyToDate(w.date)) / 864e5 <= 42);
-  const pts = (recent.length >= 2 ? recent : sorted.slice(-2)).map((w) => ({ x: (S.keyToDate(w.date) - lastDate) / 864e5, y: w.kg }));
+  const recent = sorted.filter((w) => (lastDate.getTime() - S.keyToDate(w.date).getTime()) / 864e5 <= 42);
+  const pts = (recent.length >= 2 ? recent : sorted.slice(-2)).map((w) => ({ x: (S.keyToDate(w.date).getTime() - lastDate.getTime()) / 864e5, y: w.kg }));
   const n = pts.length; const mx = pts.reduce((a, p) => a + p.x, 0) / n; const my = pts.reduce((a, p) => a + p.y, 0) / n;
   const sxx = pts.reduce((a, p) => a + (p.x - mx) ** 2, 0);
   if (!sxx) return null;
@@ -163,7 +162,7 @@ function body() {
   const st = S.get(); const ws = [...st.weights].sort((a, b) => a.date.localeCompare(b.date));
   const pts = ws.map((w) => ({ y: w.kg, label: S.prettyDate(w.date, { day: 'numeric', month: 'short' }) }));
   const first = ws[0]; const last = ws.at(-1);
-  const weeks = first && last ? Math.max(1, (S.keyToDate(last.date) - S.keyToDate(first.date)) / (7 * 86400000)) : 1;
+  const weeks = first && last ? Math.max(1, S.daysBetween(first.date, last.date) / 7) : 1;
   const rate = first && last && ws.length > 1 ? (last.kg - first.kg) / weeks : null;
   const toGoal = last ? Math.max(0, st.profile.goalKgMin - last.kg) : null;
   const bmi = last ? last.kg / ((st.profile.heightCm / 100) ** 2) : null;
@@ -181,7 +180,8 @@ function etaLine() {
   if (!tr) return '';
   if (tr.eta === 'reached') return `<p class="small mt8" style="color:var(--green);font-weight:700">Trend is in your goal zone. Now hold it.</p>`;
   if (!tr.eta) return `<p class="small mt8 muted">Trend ${tr.perWeek >= 0 ? '+' : ''}${tr.perWeek.toFixed(2)} kg/week — not climbing yet, so no goal date. One extra shake a day (≈+300 kcal) usually starts it moving.</p>`;
-  return `<p class=\"small mt8\"><span>At ${tr.perWeek.toFixed(2)} kg/week you reach ${goal} kg by</span> <b>${tr.eta.toLocaleDateString(S.uiLocale(), { day: 'numeric', month: 'long', year: tr.eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b></p>`;
+  const eta = /** @type {Date} */ (tr.eta);
+  return `<p class="small mt8"><span>At ${tr.perWeek.toFixed(2)} kg/week you reach ${goal} kg by</span> <b>${eta.toLocaleDateString(S.uiLocale(), { day: 'numeric', month: 'long', year: eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b></p>`;
 }
 
 function sxCard() {

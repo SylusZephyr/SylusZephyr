@@ -1,8 +1,9 @@
-// Small UI helpers: escaping, icons, sheets, toasts, confetti, haptic-ish feedback.
+// Small UI helpers: escaping, icons, sheets, toasts and haptic feedback.
 import * as S from './store.js';
 import * as Native from './native.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+/** @type {(sel: string, root?: ParentNode) => HTMLElement | null} */
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -115,7 +116,7 @@ export function toast(msg, icon) {
 function pumpToasts() {
   const root = $('#toast-root'); if (!root) return;
   while (toastActive < 2 && toastQueue.length) {
-    const [msg, icon] = toastQueue.shift(); toastActive++;
+    const [msg] = toastQueue.shift(); toastActive++;
     const el = document.createElement('div'); el.className = 'toast'; el.dataset.msg = msg;
     el.innerHTML = `<span>${esc(msg)}</span>`;
     root.appendChild(el);
@@ -134,48 +135,13 @@ export function undoToast(msg, onUndo, ms = 5000) {
   setTimeout(finish, ms);
 }
 
-export function xpPop() {}
-function legacyXpPop(amount, x, y) {
-  const el = document.createElement('div'); el.className = 'xp-pop';
-  el.textContent = `+${amount} XP`;
-  el.style.left = `${Number.isFinite(x) ? x : window.innerWidth / 2}px`; el.style.top = `${(Number.isFinite(y) ? y : window.innerHeight / 2) - 20}px`;
-  document.body.appendChild(el); setTimeout(() => el.remove(), 1150);
-}
-
-// ---------- confetti ----------
-let confettiParts = [];
-let confettiRunning = false;
-// Confetti is reserved; the app keeps feedback quiet. Kept as a no-op so callers stay simple.
-export function confetti() {}
-function legacyConfetti(n = 90, originY = 0.35) {
-  const c = $('#confetti'); if (!c) return;
-  const dpr = window.devicePixelRatio || 1;
-  c.width = window.innerWidth * dpr; c.height = window.innerHeight * dpr;
-  const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const colors = ['#ffb547', '#ff6b6b', '#34d399', '#5aa9ff', '#a78bfa', '#f472b6'];
-  for (let i = 0; i < n; i++) {
-    confettiParts.push({
-      x: window.innerWidth / 2 + (Math.random() - 0.5) * 80, y: window.innerHeight * originY,
-      vx: (Math.random() - 0.5) * 12, vy: -Math.random() * 12 - 4, r: Math.random() * 6 + 3,
-      c: colors[(Math.random() * colors.length) | 0], rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, life: 0,
-    });
-  }
-  if (confettiRunning) return; confettiRunning = true;
-  const tick = () => {
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    confettiParts.forEach((p) => {
-      p.vy += 0.35; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c;
-      ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6); ctx.restore();
-    });
-    confettiParts = confettiParts.filter((p) => p.y < window.innerHeight + 40 && p.life < 240);
-    if (confettiParts.length) requestAnimationFrame(tick); else { confettiRunning = false; ctx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
-  };
-  requestAnimationFrame(tick);
-}
-
 // ---------- overlays ----------
 let sheetStack = [];
+/**
+ * Bottom sheet. Returns a function that closes it.
+ * @param {string} html
+ * @param {{ onMount?: (sheet: HTMLElement, close: () => void) => void, onClose?: () => void, cls?: string }} [opts]
+ */
 export function openSheet(html, { onMount, onClose, cls = '' } = {}) {
   const root = $('#overlay-root');
   const wrap = document.createElement('div');
@@ -195,6 +161,11 @@ export function openSheet(html, { onMount, onClose, cls = '' } = {}) {
 }
 export function closeAllSheets() { [...sheetStack].forEach((c) => c()); }
 
+/**
+ * Full-screen overlay (cook mode, trainer). Returns a function that closes it.
+ * @param {string} html
+ * @param {{ onMount?: (wrap: HTMLElement, close: () => void) => void, cls?: string }} [opts]
+ */
 export function fullscreen(html, { onMount, cls = '' } = {}) {
   const root = $('#overlay-root');
   const wrap = document.createElement('div'); wrap.className = cls; wrap.innerHTML = html;
@@ -204,6 +175,7 @@ export function fullscreen(html, { onMount, cls = '' } = {}) {
   return close;
 }
 
+/** @param {{ big?: string, title: string, body?: string, rarity?: string, color?: string, btn?: string }} opts */
 export function celebrate({ big, title, body, rarity, color = 'var(--muted)', btn = 'Continue' }) {
   haptic(20);
   return new Promise((resolve) => {

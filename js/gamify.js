@@ -148,7 +148,7 @@ function safe(fn) { try { return fn(); } catch (e) { return false; } }
 // ---------- vs last week ----------
 export function weekCompare() {
   const st = S.get(); const today = S.dayKey();
-  const sum = (from, n) => { let xp = 0, ess = 0, days = 0; for (let i = 0; i < n; i++) { const k = S.addDays(from, -i); const d = st.days[k]; if (d) { xp += d.xpToday || 0; ess += essentialsDone(k); days++; } } return { xp, ess }; };
+  const sum = (from, n) => { let xp = 0, ess = 0; for (let i = 0; i < n; i++) { const k = S.addDays(from, -i); const d = st.days[k]; if (d) { xp += d.xpToday || 0; ess += essentialsDone(k); } } return { xp, ess }; };
   const wd = (S.keyToDate(today).getDay() + 6) % 7; // days since Monday
   const thisW = sum(today, wd + 1);
   const lastW = sum(S.addDays(today, -7), wd + 1); // same point last week

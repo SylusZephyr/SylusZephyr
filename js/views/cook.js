@@ -20,6 +20,7 @@ const FEELS = [
 const TIMES = [{ v: 5, l: '≤5 min' }, { v: 15, l: '≤15 min' }, { v: 30, l: '≤30 min' }];
 const BUDGETS = [{ v: 8, l: '≤¥8' }, { v: 15, l: '≤¥15' }, { v: 99, l: 'Any' }];
 
+/** @param {{ slot?: string, feel?: string, mins?: number, budget?: number }} [filters] */
 export function suggest({ slot, feel, mins, budget } = {}) {
   const pantry = new Set(S.get().pantry); const st = S.get(); const fastingNow = Pr.fasting();
   return RECIPES.map((r) => {
