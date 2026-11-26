@@ -51,7 +51,7 @@ let codeSent = false;
 
 function account() {
   const st = Cloud.status;
-  const head = `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Account & sync</h1><div class="sub">${st.user ? 'Signed in' : 'Optional — the app works fully without an account'}</div></div></div>`;
+  const head = `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Account & sync</h1><div class="sub">${st.user ? 'Signed in' : 'Optional — the app works fully without an account'}</div></div></div>`;
   if (!st.configured) return head + `
     <div class="card glow"><div class="kicker">Cloud sync</div><h3>Connect your Revive cloud</h3>
       <p class="muted small">Sync runs on your own private Supabase project, so your data never sits on anyone else’s server. Paste the two values from Supabase → Project Settings → API.</p>
@@ -66,36 +66,36 @@ function account() {
         <button class="btn primary block mt12" data-verify>Verify & sign in</button><button class="btn ghost block mt8" data-resend>Use a different email</button>`
       : `<div class="field"><label>Email</label><input id="au-email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${UI.esc(authEmail)}"></div>
         <button class="btn primary block mt12" data-sendcode>Email me a sign-in code</button>`}
-      <div class="row mt16" style="gap:10px"><div class="grow" style="height:1px;background:var(--line)"></div><span class="tiny muted">or</span><div class="grow" style="height:1px;background:var(--line)"></div></div>
+      <div class="row mt16 gap10"><div class="grow divider"></div><span class="tiny muted">or</span><div class="grow divider"></div></div>
       <button class="btn block mt12" data-google><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg> Continue with Google</button>
       <p class="tiny faint mt8">Google sign-in needs a VPN in mainland China. Email codes work everywhere.</p></div>
-    ${st.error ? `<div class="notice" style="color:var(--coral)">${UI.esc(st.error)}</div>` : ''}
+    ${st.error ? `<div class="notice c-coral">${UI.esc(st.error)}</div>` : ''}
     <button class="btn ghost block mt12 small" data-cfgclear>Disconnect cloud project</button>`;
   return head + `
-    <div class="card glow" style="text-align:center"><div style="font-size:46px"></div><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
+    <div class="card glow tc"><div style="font-size:46px"></div><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
       <p class="muted small">${st.user.provider === 'google' ? 'Google account' : 'Email account'} · ${st.online ? (st.syncing ? 'Syncing…' : st.lastSync ? 'Last synced ' + ago(st.lastSync) : 'Connecting…') : 'Offline — changes will sync when you reconnect'}</p>
       <div class="grid2 mt16"><button class="btn" data-syncnow>Sync now</button><button class="btn danger" data-signout>Sign out</button></div></div>
-    ${st.error ? `<div class="notice" style="color:var(--coral)">${UI.esc(st.error)}</div>` : ''}
+    ${st.error ? `<div class="notice c-coral">${UI.esc(st.error)}</div>` : ''}
     <div class="notice">Changes sync automatically within a few seconds. Your app lock and PIN stay on each device and are never uploaded.</div>
     <button class="btn ghost danger block mt16 small" data-delacct>Delete my account and cloud data</button>`;
 }
 
 function credits() {
   const rows = Object.entries(PHOTOS).map(([id, p]) => ({ name: RECIPE[id]?.name || DELIVERY.find((d) => d.id === id)?.name || id, ...p }));
-  return `<div class="topbar">${back('me/settings')}<div class="grow"><h1 style="font-size:24px">Photo credits</h1><div class="sub">Free-licence photos from Wikimedia Commons</div></div></div>
-  <div class="card tight">${rows.length ? rows.map((r) => `<div class="list-item"><div class="li-ico" style="background:url('${r.src}') center/cover"></div><div class="grow" style="min-width:0"><b>${UI.esc(r.name)}</b><div class="muted small">${UI.esc(r.credit)}</div><a class="tiny" href="${UI.esc(r.page)}" target="_blank" rel="noopener">Source</a>${r.licence_url ? ` · <a class="tiny" href="${UI.esc(r.licence_url)}" target="_blank" rel="noopener">Licence</a>` : ''}</div></div>`).join('') : '<div class="empty small">No photos bundled.</div>'}</div>
+  return `<div class="topbar">${back('me/settings')}<div class="grow"><h1 class="h-sub">Photo credits</h1><div class="sub">Free-licence photos from Wikimedia Commons</div></div></div>
+  <div class="card tight">${rows.length ? rows.map((r) => `<div class="list-item"><div class="li-ico" style="background:url('${r.src}') center/cover"></div><div class="grow min0"><b>${UI.esc(r.name)}</b><div class="muted small">${UI.esc(r.credit)}</div><a class="tiny" href="${UI.esc(r.page)}" target="_blank" rel="noopener">Source</a>${r.licence_url ? ` · <a class="tiny" href="${UI.esc(r.licence_url)}" target="_blank" rel="noopener">Licence</a>` : ''}</div></div>`).join('') : '<div class="empty small">No photos bundled.</div>'}</div>
   <p class="tiny faint">Photos were resized and cropped to fit.</p>`;
 }
 
 const back = (to = 'me') => `<a class="icon-btn" href="#${to}">${UI.ICON.back}</a>`;
-const item = (href, ico, title, subt) => `<a class="list-item" href="#${href}" style="color:inherit;text-decoration:none"><div class="li-ico">${ico}</div><div class="grow"><b>${title}</b>${subt ? `<div class="muted small">${subt}</div>` : ''}</div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></a>`;
+const item = (href, ico, title, subt) => `<a class="list-item plain" href="#${href}"><div class="li-ico">${ico}</div><div class="grow"><b>${title}</b>${subt ? `<div class="muted small">${subt}</div>` : ''}</div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></a>`;
 
 function main() {
   const st = S.get(); const lv = G.levelInfo(); const nb = Object.keys(st.game.badges).length;
   const qs = (st.medical.questions || []); const open = qs.filter((q) => !q.done).length;
   const days = (n) => `${n}<small> ${n === 1 ? 'day' : 'days'}</small>`;
   const pct = Math.round(lv.pct * 100);
-  return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><div class="row" style="gap:8px"><button class="icon-btn" data-sharecard aria-label="Share progress image">${UI.ICON.share}</button><a class="icon-btn" href="#me/settings" aria-label="Settings">${UI.ICON.gear}</a></div></div>
+  return `<div class="topbar"><div><div class="sub">Profile</div><h1>${UI.esc(st.profile.name || 'Me')}</h1></div><div class="row gap8"><button class="icon-btn" data-sharecard aria-label="Share progress image">${UI.ICON.share}</button><a class="icon-btn" href="#me/settings" aria-label="Settings">${UI.ICON.gear}</a></div></div>
   <div class="card level-card">
     <div class="level-head">
       <div class="level-ring" style="--p:${pct}"><span>${lv.level}</span></div>
@@ -129,7 +129,7 @@ function main() {
 function medical() {
   const st = S.get(); const m = st.medical; m.questions = m.questions || DOCTOR_QUESTIONS.map((q) => ({ id: S.uid(), q, done: false }));
   const clr = { brief: 'Discussed briefly', notCleared: 'Not cleared / waiting', cleared: 'Cleared for exercise' };
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Medical</h1><div class="sub">Follow-up, results & clearance</div></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Medical</h1><div class="sub">Follow-up, results & clearance</div></div></div>
   <div class="card ${m.exerciseCleared ? '' : 'danger'}"><div class="kicker">Exercise clearance</div>
     <div class="seg mt8">${Object.entries(clr).map(([k, l]) => `<button class="${m.clearance === k ? 'on' : ''}" data-clr="${k}">${l.split(' ')[0]}</button>`).join('')}</div>
     <p class="small muted mt8">${m.exerciseCleared ? 'Cleared. Activity unlocked in Train — still stop for any chest pain, dizziness or unusual breathlessness.' : 'Training stays gentle (walking + pelvic floor) until a doctor clears you for exercise.'}</p></div>
@@ -138,13 +138,13 @@ function medical() {
   <div class="card tight">${m.questions.map((q) => `<div class="check ${q.done ? 'done' : ''}"><button class="box" data-q="${q.id}" aria-label="Asked">${UI.ICON.check}</button><span class="label small" style="font-weight:500">${UI.esc(q.q)}</span><button class="faint" data-delq="${q.id}" aria-label="Delete" style="padding:6px">${UI.ICON.trash.replace('<svg', '<svg width="16" height="16"')}</button></div>`).join('')}</div>
 
   <div class="section-title">Visits <button class="link" data-addvisit>+ Add</button></div>
-  <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico">${UI.ICON.doctor}</div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small" style="white-space:pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">No visits logged</div>'}</div>
+  <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico">${UI.ICON.doctor}</div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">No visits logged</div>'}</div>
 
   <div class="section-title">Lab results <button class="link" data-addlab>+ Add</button></div>
   <div class="card tight">${m.labs.length ? [...m.labs].sort((a, b) => b.date.localeCompare(a.date)).map((l) => `<div class="list-item"><div class="li-ico">${UI.ICON.pulse}</div><div class="grow"><b>${UI.esc(l.name)}: ${UI.esc(l.value)} ${UI.esc(l.unit)}</b><div class="muted small">${S.prettyDate(l.date)}${l.ref ? ` · typical ${UI.esc(l.ref)}` : ''}</div></div><button class="icon-btn" data-dellab="${l.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">Add results when you get them. Ranges are typical guides — labs differ, your doctor interprets them.</div>'}</div>
 
   <div class="card"><div class="kicker">Supplements — what’s worth it</div>
-    <div class="small" style="line-height:1.6">Vitamin D / B12 — if a test or diet suggests a need<br>Iron — only if deficiency is confirmed<br>Zinc — from food (meat, eggs, nuts); avoid high doses<br>Protein powder — optional convenience<br>“Testosterone boosters” — avoid unverified products<br>Sildenafil/tadalafil — not without a doctor, especially with your exertion symptoms</div></div>
+    <div class="small lh16">Vitamin D / B12 — if a test or diet suggests a need<br>Iron — only if deficiency is confirmed<br>Zinc — from food (meat, eggs, nuts); avoid high doses<br>Protein powder — optional convenience<br>“Testosterone boosters” — avoid unverified products<br>Sildenafil/tadalafil — not without a doctor, especially with your exertion symptoms</div></div>
   <div class="card danger"><div class="kicker">Get urgent help (${Region.region().ambulance}) for</div>${RED_FLAGS.map((r) => `<div class="small">• ${UI.esc(r)}</div>`).join('')}</div>`;
 }
 
@@ -191,7 +191,7 @@ function summary() {
       <tr><th>Felt anxious/pressure</th><td>${c((x) => x.anxious)}</td></tr></table>`; })()}
     <h2>Lab results entered</h2>${st.medical.labs.length ? `<table>${st.medical.labs.map((l) => `<tr><td>${l.date}</td><td>${UI.esc(l.name)}</td><td>${UI.esc(l.value)} ${UI.esc(l.unit)}</td></tr>`).join('')}</table>` : '<p>None</p>'}
     <h2>Questions</h2><ol>${(st.medical.questions || []).filter((q) => !q.done).map((q) => `<li>${UI.esc(q.q)}</li>`).join('')}</ol>`;
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Doctor summary</h1><div class="sub">Show on your phone or print / save as PDF</div></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Doctor summary</h1><div class="sub">Show on your phone or print / save as PDF</div></div></div>
   <div class="grid2 mb12"><button class="btn primary" data-print>Print / PDF</button><button class="btn" data-sharesum>Share text</button></div>
   <div class="card summary-doc" style="background:#fff;color:#111;font-size:13px;line-height:1.45">${html.replace(/<h2>/g, '<h3 style="margin-top:14px;border-bottom:1px solid #ccc;font-size:14px">').replace(/<\/h2>/g, '</h3>').replace(/<table>/g, '<table style="width:100%;border-collapse:collapse;font-size:12px" border="1" cellpadding="4">')}</div>
   <template id="print-html">${html}</template>`;
@@ -200,15 +200,15 @@ function summary() {
 function reminders() {
   const st = S.get(); st.reminderPrefs = st.reminderPrefs || {};
   const list = ICS.reminderList().map((r) => ({ ...r, on: st.reminderPrefs[r.id] ?? r.on }));
-  if (Native.isNative) return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Reminders</h1><div class="sub">Daily notifications from Revive</div></div></div>
+  if (Native.isNative) return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Reminders</h1><div class="sub">Daily notifications from Revive</div></div></div>
   <div class="card"><div class="list-item"><div class="grow"><b>Notifications</b><div class="muted small">${st.nativeReminders ? 'On — they follow your sleep plan automatically' : 'Off'}</div></div><button class="toggle ${st.nativeReminders ? 'on' : ''}" data-nativerem></button></div></div>
   <div class="card tight">${list.map((r) => `<div class="list-item"><div class="grow"><b>${UI.esc(r.title)}</b><div class="muted small">${S.prettyTime(r.time)} daily</div></div><button class="toggle ${r.on ? 'on' : ''}" data-rem="${r.id}" aria-label="toggle"></button></div>`).join('')}</div>
   <div class="notice">Times update by themselves as your bedtime shifts earlier. Turn individual reminders on or off above.</div>`;
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Reminders</h1><div class="sub">Free daily alerts via iPhone Calendar</div></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Reminders</h1><div class="sub">Free daily alerts via iPhone Calendar</div></div></div>
   <div class="card tight">${list.map((r) => `<div class="list-item"><div class="grow"><b>${UI.esc(r.title)}</b><div class="muted small">${S.prettyTime(r.time)} daily</div></div><button class="toggle ${r.on ? 'on' : ''}" data-rem="${r.id}" aria-label="toggle"></button></div>`).join('')}</div>
   <button class="btn primary block" data-ics>Add to iPhone Calendar</button>
   <button class="btn block mt8" data-icsshare>Didn’t open? Share the file instead</button>
-  <div class="card mt12"><div class="kicker">How it works</div><div class="small" style="line-height:1.6">
+  <div class="card mt12"><div class="kicker">How it works</div><div class="small lh16">
     1. Tap the button above → Safari shows the calendar events → tap <b>Add All</b>.<br>
     2. Each one repeats daily with an alert. They come from your current sleep plan.<br>
     3. When your bedtime shifts (every 3 days), delete the “Revive” events in Calendar and add them again — or just keep them; meals follow your fixed wake time.<br>
@@ -219,7 +219,7 @@ function reminders() {
 function badges() {
   const st = S.get(); const got = G.BADGES.filter((b) => st.game.badges[b.id]); const left = G.BADGES.filter((b) => !st.game.badges[b.id]);
   const row = (b, done) => `<div class="list-item"><div class="li-ico" style="${done ? 'background:var(--green);color:#0b0c0e' : ''}">${done ? UI.ICON.check : UI.ICON.lock}</div><div class="grow"><b style="${done ? '' : 'color:var(--muted)'}">${UI.esc(b.n)}</b><div class="small muted">${UI.esc(b.d)}</div></div></div>`;
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Milestones</h1><div class="sub">${got.length} of ${G.BADGES.length} reached</div></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Milestones</h1><div class="sub">${got.length} of ${G.BADGES.length} reached</div></div></div>
   ${got.length ? `<div class="section-title">Reached</div><div class="card tight">${got.map((b) => row(b, true)).join('')}</div>` : ''}
   <div class="section-title">Ahead</div><div class="card tight">${left.map((b) => row(b, false)).join('')}</div>`;
 }
@@ -228,27 +228,27 @@ let libCat = 'all';
 function saved() {
   const st = S.get(); const cats = [...new Set(TIPS.map((t) => t.cat))];
   const list = TIPS.filter((t) => libCat === 'all' || (libCat === 'saved' ? st.savedTips.includes(t.id) : t.cat === libCat));
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Library</h1><div class="sub">${TIPS.length} short reads on food, sleep, training and mood</div></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Library</h1><div class="sub">${TIPS.length} short reads on food, sleep, training and mood</div></div></div>
   <div class="chips scroll mb12">${[['all', 'All'], ['saved', `Saved (${st.savedTips.length})`], ...cats.map((c) => [c, c])].map(([id, l]) => `<button class="chip ${libCat === id ? 'on' : ''}" data-libcat="${UI.esc(id)}">${UI.esc(l)}</button>`).join('')}</div>
-  ${list.length ? list.map((t) => { const sv = st.savedTips.includes(t.id); return `<article class="card"><div class="row between"><span class="small muted">${UI.esc(t.cat)}</span><button class="icon-btn" style="width:32px;height:32px" data-libsave="${t.id}" aria-pressed="${sv}" aria-label="Save">${sv ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div><h3 class="mt8">${UI.esc(t.title)}</h3><p class="small muted mt8" style="line-height:1.55">${UI.esc(t.body)}</p></article>`; }).join('') : '<div class="empty">Nothing saved yet.</div>'}`;
+  ${list.length ? list.map((t) => { const sv = st.savedTips.includes(t.id); return `<article class="card"><div class="row between"><span class="small muted">${UI.esc(t.cat)}</span><button class="icon-btn sz32" data-libsave="${t.id}" aria-pressed="${sv}" aria-label="Save">${sv ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div><h3 class="mt8">${UI.esc(t.title)}</h3><p class="small muted mt8" style="line-height:1.55">${UI.esc(t.body)}</p></article>`; }).join('') : '<div class="empty">Nothing saved yet.</div>'}`;
 }
 
 function prayer() {
   const st = S.get(); const cfg = Pr.settings(); const p = st.prayer || {};
   const list = Pr.todayList(); const nx = Pr.next(); const dtr = Pr.daysToRamadan(); const hj = Pr.hijri();
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Prayer & Ramadan</h1></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Prayer & Ramadan</h1></div></div>
   <div class="card tight"><div class="list-item"><div class="grow"><b>Show prayer times on Today</b><div class="muted small">Worked out on this device from the sun’s position. No location permission, no internet.</div></div><button class="toggle ${cfg.enabled ? 'on' : ''}" data-prayeron aria-label="Show prayer times"></button></div></div>
   <div class="card tight">
     <div class="list-item"><div class="grow"><b>Notify me at each prayer</b><div class="muted small">${Native.isNative ? (st.nativeReminders ? 'Refreshed daily, works offline' : 'Turn on notifications in Me → Reminders first') : 'Available in the phone app'}</div></div><button class="toggle ${p.notify ? 'on' : ''}" data-prnotify aria-label="Prayer notifications" ${Native.isNative ? '' : 'disabled'}></button></div>
     <div class="list-item"><div class="grow"><b>Suhoor & iftar alerts</b><div class="muted small">45 min before dawn, 15 min before iftar, and a late-meal nudge — only on fasting days</div></div><button class="toggle ${p.fastAlerts !== false ? 'on' : ''}" data-prfast aria-label="Suhoor and iftar alerts" ${Native.isNative ? '' : 'disabled'}></button></div>
   </div>
   <div class="card">
-    <div class="field" style="margin:0"><label>City</label><select id="pr-city">${Pr.CITIES.map((c) => `<option value="${c.id}" ${cfg.city === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}<option value="custom" ${cfg.city === 'custom' ? 'selected' : ''}>Other (enter coordinates)…</option></select></div>
+    <div class="field m0"><label>City</label><select id="pr-city">${Pr.CITIES.map((c) => `<option value="${c.id}" ${cfg.city === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}<option value="custom" ${cfg.city === 'custom' ? 'selected' : ''}>Other (enter coordinates)…</option></select></div>
     <div class="grid3 ${cfg.city === 'custom' ? '' : 'hidden'}" id="pr-custom"><div class="field"><label>Latitude</label><input id="pr-lat" type="number" step="0.001" value="${p.lat ?? cfg.lat}"></div><div class="field"><label>Longitude</label><input id="pr-lng" type="number" step="0.001" value="${p.lng ?? cfg.lng}"></div><div class="field"><label>UTC offset</label><input id="pr-tz" type="number" step="0.5" value="${cfg.tz}"></div></div>
     <div class="field"><label>Calculation method</label><select id="pr-method">${Object.entries(Pr.METHODS).map(([id, m]) => `<option value="${id}" ${cfg.method === id ? 'selected' : ''}>${m.name}</option>`).join('')}</select></div>
     <div class="field"><label>Asr</label><div class="seg" id="pr-asr"><button data-asr="standard" class="${cfg.asr === 'standard' ? 'on' : ''}">Standard</button><button data-asr="hanafi" class="${cfg.asr === 'hanafi' ? 'on' : ''}">Hanafi</button></div></div>
   </div>
-  <div class="card"><div class="row between"><div class="kicker"><span>Today</span> · <span>${UI.esc(cfg.cityName)}</span></div><span class="small" style="font-weight:700"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
+  <div class="card"><div class="row between"><div class="kicker"><span>Today</span> · <span>${UI.esc(cfg.cityName)}</span></div><span class="small fw7"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
     ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span style="font-weight:800">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
     <p class="tiny muted mt8">If your local mosque’s timetable differs, follow the mosque.</p></div>
   <div class="section-title">Ramadan fasting mode</div>
@@ -268,7 +268,7 @@ function prayer() {
 function settings() {
   const st = S.get(); const s = st.settings;
   const tg = (key, label, sub, on) => `<div class="list-item"><div class="grow"><b>${label}</b>${sub ? `<div class="muted small">${sub}</div>` : ''}</div><button class="toggle ${on ? 'on' : ''}" data-set="${key}"></button></div>`;
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Settings</h1></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Settings</h1></div></div>
   <div class="card tight">
     <div class="list-item"><div class="grow"><b>App lock</b><div class="muted small">${st.lock.enabled ? (st.lock.faceId ? 'Face ID / Windows Hello + PIN' : 'PIN') : 'Off'}</div></div><button class="toggle ${st.lock.enabled ? 'on' : ''}" data-lock></button></div>
     ${tg('winddown', 'Wind-down mode', 'Calmer app & sleeping feed after your wind-down time', s.winddown)}
@@ -279,20 +279,20 @@ function settings() {
   <div class="card"><div class="seg lang-pick" data-no-tr>${LANGUAGES.map((l) => `<button data-lang="${l.code}" class="${locale === l.code ? 'on' : ''}" lang="${l.code}">${l.native}</button>`).join('')}</div></div>
   <div class="section-title">Look</div>
   <div class="card">
-    <div class="field" style="margin:0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
-      <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''}" style="cursor:pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" style="position:absolute;opacity:0;width:1px;height:1px" aria-label="Pick a custom accent colour"></label></div></div>
+    <div class="field m0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
+      <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''} pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" style="position:absolute;opacity:0;width:1px;height:1px" aria-label="Pick a custom accent colour"></label></div></div>
     <div class="field"><label>Background</label><div class="seg" id="bgseg">${Theme.BACKGROUNDS.map((b) => `<button data-bg="${b.id}" class="${Theme.current().bg === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
     <div class="field"><label>Text size</label><div class="seg" id="fsseg">${Theme.SIZES.map((b) => `<button data-fs="${b.id}" class="${Theme.current().size === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
   </div>
   <div class="section-title">Coffee</div>
   <div class="card">
-    <div class="grid2"><div class="field" style="margin:0"><label>Your usual cup (mg caffeine)</label><input id="p-cup" type="number" min="5" max="400" step="5" value="${Caf.cupMg()}"></div>
-    <div class="field" style="margin:0"><label>Coffee cutoff</label><input id="p-cut" type="time" value="${st.profile.caffeineCutoff}"></div></div>
+    <div class="grid2"><div class="field m0"><label>Your usual cup (mg caffeine)</label><input id="p-cup" type="number" min="5" max="400" step="5" value="${Caf.cupMg()}"></div>
+    <div class="field m0"><label>Coffee cutoff</label><input id="p-cut" type="time" value="${st.profile.caffeineCutoff}"></div></div>
     <p class="tiny muted mt8">Luckin / Starbucks Americano ≈ 150 mg (medium). Single espresso ≈ 75 mg. Used for the “caffeine in your body” estimate.</p>
   </div>
   <div class="section-title">Profile</div>
   <div class="card">
-    <div class="grid2"><div class="field" style="margin:0"><label>Name</label><input id="p-name" value="${UI.esc(st.profile.name)}"></div><div class="field" style="margin:0"><label>Age</label><input id="p-age" type="number" value="${st.profile.age}"></div></div>
+    <div class="grid2"><div class="field m0"><label>Name</label><input id="p-name" value="${UI.esc(st.profile.name)}"></div><div class="field m0"><label>Age</label><input id="p-age" type="number" value="${st.profile.age}"></div></div>
     <div class="grid2"><div class="field"><label>Height (cm)</label><input id="p-h" type="number" value="${st.profile.heightCm}"></div><div class="field"><label>Water goal (ml)</label><input id="p-w" type="number" step="250" value="${st.profile.waterGoalMl}"></div></div>
     <div class="grid2"><div class="field"><label>Weekly food budget (¥)</label><input id="p-b" type="number" value="${st.profile.weeklyBudget}"></div><div class="field"><label>Start weight (kg)</label><input id="p-s" type="number" step="0.1" value="${st.profile.startKg}"></div></div>
     <button class="btn block mt12" data-saveprofile>Save profile</button>
@@ -300,31 +300,31 @@ function settings() {
   <div class="section-title">Privacy</div>
   <div class="notice">${Cloud.status.user ? 'Your data lives on this device and syncs to your own private Supabase project while you’re signed in.' : 'Your data lives only on this device. Nothing is uploaded unless you sign in to sync. If you uninstall the app or clear site data, it’s gone — export a file now and then to be safe.'}</div>
   <p class="small muted mt12">Last backup file: <b>${st.lastExportAt ? S.prettyDate(S.dayKey(new Date(st.lastExportAt)), { day: 'numeric', month: 'long', year: 'numeric' }) : 'never'}</b></p>
-  <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn" style="cursor:pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
+  <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
-  <a class="list-item mt12" href="#me/account" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.me}</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
+  <a class="list-item mt12 plain" href="#me/account"><div class="li-ico">${UI.ICON.me}</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
   <button class="list-item" data-diag><div class="li-ico">${UI.ICON.list}</div><div class="grow"><b>Copy diagnostics</b><div class="muted small">Version, language and recent errors for support. No health data.</div></div></button>
-  <a class="list-item" href="#me/credits" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.share}</div><div class="grow"><b>Photo credits</b></div></a>
-  <a class="list-item" href="privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="li-ico">${UI.ICON.lock}</div><div class="grow"><b>Privacy policy</b></div></a>
-  <p class="tiny faint mt16" style="text-align:center">Revive ${APP_VERSION.split('.').slice(0, 2).join('.')} · not medical advice</p>`;
+  <a class="list-item plain" href="#me/credits"><div class="li-ico">${UI.ICON.share}</div><div class="grow"><b>Photo credits</b></div></a>
+  <a class="list-item plain" href="privacy.html" target="_blank" rel="noopener"><div class="li-ico">${UI.ICON.lock}</div><div class="grow"><b>Privacy policy</b></div></a>
+  <p class="tiny faint mt16 tc">Revive ${APP_VERSION.split('.').slice(0, 2).join('.')} · not medical advice</p>`;
 }
 
 function install() {
   const canPc = !!window.__canInstall;
-  return `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Install Revive</h1><div class="sub">iPhone and Windows PC</div></div></div>
+  return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Install Revive</h1><div class="sub">iPhone and Windows PC</div></div></div>
   <div class="card"><div class="kicker">Windows PC</div>
     ${canPc ? '<button class="btn primary block mb12" data-installpc>Install on this PC</button>' : ''}
-    <div class="small" style="line-height:1.8">
+    <div class="small lh18">
     1. Open <b>https://syluszephyr.github.io/SylusZephyr/</b> in <b>Microsoft Edge</b> or <b>Google Chrome</b>.<br>
     2. Click the <b>Install</b> icon in the address bar (a monitor with ⬇), or menu <b>⋯ → Apps → Install Revive</b>.<br>
     3. Revive opens in its own window and appears in the <b>Start menu</b> — right-click it to <b>Pin to taskbar</b>.<br>
     4. Works offline. Lock with <b>Windows Hello</b> (face, fingerprint or PIN) in Settings.<br>
     Keyboard: <kbd>1</kbd>–<kbd>5</kbd> switch tabs · <kbd>Esc</kbd> closes · type your PIN on the lock screen.</div></div>
-  <div class="card"><div class="kicker">iPhone</div><div class="small" style="line-height:1.8">
+  <div class="card"><div class="kicker">iPhone</div><div class="small lh18">
     1. Open the same link in <b>Safari</b> (not WeChat’s browser).<br>
     2. Tap <b>Share</b> → <b>Add to Home Screen</b> → <b>Add</b>.<br>
     3. Always open Revive from the Home Screen icon.</div></div>
-  <div class="card"><div class="kicker">Phone ⇄ PC</div><p class="small muted" style="line-height:1.6">Each device keeps its own private data — nothing is uploaded, so they don’t sync automatically. To move your progress, use <b>Me → Settings → Export file</b> on one device and <b>Import file</b> on the other (AirDrop, WeChat File Transfer or a USB cable).</p></div>
+  <div class="card"><div class="kicker">Phone ⇄ PC</div><p class="small muted lh16">Each device keeps its own private data — nothing is uploaded, so they don’t sync automatically. To move your progress, use <b>Me → Settings → Export file</b> on one device and <b>Import file</b> on the other (AirDrop, WeChat File Transfer or a USB cable).</p></div>
   <div class="notice">In China, github.io can be slow — load it once (VPN if needed). After that it works offline on both devices.</div>`;
 }
 

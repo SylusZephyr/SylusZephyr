@@ -60,7 +60,7 @@ export function art(r, { eager = false } = {}) {
 
 function recipeCard(r) {
   const fav = S.get().favorites.includes(r.id); const a = art(r);
-  return `<a class="rcard" data-key="r-${r.id}" href="#cook/r/${r.id}" style="color:inherit;text-decoration:none"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? `<span class="fav" style="color:var(--coral)">${UI.ICON.heartFill}</span>` : ''}${methodPill(r.method)}</div>
+  return `<a class="rcard plain" data-key="r-${r.id}" href="#cook/r/${r.id}"><div class="hero ${a.cls}" style="${a.style}">${a.emoji}${fav ? `<span class="fav c-coral">${UI.ICON.heartFill}</span>` : ''}${methodPill(r.method)}</div>
     <div class="body"><div class="name">${UI.esc(r.name)}</div><div class="meta">${r.mins} min · ${r.kcal} kcal · ¥${r.cost}</div></div></a>`;
 }
 
@@ -105,7 +105,7 @@ function main() {
   ${planTeaser()}`}
 
   <div class="chips scroll mb12 ${filt.q ? 'mt16' : ''}">${CATS.map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
-  <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1">No recipes match. Try another filter.</div>'}</div>
+  <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty span-all">No recipes match. Try another filter.</div>'}</div>
 
   <a class="list-row mt16" href="#cook/delivery"><span class="ico">${UI.ICON.bag}</span><span class="grow"><b>Halal delivery picks</b><span class="small muted">Meituan and Ele.me orders that still hit your protein</span></span><span class="chev">${UI.ICON.chev}</span></a>`;
 }
@@ -141,7 +141,7 @@ function detail(r) {
   return `
   <div class="hero-lg ${art(r).cls}" style="${art(r).style}"><a class="icon-btn back" href="#cook">${UI.ICON.back}</a><button class="icon-btn fav" data-fav aria-pressed="${fav}" aria-label="Favourite" style="${fav ? 'color:var(--coral)' : ''}">${fav ? UI.ICON.heartFill : UI.ICON.heart}</button>${art(r, { eager: true }).emoji}</div>
   ${PHOTOS[r.id] ? `<div class="photo-credit">Photo: ${UI.esc(PHOTOS[r.id].credit)}</div>` : ''}
-  <div class="row wrap mb8" style="gap:6px">${methodPill(r.method)}${r.tags.map((t) => `<span class="pill">${t}</span>`).join('')}${cookedN ? `<span class="pill green">Cooked ${cookedN}×</span>` : ''}</div>
+  <div class="row wrap mb8 gap6">${methodPill(r.method)}${r.tags.map((t) => `<span class="pill">${t}</span>`).join('')}${cookedN ? `<span class="pill green">Cooked ${cookedN}×</span>` : ''}</div>
   <h1 style="font-size:28px">${UI.esc(r.name)}</h1>
   <p class="muted mt8">${UI.esc(r.desc)}</p>
   <div class="stats mt16">
@@ -151,7 +151,7 @@ function detail(r) {
   <div class="grid2 mt16"><button class="btn primary" data-cook>Start cooking</button><button class="btn" data-ate>I ate this</button></div>
 
   <div class="section-title">Ingredients ${missing.length ? `<button class="link" data-addmissing>+ Add ${missing.length} to list</button>` : '<span class="pill green">All in pantry</span>'}</div>
-  <div class="card">${r.ing.map((i) => { const g = ING[i.id]; const have = pantry.has(i.id); return `<button class="ing ${have ? 'have' : ''}" data-toggle="${i.id}" style="width:100%;text-align:left">
+  <div class="card">${r.ing.map((i) => { const g = ING[i.id]; const have = pantry.has(i.id); return `<button class="ing ${have ? 'have' : ''} w100 ts" data-toggle="${i.id}">
     <span class="have-dot" aria-hidden="true">${have ? UI.ICON.check : ''}</span><div class="grow"><div class="name">${UI.esc(g.name)} ${i.opt ? '<span class="muted small">(optional)</span>' : ''}</div><div class="zh">${UI.esc(g.zh)}</div></div><div class="muted small">${UI.esc(i.q)}</div></button>`; }).join('')}
     <p class="tiny muted mt8">Tap an ingredient to mark it as in/out of your pantry. Chinese names help when shopping on Hema/Taobao.</p></div>
 
@@ -171,7 +171,7 @@ let panQ = '';
 function pantryView() {
   const pantry = new Set(S.get().pantry); const q = panQ.trim().toLowerCase();
   const match = (i) => !q || i.name.toLowerCase().includes(q) || (i.zh || '').includes(q);
-  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">My pantry</h1><div class="sub">${pantry.size} of ${INGREDIENTS.length} items · tap to toggle</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 class="h-sub">My pantry</h1><div class="sub">${pantry.size} of ${INGREDIENTS.length} items · tap to toggle</div></div></div>
   <label class="searchbar">${UI.ICON.search}<input id="pan-q" type="search" placeholder="Find an ingredient" value="${UI.esc(panQ)}" autocomplete="off"></label>
   ${ING_CATS.map((c) => { const list = INGREDIENTS.filter((i) => i.cat === c && match(i)); if (!list.length) return ''; const have = INGREDIENTS.filter((i) => i.cat === c && pantry.has(i.id)).length; const all = INGREDIENTS.filter((i) => i.cat === c).length;
     return `<div class="section-title">${c}<span class="small muted">${have} of ${all}</span></div><div class="chips">${list.map((i) => `<button class="chip ${pantry.has(i.id) ? 'on' : ''}" data-pan="${i.id}">${UI.esc(i.name)}</button>`).join('')}</div>`; }).join('') || '<div class="empty">No ingredient matches.</div>'}
@@ -179,12 +179,12 @@ function pantryView() {
 }
 
 function deliveryView() {
-  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Halal delivery</h1><div class="sub">Meituan 美团 · Ele.me 饿了么</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 class="h-sub">Halal delivery</h1><div class="sub">Meituan 美团 · Ele.me 饿了么</div></div></div>
   <div class="notice mb12">Search <b>清真</b> in the app and sort by rating. Ask for <b>少盐</b> (less salt) and <b>加蛋 / 加肉</b> (extra egg / meat) for protein. Ordering still counts — eating something is the win.</div>
   ${DELIVERY.map((d) => `<div class="card tight deliv"><div class="row" style="align-items:flex-start;gap:14px"><div class="dthumb ${PHOTOS[d.id] ? 'has-photo' : 'mono-tile'}" style="--tint:${d.bg?.[0] || '#555'}">${PHOTOS[d.id] ? `<img class="ph" src="${PHOTOS[d.id].src}" alt="" loading="lazy" decoding="async">` : `<span class="mono" aria-hidden="true">${UI.ICON.bag}</span>`}</div>
     <div class="grow"><b>${UI.esc(d.name)}</b><div class="small muted">${UI.esc(d.zh)}</div><div class="small mt8">~¥${d.cost} · ${d.kcal} kcal · ${d.protein} g protein</div></div></div>
     <p class="small muted mt8">${UI.esc(d.tip)}</p>
-    <div class="row mt12" style="gap:8px"><button class="btn sm grow" data-copy="${UI.esc(d.zh)}">Copy search</button><button class="btn sm grow" data-ate-del="${d.id}">${UI.ICON.check}<span>I ate this</span></button></div></div>`).join('')}`;
+    <div class="row mt12 gap8"><button class="btn sm grow" data-copy="${UI.esc(d.zh)}">Copy search</button><button class="btn sm grow" data-ate-del="${d.id}">${UI.ICON.check}<span>I ate this</span></button></div></div>`).join('')}`;
 }
 
 function shopView() {
@@ -192,10 +192,10 @@ function shopView() {
   const items = st.shopping.map((x) => ({ ...x, g: ING[x.id] })).filter((x) => x.g);
   const left = items.filter((x) => !x.done); const total = left.reduce((a, x) => a + x.g.price, 0);
   const weekly = st.profile.weeklyBudget; const bought = items.length - left.length;
-  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Shopping list</h1><div class="sub">${total ? `About ¥${total} to buy · ` : ''}Budget ¥${weekly} a week</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 class="h-sub">Shopping list</h1><div class="sub">${total ? `About ¥${total} to buy · ` : ''}Budget ¥${weekly} a week</div></div></div>
   ${items.length ? `<div class="card tight"><div class="row between small"><span class="muted">${bought} of ${items.length} bought</span><b>~¥${total}</b></div><div class="lvlbar mt8"><i style="width:${Math.round(bought / items.length * 100)}%;background:var(--green)"></i></div></div>` : ''}
   ${total > weekly ? '<div class="notice mb12">This list is over your weekly budget. Spices and protein powder last for weeks, so it evens out.</div>' : ''}
-  ${items.length ? `<div class="card ess-list">${items.map((x) => `<button class="check ${x.done ? 'done' : ''}" data-shop="${x.id}" style="width:100%;text-align:left"><span class="box">${UI.ICON.check}</span><span class="label">${UI.esc(x.g.name)}<span class="zh muted small" style="display:block">${UI.esc(x.g.zh)} · ${x.g.unit}</span></span><span class="muted small">¥${x.g.price}</span></button>`).join('')}</div>`
+  ${items.length ? `<div class="card ess-list">${items.map((x) => `<button class="check ${x.done ? 'done' : ''} w100 ts" data-shop="${x.id}"><span class="box">${UI.ICON.check}</span><span class="label">${UI.esc(x.g.name)}<span class="zh muted small db">${UI.esc(x.g.zh)} · ${x.g.unit}</span></span><span class="muted small">¥${x.g.price}</span></button>`).join('')}</div>`
     : `<div class="card empty-state"><span class="es-ico">${UI.ICON.cart}</span><b>Your list is empty</b><p class="small muted">Open a recipe and tap “Add to list”, or plan your week to get one list for everything.</p><a class="btn sm mt12" href="#cook/plan">Plan your week</a></div>`}
   <div class="section-title">Always-stocked essentials</div>
   <div class="chips">${['eggs', 'cooked_chicken', 'shouzhuabing', 'tortilla', 'yogurt', 'milk', 'banana', 'instant_rice', 'frozen_veg', 'chicken_thigh'].map((id) => `<button class="chip" data-addshop="${id}">${UI.ICON.plus.replace('<svg', '<svg width="14" height="14"')}${UI.esc(ING[id].name)}</button>`).join('')}</div>
@@ -207,7 +207,7 @@ function shopView() {
 function cookMode(r, rerender) {
   let i = 0; let remaining = 0; let iv = null; let running = false;
   UI.fullscreen(`<div class="cookmode">
-    <div class="row between"><button class="icon-btn" data-x>${UI.ICON.close}</button><b class="ellipsis" style="max-width:60%">${r.emoji} ${UI.esc(r.name)}</b><div style="width:40px"></div></div>
+    <div class="row between"><button class="icon-btn" data-x>${UI.ICON.close}</button><b class="ellipsis" style="max-width:60%">${r.emoji} ${UI.esc(r.name)}</b><div class="w40"></div></div>
     <div class="progress">${r.steps.map(() => '<i></i>').join('')}</div>
     <div class="stepbig"><div class="num" id="cm-num"></div><div class="txt" id="cm-txt"></div><div id="cm-timer"></div></div>
     <div class="grid2"><button class="btn" data-prev>Back</button><button class="btn primary" data-next>Next</button></div>
@@ -268,7 +268,7 @@ export function bind(root, parts, { rerender }) {
     q.addEventListener('input', () => {
       filt.q = q.value; const grid = root.querySelector('#rgrid'); const ql = filt.q.toLowerCase();
       const list = RECIPES.filter((r) => !ql || r.name.toLowerCase().includes(ql) || r.ing.some((i) => ING[i.id]?.name.toLowerCase().includes(ql)) || r.tags.join(' ').includes(ql));
-      morph(grid, list.length ? list.map(recipeCard).join('') : '<div class="empty" style="grid-column:1/-1">Nothing found</div>');
+      morph(grid, list.length ? list.map(recipeCard).join('') : '<div class="empty span-all">Nothing found</div>');
     });
   }
   if (sub === 'r') {
@@ -371,11 +371,11 @@ function planView() {
   const wk = S.weekKey();
   let cost = 0, kcal = 0;
   if (has) st.weekPlan.days.forEach((d) => PLAN_SLOTS.forEach((sl) => { const r = RECIPE[d[sl]]; if (r) { cost += r.cost; kcal += r.kcal; } }));
-  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Meal plan</h1><div class="sub"><span>Week of</span> ${S.prettyDate(wk, { day: 'numeric', month: 'short' })}</div></div></div>
+  return `<div class="topbar"><a class="icon-btn" href="#cook">${UI.ICON.back}</a><div class="grow"><h1 class="h-sub">Meal plan</h1><div class="sub"><span>Week of</span> ${S.prettyDate(wk, { day: 'numeric', month: 'short' })}</div></div></div>
   ${has ? `<div class="grid3 mb12"><div class="macro"><b>¥${cost}</b><span>whole week</span></div><div class="macro"><b>${Math.round(kcal / 7)}</b><span>kcal/day</span></div><div class="macro"><b>${planIngredients().filter((id) => !st.pantry.includes(id)).length}</b><span>to buy</span></div></div>
     ${st.weekPlan.days.map((d, i) => { const k = S.addDays(wk, i); return `<div class="card tight" style="${i === todayIdx ? 'border-color:var(--line2)' : ''}">
       <div class="row between mb8"><b>${S.prettyDate(k, { weekday: 'long' })}${i === todayIdx ? ' · today' : ''}</b><span class="muted small">${PLAN_SLOTS.reduce((s, sl) => s + (RECIPE[d[sl]]?.kcal || 0), 0)} kcal</span></div>
-      ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row" style="padding:5px 0"><span class="slot-tag">${P.SLOT_LABEL[sl].split(' ')[0]}</span><a href="#cook/r/${r.id}" class="grow ellipsis" style="color:inherit;text-decoration:none">${r.emoji} ${UI.esc(r.name)}</a><button class="icon-btn" style="width:32px;height:32px" data-swap="${i}:${sl}" aria-label="Swap meal">${UI.ICON.refresh}</button></div>`; }).join('')}
+      ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row" style="padding:5px 0"><span class="slot-tag">${P.SLOT_LABEL[sl].split(' ')[0]}</span><a href="#cook/r/${r.id}" class="grow ellipsis plain">${r.emoji} ${UI.esc(r.name)}</a><button class="icon-btn sz32" data-swap="${i}:${sl}" aria-label="Swap meal">${UI.ICON.refresh}</button></div>`; }).join('')}
     </div>`; }).join('')}
     <div class="grid2 mt8"><button class="btn" data-genplan>Regenerate</button><button class="btn primary" data-planshop>Shopping list</button></div>`
     : `<div class="empty"><span class="e"></span>No plan for this week yet.</div><button class="btn primary block" data-genplan>Generate my week</button>`}

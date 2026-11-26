@@ -88,12 +88,12 @@ export function render() {
     ${PF_PHASES.map((p) => { const active = p.weeks.includes(wk); const done = Math.max(...p.weeks) < wk; return `<div class="list-item">
       <div class="li-ico" style="${active ? 'background:var(--text);color:#0b0c0e' : done ? 'background:var(--green);color:#0b0c0e' : ''}">${done ? UI.ICON.check : active ? UI.ICON.play : UI.ICON.lock}</div>
       <div class="grow"><b>${p.name}</b> <span class="muted small">· weeks ${p.weeks[0]}–${p.weeks.at(-1)}</span><div class="muted small">${p.reps} × ${p.hold}s holds · ${p.flicks} flicks · ${p.pos.toLowerCase()}</div></div></div>`; }).join('')}
-    <div class="row between" style="padding:12px 2px 4px"><span class="small muted">Program week</span><div class="row"><button class="icon-btn" style="width:32px;height:32px" data-wk="-1" aria-label="Previous week">${UI.ICON.minus}</button><b style="min-width:20px;text-align:center">${wk}</b><button class="icon-btn" style="width:32px;height:32px" data-wk="1" aria-label="Next week">${UI.ICON.plus}</button></div></div>
+    <div class="row between" style="padding:12px 2px 4px"><span class="small muted">Program week</span><div class="row"><button class="icon-btn sz32" data-wk="-1" aria-label="Previous week">${UI.ICON.minus}</button><b style="min-width:20px;text-align:center">${wk}</b><button class="icon-btn sz32" data-wk="1" aria-label="Next week">${UI.ICON.plus}</button></div></div>
   </section>
 
   <div class="section-title">Walking</div>
   <section class="card ${w.cleared ? '' : 'danger'}">
-    <div class="row between"><div class="kicker" style="margin:0">${w.cleared ? `Level ${w.level} of ${CARDIO.length}` : 'Gentle walks only until a doctor clears you'}</div><span class="small muted" style="white-space:nowrap">${w.hit} of 5 days</span></div>
+    <div class="row between"><div class="kicker m0">${w.cleared ? `Level ${w.level} of ${CARDIO.length}` : 'Gentle walks only until a doctor clears you'}</div><span class="small muted nowrap">${w.hit} of 5 days</span></div>
     <h3 class="mt8">${w.c.min} minutes a day</h3><p class="small muted">${UI.esc(w.c.t)}.${w.cleared && w.level < CARDIO.length ? ` Five days on target this week moves you to ${CARDIO[w.level].min} minutes.` : ''}</p>
     <div class="walk-week mt12">${w.days.map((k, i) => `<div class="ww ${k === S.dayKey() ? 'today' : ''}"><div class="col-bar"><i style="height:${Math.min(100, Math.round(w.mins[i] / w.c.min * 100))}%" class="${w.mins[i] >= w.c.min ? 'hit' : ''}"></i></div><span>${S.prettyDate(k, { weekday: 'narrow' })}</span></div>`).join('')}</div>
     <div class="grid3 mt12">${[5, 10, 15].map((m) => `<button class="btn sm" data-walk="${m}">+${m} min</button>`).join('')}</div>
@@ -102,8 +102,8 @@ export function render() {
   </section>
 
   <div class="grid2">
-    <button class="card" style="margin:0;text-align:left" data-breath><div class="kicker">Breathing</div><b>2-minute calm</b><div class="muted small">In for 4, out for 6</div></button>
-    <button class="card" style="margin:0;text-align:left" data-control><div class="kicker">Control practice</div><b>${control} logged</b><div class="muted small">Stop–start, private</div></button>
+    <button class="card m0 ts" data-breath><div class="kicker">Breathing</div><b>2-minute calm</b><div class="muted small">In for 4, out for 6</div></button>
+    <button class="card m0 ts" data-control><div class="kicker">Control practice</div><b>${control} logged</b><div class="muted small">Stop–start, private</div></button>
   </div>
 
   <div class="section-title">Learn</div>
@@ -124,11 +124,11 @@ function runSession(rerender) {
   let idx = 0; let left = seq[0].s; let elapsed = 0; let iv = null; let paused = false;
 
   UI.fullscreen(`<div class="trainer">
-    <div class="row between" style="width:100%"><button class="icon-btn" data-x>${UI.ICON.close}</button><div class="muted small" id="tr-left"></div><button class="icon-btn" data-p>${UI.ICON.pause}</button></div>
+    <div class="row between w100"><button class="icon-btn" data-x>${UI.ICON.close}</button><div class="muted small" id="tr-left"></div><button class="icon-btn" data-p>${UI.ICON.pause}</button></div>
     <div class="lvlbar" style="width:100%;margin-top:14px"><i id="tr-bar" style="width:0%"></i></div>
     <div class="orb-wrap"><div class="orb" id="orb"><svg class="orb-ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92"/></svg><div class="count" id="tr-count"></div></div></div>
     <div class="phase" id="tr-label"></div><div class="meta mt8" id="tr-sub"></div>
-    <p class="tiny faint mt16" style="text-align:center">Keep breathing. Buttocks, thighs and stomach stay loose.</p>
+    <p class="tiny faint mt16 tc">Keep breathing. Buttocks, thighs and stomach stay loose.</p>
   </div>`, {
     onMount: (w, close) => {
       const orb = w.querySelector('#orb');
