@@ -174,3 +174,14 @@ Drink # L on at least # days. Keep a bottle where you eat and refill it at each 
 Get up at your anchor time every day, weekends too. Bedtime follows once the wake time is fixed.	每天按固定时间起床，周末也一样。起床时间固定了，入睡时间自然会跟上。	ہر روز، ہفتے کے آخر میں بھی، مقررہ وقت پر اٹھیں۔ جاگنے کا وقت طے ہو جائے تو سونے کا وقت خود ٹھیک ہو جاتا ہے۔
 Step outside for # minutes before noon on # days. Daylight early sets your body clock.	有 {2} 天在中午前到户外待 {1} 分钟。早上的日光能校准生物钟。	{2} دن دوپہر سے پہلے {1} منٹ باہر جائیں۔ صبح کی روشنی جسمانی گھڑی درست کرتی ہے۔
 Switch to decaf or tea after your coffee cutoff on at least # days.	至少 # 天在咖啡截止时间后改喝低因咖啡或茶。	کم از کم # دن کافی کے آخری وقت کے بعد ڈی کیف یا چائے پر آ جائیں۔
+Error log	错误日志	خرابیوں کا ریکارڈ
+# recorded	已记录 # 条	# درج
+stays on this device	只保存在本设备	صرف اس آلے پر رہتا ہے
+No errors recorded	没有错误记录	کوئی خرابی درج نہیں
+Nothing has gone wrong on this device.	本设备上没有出现问题。	اس آلے پر کوئی مسئلہ نہیں ہوا۔
+Clear	清除	صاف کریں
+Copy	复制	کاپی کریں
+Copied	已复制	کاپی ہو گیا
+Could not copy	无法复制	کاپی نہیں ہو سکا
+Error log cleared	错误日志已清除	خرابیوں کا ریکارڈ صاف ہو گیا
+Problems the app caught and recovered from. They stay on this device; copy them only if you want to report one.	应用捕获并已自动恢复的问题。它们只保存在本设备上；只有想反馈问题时才需要复制。	وہ مسائل جو ایپ نے پکڑے اور سنبھال لیے۔ یہ اسی آلے پر رہتے ہیں؛ صرف اسی وقت کاپی کریں جب آپ کوئی مسئلہ بتانا چاہیں۔

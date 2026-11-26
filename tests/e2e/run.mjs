@@ -172,7 +172,7 @@ await test('Track and Me screens render', async (p) => {
 // Allowed: brand and product names, photo authors, URLs, and text already mixed with CJK/Arabic script.
 const ROUTES = ['today', 'cook', 'cook/delivery', 'cook/pantry', 'cook/plan', 'cook/shop', 'cook/r/egg_paratha', 'cook/r/egg_muffins', 'train', 'track',
   'me', 'me/account', 'me/credits', 'me/medical', 'me/prayer', 'me/settings', 'me/summary', 'me/badges', 'me/saved', 'me/reminders', 'me/install'];
-const SHEET_BUTTONS = ['[data-logmeal]', '[data-drinks]', '[data-filters]', '[data-search]', '[data-weigh]', '[data-logsleep]', '[data-ci]', '[data-recap]', '[data-sleepset]'];
+const SHEET_BUTTONS = ['[data-logmeal]', '[data-drinks]', '[data-filters]', '[data-search]', '[data-weigh]', '[data-logsleep]', '[data-ci]', '[data-recap]', '[data-sleepset]', '[data-errlog]'];
 const ALLOWED = 'Revive|Wajid|Supabase|iPhone|Windows|Android|OLED|ISNA|UTC|PHQ|XP|Face ID|Hello|Google|Meituan|Ele\\.me|Hema|CC BY|CC0|Public domain|Commons|Wikimedia|Open Food Facts|PIN|BMI|kcal|GitHub|JSON|ICS|PDF|Kegel|Safari|Microsoft Edge|^Esc$';
 const untranslated = (p) => p.evaluate((allowed) => {
   const ok = new RegExp(allowed); const out = [];
@@ -287,6 +287,13 @@ await test('A screen error shows recovery instead of a blank app', async (p) => 
   await p.waitForSelector('[data-crash-home]');
   await p.evaluate(() => { window.__revive.S.day().meals = []; }); await p.click('[data-crash-home]');
   await p.waitForSelector('.t-head');
+  // The caught error is visible in Settings → Error log, and can be cleared
+  await go(p, 'me/settings');
+  assert.match(await p.textContent('[data-errlog]'), /recorded/);
+  await p.click('[data-errlog]'); await p.waitForTimeout(300);
+  assert.match(await p.textContent('#overlay-root'), /render:today/);
+  await p.click('[data-errclear]'); await p.waitForTimeout(300);
+  assert.match(await p.textContent('[data-errlog]'), /No errors recorded/);
 }, { allowErrors: true });
 
 await test('Random taps across the app cause no errors', async (p) => {
