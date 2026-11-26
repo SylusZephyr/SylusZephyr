@@ -31,7 +31,7 @@ Mistakes should be caught by machines, not by the user.
 
 One way to build each thing.
 
-- [ ] Token scales documented in `css/app.css`:
+- [x] Token scales documented in `css/app.css`:
   - spacing (4/8/12/16/24/32)
   - type (12/13/15/17/22/28/34)
   - radius (8/12/16)
@@ -47,9 +47,9 @@ One way to build each thing.
 
 What people open the app for every day.
 
-- [ ] Log a meal in ≤2 taps from Today (recents first, one-tap re-log).
+- [x] Log a meal in ≤2 taps from Today (recents first, one-tap re-log).
 - [ ] Log water and coffee in 1 tap, with undo.
-- [ ] Morning check: last night's sleep pre-filled from the plan, confirmed with one tap.
+- [x] Morning check: last night's sleep pre-filled from the plan, confirmed with one tap.
 - [ ] Reminders: verify that each scheduled notification fires on Android and iOS. Show the next reminder on Today.
 - [ ] Training session: resume after interruption, and screen-off safe timing.
 - [ ] Weekly summary that says what changed and what to do next week, in one screen.
