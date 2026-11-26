@@ -132,6 +132,20 @@ await test('weight trend projects a goal date', () => {
   assert.equal(weightTrend([{ date: '2026-10-01', kg: 62 }], 66), null);
 });
 
+await test('weekly insight compares weeks and picks the weakest essential', async () => {
+  const G = await import('../js/gamify.js');
+  const st = S.get(); const wk = '2026-11-16'; // a Monday
+  for (let i = 0; i < 7; i++) {
+    const d = S.day(S.addDays(wk, i)); Object.assign(d.checks, { breakfast: true, lunch: true, dinner: true, sleep: true, outdoors: true, caffeine: true, fluids: i < 2 });
+    if (i < 3) S.day(S.addDays(wk, i - 7)).checks.breakfast = true; // the week before had some logging
+  }
+  st.days[S.addDays(wk, -7)].waterMl = 0;
+  const w = G.weekInsight(wk);
+  assert.equal(w.focus, 'fluids'); assert.equal(w.focusDays, 2);
+  assert.ok(G.FOCUS[w.focus].length > 20);
+  assert.equal(w.comparable, true);
+});
+
 await test('pending alerts stay under the iOS limit of 64', async () => {
   const { reminderList } = await import('../js/ics.js');
   S.get().prayer = { enabled: true, notify: true, city: 'beijing', ramadan: 'on' };

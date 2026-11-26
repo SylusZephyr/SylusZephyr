@@ -973,3 +973,11 @@ button.list-item:last-child { border-bottom: 0; }
 .bottom-dock { position: fixed; inset-inline: 0; bottom: 0; padding: 16px 16px calc(var(--safe-bottom) + 18px); background: linear-gradient(transparent, var(--bg) 30%); }
 
 .chart-empty { padding: 24px 0 8px; text-align: center; }
+.review-grid b em { font-style: normal; font-size: var(--fs-xs); font-weight: 600; margin-inline-start: 4px; vertical-align: middle; }
+.review-grid b em.up { color: var(--green); } .review-grid b em.down { color: var(--muted); }
+.review-focus { margin-top: 14px; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface2); text-align: start; }
+.review-focus p { margin: 4px 0 0; font-size: var(--fs-body); line-height: 1.45; }
+.review-focus .kicker { margin: 0; }
+
+/* Dialogs take focus on open for screen readers; the container itself needs no visible ring. */
+[role="dialog"]:focus { outline: none; }

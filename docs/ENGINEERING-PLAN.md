@@ -52,7 +52,7 @@ What people open the app for every day.
 - [x] Morning check: last night's sleep pre-filled from the plan, confirmed with one tap.
 - [ ] Reminders: verify that each scheduled notification fires on Android and iOS. Show the next reminder on Today.
 - [x] Training session: resume after interruption, and screen-off safe timing.
-- [ ] Weekly summary that says what changed and what to do next week, in one screen.
+- [x] Weekly summary that says what changed and what to do next week, in one screen.
 
 ## Phase 4 — Scale and reliability
 
