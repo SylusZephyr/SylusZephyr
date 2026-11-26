@@ -56,7 +56,7 @@ What people open the app for every day.
 
 ## Phase 4 — Scale and reliability
 
-- [ ] State size and render time stay within budget with 3 years of data (already tested), and with 10 years.
+- [x] State size and render time stay within budget with 3 years of data (already tested), and with 10 years. (10 years of full logging: 2.4 MB, unit-tested < 4 MB; first paint 270–440 ms and tab switches 13–43 ms at 4× slowdown.)
 - [x] Storage quota errors are handled, with export offered.
 - [x] Crash and error log viewer in Settings (local only).
 - [ ] Accessibility: screen-reader pass of every flow; text size 200% without overlap.

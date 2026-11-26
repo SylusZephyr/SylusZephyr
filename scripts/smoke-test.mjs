@@ -146,6 +146,21 @@ await test('weekly insight compares weeks and picks the weakest essential', asyn
   assert.equal(w.comparable, true);
 });
 
+await test('ten years of full daily logging fits browser storage', () => {
+  const st = S.get(); const saved = st.days; st.days = {};
+  for (let i = 0; i < 3650; i++) {
+    const d = S.day(S.addDays('2026-11-24', -i));
+    d.meals.push({ id: 'b' + i, slot: 'breakfast', name: 'Crispy Egg Paratha', kcal: 520, protein: 20, time: '10:40', recipeId: 'egg_paratha' },
+      { id: 'l' + i, slot: 'lunch', name: 'Chicken wrap', kcal: 680, protein: 42, time: '14:10' },
+      { id: 'd' + i, slot: 'dinner', name: 'Air-fryer chicken curry', kcal: 720, protein: 48, time: '20:05' });
+    d.waterMl = 1750; d.coffee = ['10:30', '15:00@40']; d.sleep = { bed: '02:40', wake: '10:05', q: 3 };
+    Object.assign(d.checks, { breakfast: true, lunch: true, dinner: true, fluids: true, sleep: true, caffeine: true });
+  }
+  const chars = JSON.stringify(st).length; st.days = saved;
+  // Browsers allow about 5 million characters per origin; keep 20% headroom.
+  assert.ok(chars < 4_000_000, `${Math.round(chars / 1024)} KB for 10 years`);
+});
+
 await test('pending alerts stay under the iOS limit of 64', async () => {
   const { reminderList } = await import('../js/ics.js');
   S.get().prayer = { enabled: true, notify: true, city: 'beijing', ramadan: 'on' };
