@@ -1,5 +1,5 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-3f3c65bc89f2';
+const VERSION = 'revive-5c9e98975086';
 const ASSETS = [
   './',
   'css/app.css',
