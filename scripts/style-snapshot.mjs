@@ -31,7 +31,7 @@ async function capture(file) {
       if (click) { await p.click(click).catch(() => {}); await p.waitForTimeout(500); }
       out[label + ':' + h + (click || '')] = await p.evaluate(() => {
         const res = {}; const path = (el) => { const a = []; for (let e = el; e && e !== document.body; e = e.parentElement) a.unshift(e.tagName + ':' + [...e.parentElement.children].indexOf(e)); return a.join('/'); };
-        for (const el of document.body.querySelectorAll('*')) { if (el.closest('svg') && el.tagName !== 'svg') continue; const cs = getComputedStyle(el); const o = {}; for (const k of cs) if (!k.startsWith('transition') && !k.startsWith('animation')) o[k] = cs.getPropertyValue(k); o['::before'] = getComputedStyle(el, '::before').content + getComputedStyle(el, '::before').background; res[path(el) + ' ' + el.className] = o; }
+        for (const el of document.body.querySelectorAll('*')) { if (el.closest('svg') && el.tagName !== 'svg') continue; const cs = getComputedStyle(el); const o = {}; for (const k of cs) if (!k.startsWith('transition') && !k.startsWith('animation')) o[k] = cs.getPropertyValue(k); o['::before'] = getComputedStyle(el, '::before').content + getComputedStyle(el, '::before').background; o['@class'] = String(el.className?.baseVal ?? el.className); res[path(el)] = o; }
         return res; });
     }
     await ctx.close();
@@ -42,10 +42,11 @@ async function capture(file) {
 function compare(fa, fb) {
   const a = JSON.parse(readFileSync(fa, 'utf8')), b = JSON.parse(readFileSync(fb, 'utf8'));
   let n = 0; const seen = new Set();
+  // Elements are matched by DOM position; class names may change (that is the point of a refactor).
   for (const s in a) for (const el in a[s]) {
     const x = a[s][el], y = b[s]?.[el];
     if (!y) { if (n++ < 20) console.log('missing', s, el); continue; }
-    for (const k in x) if (x[k] !== y[k]) { const key = el.split(' ').slice(1).join(' ') + ' ' + k; if (!seen.has(key) && seen.size < 60) { seen.add(key); console.log(s, '|', el.split(' ').slice(1).join(' '), '|', k, ':', x[k], '→', y[k]); } n++; }
+    for (const k in x) if (k !== '@class' && x[k] !== y[k]) { const key = x['@class'] + ' ' + k; if (!seen.has(key) && seen.size < 60) { seen.add(key); console.log(s, '|', x['@class'], '|', k, ':', x[k], '→', y[k]); } n++; }
   }
   console.log('differences', n); return n;
 }

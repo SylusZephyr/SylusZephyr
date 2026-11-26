@@ -117,7 +117,7 @@ function insightsCard() {
   const r = insights();
   return `<div class="card cool glow"><div class="kicker">Your patterns</div>
     ${r.need ? `<p class="muted small">Log energy & mood on ${r.need} more day${r.need === 1 ? '' : 's'} to unlock personal insights — what actually makes <i>you</i> feel better.</p>`
-      : r.list.length ? r.list.map((x) => `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span style="font-size:20px">${x.diff > 0 ? '' : ''}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
+      : r.list.length ? r.list.map((x) => `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="fs-lg">${x.diff > 0 ? '' : ''}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
       : '<p class="muted small">No clear patterns yet. Keep logging — they usually appear after 1–2 weeks.</p>'}</div>`;
 }
 
@@ -131,7 +131,7 @@ function food() {
   <div class="card"><div class="row between"><div class="kicker">Calories · 7 days</div><span class="small muted">target ${tg.kcal}</span></div>${C.barChart(kc, { goal: tg.kcal, color: '#60a5fa' })}
     <p class="tiny muted">Target = estimated needs (${tg.tdee}) + ~300 kcal for slow gain. Build up gradually — no need to force it.</p></div>
   <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein, color: '#4ade80' })}</div>
-  <div class="card"><div class="kicker">Main meals per day</div><div class="row" style="justify-content:space-around">${days.map((k, i) => `<div style="text-align:center"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
+  <div class="card"><div class="kicker">Main meals per day</div><div class="row" style="justify-content:space-around">${days.map((k, i) => `<div class="tc"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
   <div class="section-title">Today’s meals <button class="link" data-logmeal>+ Log</button></div>
   <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${UI.ICON.meal}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty"><span class="e"></span>No meals logged yet</div>'}</div>`;
 }
@@ -188,8 +188,8 @@ function sxCard() {
   const log = (S.get().sxLog || []).filter((x) => x.date >= S.addDays(S.dayKey(), -28));
   const n = log.length; const pct = (f) => n ? Math.round(log.filter(f).length / n * 100) : 0;
   return `<div class="card"><div class="row between"><div><div class="kicker">Private log · 28 days</div><div class="tiny muted">${n} entries</div></div><button class="btn sm primary" data-sx>+ Log</button></div>
-    ${n ? `<div class="grid3 mt12"><div class="macro"><b>${pct((x) => x.firm >= 3)}%</b><span>firm enough</span></div><div class="macro"><b>${pct((x) => x.kept === 2)}%</b><span>kept it</span></div><div class="macro"><b>${pct((x) => x.semen === 2)}%</b><span>dry</span></div></div>
-    <div class="grid2 mt8"><div class="macro"><b>${pct((x) => x.time <= 1)}%</b><span>under 2 min</span></div><div class="macro"><b>${pct((x) => x.anxious)}%</b><span>felt pressure</span></div></div>` : '<p class="muted small mt8">Optional. Log after any sexual activity — it shows your doctor patterns (e.g. solo vs partner, dry orgasms) that questionnaires miss.</p>'}</div>`;
+    ${n ? `<div class="stats mt16"><div class="stat"><b>${pct((x) => x.firm >= 3)}%</b><span>Firm enough</span></div><div class="stat"><b>${pct((x) => x.kept === 2)}%</b><span>Kept it</span></div><div class="stat"><b>${pct((x) => x.semen === 2)}%</b><span>Dry</span></div></div>
+    <div class="stats mt16"><div class="stat"><b>${pct((x) => x.time <= 1)}%</b><span>Under 2 min</span></div><div class="stat"><b>${pct((x) => x.anxious)}%</b><span>Felt pressure</span></div><div class="stat"></div></div>` : '<p class="muted small mt8">Optional. Log after any sexual activity — it shows your doctor patterns (e.g. solo vs partner, dry orgasms) that questionnaires miss.</p>'}</div>`;
 }
 
 function checkins() {
@@ -213,7 +213,7 @@ function sleepSettings(rerender) {
     <div class="field"><label>Current usual bedtime (starting point)</label><input type="time" id="ss-bed" value="${p.currentBedtime}"></div>
     <div class="field"><label>Time in bed needed</label><select id="ss-need">${[450, 480, 510, 540].map((m) => `<option value="${m}" ${p.sleepNeedMin === m ? 'selected' : ''}>${m / 60} h</option>`).join('')}</select></div>
     <div class="field"><label>Coffee cutoff</label><input type="time" id="ss-cut" value="${p.caffeineCutoff}"></div>
-    <label class="row mt12" style="gap:10px"><input type="checkbox" id="ss-restart" style="width:22px;height:22px"><span>Restart gradual shift from today</span></label>
+    <label class="row mt12 gap10"><input type="checkbox" id="ss-restart" class="sz22"><span>Restart gradual shift from today</span></label>
     <button class="btn primary block mt16" id="ss-save">Save</button>`, {
     onMount: (sh, close) => sh.querySelector('#ss-save').onclick = () => {
       p.wakeAnchor = sh.querySelector('#ss-wake').value || p.wakeAnchor; p.currentBedtime = sh.querySelector('#ss-bed').value || p.currentBedtime;

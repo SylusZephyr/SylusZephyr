@@ -40,7 +40,7 @@ async function scanWithCamera() {
     UI.fullscreen(`<div class="scanner" role="dialog" aria-modal="true" aria-label="Scan a barcode">
       <video playsinline muted autoplay></video>
       <div class="scan-frame" aria-hidden="true"><i></i></div>
-      <div class="scan-top"><button class="icon-btn" data-x aria-label="Close">${UI.ICON.close}</button><span>Point at the barcode</span><span style="width:40px"></span></div>
+      <div class="scan-top"><button class="icon-btn" data-x aria-label="Close">${UI.ICON.close}</button><span>Point at the barcode</span><span class="w40"></span></div>
       <div class="scan-bottom"><button class="btn" data-type>Type the number instead</button></div>
     </div>`, {
       onMount: (w, close) => {

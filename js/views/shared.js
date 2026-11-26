@@ -44,15 +44,15 @@ export function mealSheet(onDone, preset = {}) {
   const recent = [...new Set(Object.values(st.days).flatMap((d) => d.meals.map((m) => m.recipeId)).filter(Boolean))].slice(-6).reverse();
   const favs = st.favorites;
   const picks = [...new Set([...favs, ...recent, 'egg_paratha', 'chicken_cheese_wrap', 'airfryer_chicken_curry', 'shaker_smoothie'])].slice(0, 10).map((id) => RECIPE[id]).filter(Boolean);
-  const entryRow = (m, attr) => `<button class="list-item" ${attr}><div class="grow" style="min-width:0"><b class="ellipsis" style="display:block">${UI.esc(m.name)}</b><div class="muted small">${m.kcal} kcal · ${m.protein} g protein</div></div><span class="add-dot" aria-hidden="true">${UI.ICON.plus}</span></button>`;
+  const entryRow = (m, attr) => `<button class="list-item" ${attr}><div class="grow min0"><b class="ellipsis db">${UI.esc(m.name)}</b><div class="muted small">${m.kcal} kcal · ${m.protein} g protein</div></div><span class="add-dot" aria-hidden="true">${UI.ICON.plus}</span></button>`;
   const html = () => `<h2>Log a meal</h2>
     <div class="seg mt12" id="slotseg">${Object.keys(SLOT_LABEL).map((s) => `<button data-slot="${s}" class="${s === slot ? 'on' : ''}">${SLOT_LABEL[s].split(' ')[0]}</button>`).join('')}</div>
-    <div class="row mt12" style="gap:8px"><label class="searchbar grow">${UI.ICON.search}<input id="food-q" type="search" placeholder="Search food — naan, 鸡蛋, Snickers…" autocomplete="off"></label>
+    <div class="row mt12 gap8"><label class="searchbar grow">${UI.ICON.search}<input id="food-q" type="search" placeholder="Search food — naan, 鸡蛋, Snickers…" autocomplete="off"></label>
       <button class="icon-btn" style="width:44px;height:44px;border-radius:12px" id="scan-btn" aria-label="Scan a barcode">${UI.ICON.barcode}</button></div>
     <div id="food-res"></div>
     <div id="meal-rest">
-    ${st.myMeals.length ? `<div class="kicker mt16">My meals</div><div class="card tight" style="margin:0">${st.myMeals.map((m, i) => entryRow(m, `data-my="${i}"`)).join('')}</div>` : ''}
-    ${recents.length ? `<div class="kicker mt16">Recent</div><div class="card tight" style="margin:0">${recents.map((m, i) => entryRow(m, `data-recent="${i}"`)).join('')}</div>` : ''}
+    ${st.myMeals.length ? `<div class="kicker mt16">My meals</div><div class="card tight m0">${st.myMeals.map((m, i) => entryRow(m, `data-my="${i}"`)).join('')}</div>` : ''}
+    ${recents.length ? `<div class="kicker mt16">Recent</div><div class="card tight m0">${recents.map((m, i) => entryRow(m, `data-recent="${i}"`)).join('')}</div>` : ''}
     <div class="kicker mt16">Your recipes</div>
     <div class="carousel mini">${picks.map((r) => `<button class="ccard" data-rec="${r.id}"><div class="ph-wrap ${art(r).cls}" style="${art(r).style}">${art(r).emoji}</div><div class="cc-body"><div class="cc-name">${UI.esc(r.name)}</div><div class="cc-meta">${r.kcal} kcal · ${r.protein} g</div></div></button>`).join('')}</div>
     <div class="kicker mt16">Quick estimate</div>
@@ -62,7 +62,7 @@ export function mealSheet(onDone, preset = {}) {
     <div class="kicker mt16">Something else</div>
     <div class="field" style="margin-top:0"><input id="cust-name" placeholder="e.g. Lamb samsa ×2"></div>
     <div class="grid2 mt8"><input id="cust-kcal" type="number" inputmode="numeric" placeholder="kcal"><input id="cust-p" type="number" inputmode="numeric" placeholder="protein g (optional)"></div>
-    <label class="row mt12" style="gap:10px"><input type="checkbox" id="cust-save" style="width:20px;height:20px"><span class="small">Save to My meals</span></label>
+    <label class="row mt12 gap10"><input type="checkbox" id="cust-save" class="sz20"><span class="small">Save to My meals</span></label>
     <button class="btn block mt12" id="cust-add">Add</button></div>`;
   UI.openSheet(html(), {
     onMount: (sh, close) => {
@@ -85,7 +85,7 @@ export function mealSheet(onDone, preset = {}) {
         const q = sh.querySelector('#food-q'), res = sh.querySelector('#food-res'), rest = sh.querySelector('#meal-rest');
         let found = [], timer = null, seq = 0;
         const row = (f, i) => `<button class="rwide" data-food="${i}"><div class="thumb" style="background:var(--surface2);width:48px;height:48px;font-size:24px">${f.image ? `<img src="${UI.esc(f.image)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px" loading="lazy" referrerpolicy="no-referrer">` : f.e}</div>
-          <div class="grow" style="min-width:0"><div class="ellipsis" style="font-weight:700">${UI.esc(f.name)}</div><div class="muted small ellipsis">${f.brand ? UI.esc(f.brand) + ' · ' : ''}${forPortion(f, f.portionG).kcal} kcal · ${UI.esc(f.portionLabel)}</div></div>
+          <div class="grow min0"><div class="ellipsis fw7">${UI.esc(f.name)}</div><div class="muted small ellipsis">${f.brand ? UI.esc(f.brand) + ' · ' : ''}${forPortion(f, f.portionG).kcal} kcal · ${UI.esc(f.portionLabel)}</div></div>
           <span class="pill ${f.source === 'Revive' ? 'amber' : 'blue'}">${f.source === 'Revive' ? 'Built-in' : 'Online'}</span></button>`;
         const paint = (loading) => {
           res.innerHTML = found.length ? found.map(row).join('') + (loading ? '<p class="tiny muted mt8">Searching online…</p>' : '') : (q.value.trim() ? (loading ? '<p class="small muted">Searching…</p>' : '<p class="small muted">No match — use a quick size or custom below.</p>') : '');
@@ -102,8 +102,8 @@ export function mealSheet(onDone, preset = {}) {
           let grams = f.portionG;
           const draw = () => { const n = forPortion(f, grams); return `<div class="card tight mt12"><div class="row">${f.image ? `<img src="${UI.esc(f.image)}" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover" referrerpolicy="no-referrer">` : ''}<div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g</div></div></div>
             <div class="chips mt12">${[0.5, 1, 1.5, 2].map((m) => `<button class="chip ${Math.abs(grams - f.portionG * m) < 0.5 ? 'on' : ''}" data-mult="${m}">${m === 1 ? '' : m + ' × '}${UI.esc(f.portionLabel)}</button>`).join('')}</div>
-            <div class="row mt12"><input id="food-g" type="number" inputmode="decimal" value="${Math.round(grams)}" style="width:110px"><span class="muted">grams</span><div class="grow" style="text-align:right"><b style="font-size:20px">${n.kcal}</b> kcal · <b>${n.protein}</b> g</div></div>
-            <label class="row mt12" style="gap:10px"><input type="checkbox" id="food-save" style="width:20px;height:20px"><span class="small">Save to My meals</span></label>
+            <div class="row mt12"><input id="food-g" type="number" inputmode="decimal" value="${Math.round(grams)}" style="width:110px"><span class="muted">grams</span><div class="grow te"><b class="fs-lg">${n.kcal}</b> kcal · <b>${n.protein}</b> g</div></div>
+            <label class="row mt12 gap10"><input type="checkbox" id="food-save" class="sz20"><span class="small">Save to My meals</span></label>
             <div class="grid2 mt12"><button class="btn" data-back>Back</button><button class="btn primary" data-logfood>Log it</button></div></div>`; };
           const mount = () => {
             res.innerHTML = draw();
@@ -139,7 +139,7 @@ export function sleepSheet(onDone) {
       <div class="field"><label>Woke up</label><input type="time" id="sl-wake" value="${d.sleep.wake || S.hm()}"></div>
     </div>
     <div class="field"><label>Sleep quality</label>${UI.scaleButtons('q', 5, d.sleep.q ?? null, ['', '', '', '', ''], true)}</div>
-    <label class="row mt12" style="gap:10px"><input type="checkbox" id="sl-me" ${d.sleep.morningErection ? 'checked' : ''} style="width:22px;height:22px"><span>Morning erection noticed <span class="muted small">(private)</span></span></label>
+    <label class="row mt12 gap10"><input type="checkbox" id="sl-me" ${d.sleep.morningErection ? 'checked' : ''} class="sz22"><span>Morning erection noticed <span class="muted small">(private)</span></span></label>
     <button class="btn primary block mt16" id="sl-save">Save</button>`, {
     onMount: (sh, close) => {
       let q = d.sleep.q ?? null;
@@ -165,7 +165,7 @@ export function breathing({ minutes = 2, onDone } = {}) {
   const total = minutes * 60; let t = 0; let timer = null; let running = true;
   const phases = [{ n: 'Breathe in', s: 4, cls: 'big' }, { n: 'Breathe out', s: 6, cls: 'small' }];
   UI.fullscreen(`<div class="trainer">
-    <div class="row between" style="width:100%"><button class="icon-btn" data-x>${UI.ICON.close}</button><div class="muted" id="br-left"></div><div style="width:40px"></div></div>
+    <div class="row between w100"><button class="icon-btn" data-x>${UI.ICON.close}</button><div class="muted" id="br-left"></div><div class="w40"></div></div>
     <div class="orb-wrap"><div class="orb cool" id="orb"></div></div>
     <div class="phase" id="br-phase">Get comfortable</div>
     <div class="meta mt8">Belly breathing · in through the nose, slow out through the mouth</div>
@@ -196,8 +196,8 @@ export function checkinSheet(type, onDone) {
   const def = CHECKINS[type]; const wk = S.weekKey(); const st = S.get();
   const prev = st.checkins[wk]?.[type]?.answers || [];
   const answers = [...prev];
-  const body = () => def.qs.map((q, i) => `<div class="card tight"><div style="font-weight:700" class="mb8">${i + 1}. ${UI.esc(q.q)}</div>
-    <div class="col" style="gap:6px">${q.a.map((a, j) => `<button class="chip ${answers[i] === j ? 'on' : ''}" data-q="${i}" data-a="${j}" style="justify-content:flex-start;white-space:normal;text-align:left">${UI.esc(a)}</button>`).join('')}</div></div>`).join('');
+  const body = () => def.qs.map((q, i) => `<div class="card tight"><div class="mb8 fw7">${i + 1}. ${UI.esc(q.q)}</div>
+    <div class="col gap6">${q.a.map((a, j) => `<button class="chip ${answers[i] === j ? 'on' : ''}" data-q="${i}" data-a="${j}" style="justify-content:flex-start;white-space:normal;text-align:left">${UI.esc(a)}</button>`).join('')}</div></div>`).join('');
   UI.openSheet(`<h2>${def.e} ${UI.esc(def.title)}</h2><p class="muted small mb12">${UI.esc(def.note)}</p><div id="ci-body">${body()}</div>
     <button class="btn primary block mt8" id="ci-save">Save check-in</button>`, {
     onMount: (sh, close) => {
@@ -237,7 +237,7 @@ export function sxSheet(onDone) {
   const row = (key, label) => `<div class="field"><label>${label}</label><div class="chips">${SX[key].map((a, i) => `<button class="chip" data-k="${key}" data-v="${i}">${a}</button>`).join('')}</div></div>`;
   UI.openSheet(`<h2>Private log</h2><p class="muted small">Quick facts for your doctor. Stays on this phone. No judgement — data helps find causes.</p>
     ${row('type', 'Type')}${row('firm', 'Firmness at best')}${row('kept', 'Kept the erection?')}${row('time', 'Time to ejaculation')}${row('semen', 'Semen')}
-    <label class="row mt12" style="gap:10px"><input type="checkbox" id="sx-anx" style="width:22px;height:22px"><span>I felt anxious / under pressure</span></label>
+    <label class="row mt12 gap10"><input type="checkbox" id="sx-anx" class="sz22"><span>I felt anxious / under pressure</span></label>
     <button class="btn primary block mt16" id="sx-save">Save</button>`, {
     onMount: (sh, close) => {
       sh.querySelectorAll('[data-k]').forEach((b) => b.onclick = () => { v[b.dataset.k] = +b.dataset.v; sh.querySelectorAll(`[data-k="${b.dataset.k}"]`).forEach((x) => x.classList.toggle('on', x === b)); UI.haptic(6); });

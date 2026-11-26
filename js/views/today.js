@@ -79,8 +79,8 @@ function cafCard(k) {
   const tone = sum.safeAtBed ? 'var(--green)' : 'var(--coral)';
   return `<div class="card mt12 caf-card">
     <div class="row between"><div class="kicker">Caffeine</div><span class="pill ${sum.overLimit ? 'coral' : ''}">${sum.total} mg today</span></div>
-    <div class="grid2 mt8"><div class="macro"><b>≈${sum.now} mg</b><span>right now</span></div>
-      <div class="macro"><b style="color:${tone}">≈${sum.atBed} mg</b><span>at bed (${S.prettyTime(sum.bedClock)})</span></div></div>
+    <div class="stats mt12"><div class="stat"><b>≈${sum.now}<small> mg</small></b><span>Right now</span></div>
+      <div class="stat"><b style="color:${tone}">≈${sum.atBed}<small> mg</small></b><span>At bed (${S.prettyTime(sum.bedClock)})</span></div></div>
     ${Caf.curveSvg(k)}
     <p class="small muted mt8">${sum.safeAtBed
       ? (sum.ifOneMore >= Caf.SLEEP_SAFE_MG ? `Another cup now would leave ≈${sum.ifOneMore} mg at your ${S.prettyTime(sum.bedClock)} bedtime — enough to delay sleep.` : `You have room: one more cup still clears before ${S.prettyTime(sum.bedClock)}.`)
@@ -105,7 +105,7 @@ function drinkSheet(onDone, onRemove) {
 function challengeCard() {
   const c = Progress.thisWeek();
   return `<section class="card challenge ${c.done ? 'done' : ''}">
-    <div class="row between"><div class="kicker" style="margin:0">This week’s challenge</div><span class="small muted">${c.done ? 'Complete' : c.daysLeft ? `${c.daysLeft} day${c.daysLeft === 1 ? '' : 's'} left` : 'Last day'}</span></div>
+    <div class="row between"><div class="kicker m0">This week’s challenge</div><span class="small muted">${c.done ? 'Complete' : c.daysLeft ? `${c.daysLeft} day${c.daysLeft === 1 ? '' : 's'} left` : 'Last day'}</span></div>
     <h3 class="mt8">${UI.esc(c.t)}</h3>
     <div class="segbar mt12" role="img" aria-label="${c.value} of ${c.goal}">${Array.from({ length: c.goal }, (_, i) => `<i class="${i < c.value ? 'on' : ''}"></i>`).join('')}</div>
     <div class="row between mt8 small"><span class="muted">${c.done ? 'Earned 150 XP and a streak freeze' : UI.esc(c.why)}</span><b style="white-space:nowrap;margin-left:12px">${c.value} / ${c.goal}</b></div>
@@ -192,17 +192,17 @@ export function render(_, { night }) {
 
   ${sug ? `<div class="section-title">Eat next <a class="link" href="#cook">All recipes</a></div>
   <a class="rwide" href="#cook/r/${sug.r.id}"><div class="thumb ${a.cls}" style="${a.style}">${a.emoji}</div>
-    <div class="grow"><div style="font-weight:600" class="ellipsis">${UI.esc(sug.r.name)}</div><div class="muted small">${sug.r.mins} min · ${sug.r.kcal} kcal · ${sug.r.protein} g protein</div>
+    <div class="grow"><div class="ellipsis fw6">${UI.esc(sug.r.name)}</div><div class="muted small">${sug.r.mins} min · ${sug.r.kcal} kcal · ${sug.r.protein} g protein</div>
     <div class="small" style="color:${sug.have === sug.total ? 'var(--green)' : 'var(--muted)'}">${sug.have === sug.total ? 'You have everything' : `You have ${sug.have} of ${sug.total}`}</div></div></a>` : ''}
 
   <div class="section-title">Essentials</div>
   <section class="card ess-list">
-    ${G.ESSENTIALS.map((e) => `<button class="check ${d.checks[e.id] ? 'done' : ''}" data-ess="${e.id}" style="width:100%;text-align:left">
+    ${G.ESSENTIALS.map((e) => `<button class="check ${d.checks[e.id] ? 'done' : ''} w100 ts" data-ess="${e.id}">
       <span class="box">${I.check}</span><span class="label">${essLabel(e)}</span></button>`).join('')}
   </section>
 
   ${due.length ? `<button class="card" style="display:flex;width:100%;text-align:left;align-items:center;gap:12px" data-weekly>
-    <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div style="font-weight:600">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left</div></span><span class="chev">${I.chev}</span></button>` : ''}
+    <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div class="fw6">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left</div></span><span class="chev">${I.chev}</span></button>` : ''}
   </div></div>
   `;
 }

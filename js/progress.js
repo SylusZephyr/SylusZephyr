@@ -116,12 +116,12 @@ export function monthData(ym) {
 
 export function recapHtml(r) {
   const kg = r.startKg != null && r.endKg != null ? r.endKg - r.startKg : null;
-  const cell = (v, l) => `<div class="macro"><b>${v}</b><span>${l}</span></div>`;
+  const cell = (v, l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
   return `<div class="recap">
     <div class="m-kicker">Monthly recap</div><h2>${UI.esc(r.label)}</h2>
     <div class="recap-hero"><div class="score-big">${r.onTrack}</div><div class="muted">days on track of ${r.days}</div></div>
-    <div class="grid3 mt12">${cell(r.best, 'best run')}${cell(r.meals, 'main meals')}${cell(r.avgSleep != null ? `${Math.floor(r.avgSleep / 60)}h${S.pad(Math.round(r.avgSleep % 60))}` : '—', 'avg sleep')}</div>
-    <div class="grid3 mt8">${cell(kg != null ? `${kg >= 0 ? '+' : ''}${kg.toFixed(1)}` : '—', 'kg change')}${cell(r.pf, 'PF sessions')}${cell(r.water, 'days 1.5 L+')}</div>
+    <div class="stats mt16">${cell(r.best, 'best run')}${cell(r.meals, 'main meals')}${cell(r.avgSleep != null ? `${Math.floor(r.avgSleep / 60)}h${S.pad(Math.round(r.avgSleep % 60))}` : '—', 'avg sleep')}</div>
+    <div class="stats mt16">${cell(kg != null ? `${kg >= 0 ? '+' : ''}${kg.toFixed(1)}` : '—', 'kg change')}${cell(r.pf, 'PF sessions')}${cell(r.water, 'days 1.5 L+')}</div>
   </div>`;
 }
 
