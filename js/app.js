@@ -131,7 +131,7 @@ function logError(err, where = 'global') {
   console.error(where, err);
 }
 function crashCard() {
-  return `<div class="card danger" style="margin-top:40px;text-align:center"><div style="font-size:42px"></div><h3 class="mt8">${t('error.screen')}</h3>
+  return `<div class="card danger mt40 tc"><h3 class="mt8">${t('error.screen')}</h3>
     <p class="muted small mt8">${t('error.safe')}</p>
     <div class="grid2 mt16"><button class="btn" data-crash-home>Back to Today</button><button class="btn primary" data-crash-reload>Reload</button></div></div>`;
 }
@@ -278,9 +278,9 @@ const IN_WECHAT = !Native.isNative && /MicroMessenger/i.test(UA);
 const IS_STANDALONE = window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
 const IS_IOS = /iPhone|iPad|iPod/.test(UA);
 function wechatGate() {
-  UI.fullscreen(`<div class="lock" style="z-index:600;text-align:center">
+  UI.fullscreen(`<div class="lock z-top tc">
     <div class="logo"></div><h2>Open in Safari</h2>
-    <p class="muted" style="max-width:320px">WeChat’s browser can’t install Revive or keep your data safely.<br><br>Tap <b>···</b> (top right) → <b>Open in Browser / 在浏览器打开</b>, then in Safari: Share → <b>Add to Home Screen</b>.</p>
+    <p class="muted maxw320">WeChat’s browser can’t install Revive or keep your data safely.<br><br>Tap <b>···</b> (top right) → <b>Open in Browser / 在浏览器打开</b>, then in Safari: Share → <b>Add to Home Screen</b>.</p>
   </div>`);
 }
 export function installHintNeeded() { return IS_IOS && !IS_STANDALONE && !IN_WECHAT; }

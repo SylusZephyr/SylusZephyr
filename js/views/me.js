@@ -73,7 +73,7 @@ function account() {
     ${st.error ? `<div class="notice c-coral">${UI.esc(st.error)}</div>` : ''}
     <button class="btn ghost block mt12 small" data-cfgclear>Disconnect cloud project</button>`;
   return head + `
-    <div class="card glow tc"><div style="font-size:46px"></div><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
+    <div class="card glow tc"><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
       <p class="muted small">${st.user.provider === 'google' ? 'Google account' : 'Email account'} · ${st.online ? (st.syncing ? 'Syncing…' : st.lastSync ? 'Last synced ' + ago(st.lastSync) : 'Connecting…') : 'Offline — changes will sync when you reconnect'}</p>
       <div class="grid2 mt16"><button class="btn" data-syncnow>Sync now</button><button class="btn danger" data-signout>Sign out</button></div></div>
     ${st.error ? `<div class="notice c-coral">${UI.esc(st.error)}</div>` : ''}
@@ -144,7 +144,7 @@ function medical() {
     <p class="small muted mt8">${m.exerciseCleared ? 'Cleared. Activity unlocked in Train — still stop for any chest pain, dizziness or unusual breathlessness.' : 'Training stays gentle (walking + pelvic floor) until a doctor clears you for exercise.'}</p></div>
 
   <div class="section-title">Ask at your next visit <button class="link" data-addq>+ Add</button></div>
-  <div class="card tight">${m.questions.map((q) => `<div class="check ${q.done ? 'done' : ''}"><button class="box" data-q="${q.id}" aria-label="Asked">${UI.ICON.check}</button><span class="label small" style="font-weight:500">${UI.esc(q.q)}</span><button class="faint" data-delq="${q.id}" aria-label="Delete" style="padding:6px">${UI.ICON.trash.replace('<svg', '<svg width="16" height="16"')}</button></div>`).join('')}</div>
+  <div class="card tight">${m.questions.map((q) => `<div class="check ${q.done ? 'done' : ''}"><button class="box" data-q="${q.id}" aria-label="Asked">${UI.ICON.check}</button><span class="label small fw5">${UI.esc(q.q)}</span><button class="faint p6" data-delq="${q.id}" aria-label="Delete">${UI.ICON.trash.replace('<svg', '<svg width="16" height="16"')}</button></div>`).join('')}</div>
 
   <div class="section-title">Visits <button class="link" data-addvisit>+ Add</button></div>
   <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico">${UI.ICON.doctor}</div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">No visits logged</div>'}</div>
@@ -239,7 +239,7 @@ function saved() {
   const list = TIPS.filter((t) => libCat === 'all' || (libCat === 'saved' ? st.savedTips.includes(t.id) : t.cat === libCat));
   return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Library</h1><div class="sub">${TIPS.length} short reads on food, sleep, training and mood</div></div></div>
   <div class="chips scroll mb12">${[['all', 'All'], ['saved', `Saved (${st.savedTips.length})`], ...cats.map((c) => [c, c])].map(([id, l]) => `<button class="chip ${libCat === id ? 'on' : ''}" data-libcat="${UI.esc(id)}">${UI.esc(l)}</button>`).join('')}</div>
-  ${list.length ? list.map((t) => { const sv = st.savedTips.includes(t.id); return `<article class="card"><div class="row between"><span class="small muted">${UI.esc(t.cat)}</span><button class="icon-btn sz32" data-libsave="${t.id}" aria-pressed="${sv}" aria-label="Save">${sv ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div><h3 class="mt8">${UI.esc(t.title)}</h3><p class="small muted mt8" style="line-height:1.55">${UI.esc(t.body)}</p></article>`; }).join('') : '<div class="empty">Nothing saved yet.</div>'}`;
+  ${list.length ? list.map((t) => { const sv = st.savedTips.includes(t.id); return `<article class="card"><div class="row between"><span class="small muted">${UI.esc(t.cat)}</span><button class="icon-btn sz32" data-libsave="${t.id}" aria-pressed="${sv}" aria-label="Save">${sv ? UI.ICON.bookmarkFill : UI.ICON.bookmark}</button></div><h3 class="mt8">${UI.esc(t.title)}</h3><p class="small muted mt8 lh16">${UI.esc(t.body)}</p></article>`; }).join('') : '<div class="empty">Nothing saved yet.</div>'}`;
 }
 
 function prayer() {
@@ -258,7 +258,7 @@ function prayer() {
     <div class="field"><label>Asr</label><div class="seg" id="pr-asr"><button data-asr="standard" class="${cfg.asr === 'standard' ? 'on' : ''}">Standard</button><button data-asr="hanafi" class="${cfg.asr === 'hanafi' ? 'on' : ''}">Hanafi</button></div></div>
   </div>
   <div class="card"><div class="row between"><div class="kicker"><span>Today</span> · <span>${UI.esc(cfg.cityName)}</span></div><span class="small fw7"><span>${nx.label}</span> <span>in ${Pr.countdown(nx.inMin)}</span></span></div>
-    ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span style="font-weight:800">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
+    ${list.map((x) => `<div class="list-item"><div class="grow"><b>${x.label}</b></div><span class="fw7">${x.clock ? S.prettyTime(x.clock) : '—'}</span></div>`).join('')}
     <p class="tiny muted mt8">If your local mosque’s timetable differs, follow the mosque.</p></div>
   <div class="section-title">Ramadan fasting mode</div>
   <div class="card">
@@ -267,7 +267,7 @@ function prayer() {
     <div class="notice mt12">You’re still regaining weight and energy. Islam exempts people who are unwell from fasting. Ask your doctor first, and stop the fast if you feel faint, chest pain, a racing heart or confusion.</div>
   </div>
   <div class="card"><div class="kicker">Suhoor & iftar that work for you</div>
-    <ul class="small" style="line-height:1.7;padding-left:18px;margin:8px 0 0">
+    <ul class="small plain-list">
       <li><b>Suhoor:</b> slow energy and protein — overnight oats, eggs on paratha, yogurt + dates + nuts. Two big glasses of water.</li>
       <li><b>Iftar:</b> 3 dates and water, pray, then a full plate. Don’t skip the late meal: you need the calories.</li>
       <li><b>Weight goal:</b> aim for at least two real meals plus a shake between iftar and suhoor.</li>
@@ -289,7 +289,7 @@ function settings() {
   <div class="section-title">Look</div>
   <div class="card">
     <div class="field m0"><label>Accent colour</label><div class="chips">${Theme.ACCENTS.map((a) => `<button class="chip swatch ${Theme.current().accent === a.id ? 'on' : ''}" data-accent="${a.id}" aria-label="${a.label}" aria-pressed="${Theme.current().accent === a.id}"><i style="background:${a.c1}"></i>${a.label}</button>`).join('')}
-      <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''} pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" style="position:absolute;opacity:0;width:1px;height:1px" aria-label="Pick a custom accent colour"></label></div></div>
+      <label class="chip swatch ${Theme.current().accent === 'custom' ? 'on' : ''} pointer"><i style="background:${Theme.current().custom}"></i>Custom<input type="color" data-customaccent value="${Theme.current().custom}" aria-label="Pick a custom accent colour" class="visually-hidden"></label></div></div>
     <div class="field"><label>Background</label><div class="seg" id="bgseg">${Theme.BACKGROUNDS.map((b) => `<button data-bg="${b.id}" class="${Theme.current().bg === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
     <div class="field"><label>Text size</label><div class="seg" id="fsseg">${Theme.SIZES.map((b) => `<button data-fs="${b.id}" class="${Theme.current().size === b.id ? 'on' : ''}">${b.label}</button>`).join('')}</div></div>
   </div>

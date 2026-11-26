@@ -112,7 +112,7 @@ function challengeCard() {
     <div class="row between"><div class="kicker m0">This week’s challenge</div><span class="small muted">${c.done ? 'Complete' : c.daysLeft ? `${c.daysLeft} day${c.daysLeft === 1 ? '' : 's'} left` : 'Last day'}</span></div>
     <h3 class="mt8">${UI.esc(c.t)}</h3>
     <div class="segbar mt12" role="img" aria-label="${c.value} of ${c.goal}">${Array.from({ length: c.goal }, (_, i) => `<i class="${i < c.value ? 'on' : ''}"></i>`).join('')}</div>
-    <div class="row between mt8 small"><span class="muted">${c.done ? 'Earned 150 XP and a streak freeze' : UI.esc(c.why)}</span><b style="white-space:nowrap;margin-left:12px">${c.value} / ${c.goal}</b></div>
+    <div class="row between mt8 small"><span class="muted">${c.done ? 'Earned 150 XP and a streak freeze' : UI.esc(c.why)}</span><b class="nowrap ms12">${c.value} / ${c.goal}</b></div>
   </section>`;
 }
 
@@ -164,9 +164,9 @@ export function render(_, { night }) {
     <div class="summary">
       ${rings(ringVals)}
       <div class="legend-v">
-        <div class="lg"><i class="dot" style="background:var(--ring-1)"></i><span class="k">Essentials</span><span class="v">${n}<small> / 7</small></span></div>
-        <div class="lg"><i class="dot" style="background:var(--ring-2)"></i><span class="k">Calories</span><span class="v">${tot.kcal.toLocaleString('en')}<small> / ${tg.kcal.toLocaleString('en')}</small></span></div>
-        <div class="lg"><i class="dot" style="background:var(--ring-3)"></i><span class="k">Water</span><span class="v">${(d.waterMl / 1000).toFixed(1)}<small> / ${(goalMl / 1000).toFixed(1)} L</small></span></div>
+        <div class="lg"><i class="dot bg-ring1"></i><span class="k">Essentials</span><span class="v">${n}<small> / 7</small></span></div>
+        <div class="lg"><i class="dot bg-ring2"></i><span class="k">Calories</span><span class="v">${tot.kcal.toLocaleString('en')}<small> / ${tg.kcal.toLocaleString('en')}</small></span></div>
+        <div class="lg"><i class="dot bg-ring3"></i><span class="k">Water</span><span class="v">${(d.waterMl / 1000).toFixed(1)}<small> / ${(goalMl / 1000).toFixed(1)} L</small></span></div>
       </div>
     </div>
     <div class="summary-foot"><span>Protein <b>${tot.protein}</b> / ${tg.protein} g</span><span>${n >= G.STREAK_THRESHOLD ? '<b>Day secured</b>' : `<b>${G.STREAK_THRESHOLD - n}</b> more to keep the streak`}</span></div>
@@ -205,7 +205,7 @@ export function render(_, { night }) {
       <span class="box">${I.check}</span><span class="label">${essLabel(e)}</span></button>`).join('')}
   </section>
 
-  ${due.length ? `<button class="card" style="display:flex;width:100%;text-align:left;align-items:center;gap:12px" data-weekly>
+  ${due.length ? `<button class="card card-row" data-weekly>
     <span class="nx"><span class="ico">${I.list}</span></span><span class="grow"><div class="fw6">Weekly check-in</div><div class="small muted">${due.length} of ${3 + (due.includes('weigh') ? 1 : 0)} left</div></span><span class="chev">${I.chev}</span></button>` : ''}
   </div></div>
   `;

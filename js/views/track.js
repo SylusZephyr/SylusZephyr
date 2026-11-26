@@ -54,7 +54,7 @@ function yearCard() {
     <div class="yheat-months" aria-hidden="true">${months.map((m) => `<span class="tiny muted" style="grid-column:${m.w + 1}">${m.l}</span>`).join('')}</div>
     <div class="yheat" role="img" aria-label="${secured} days with 5 or more essentials in the last 6 months">${cells.join('')}</div>
     <div class="row between mt8"><span class="tiny muted">${counted ? Math.round(active / counted * 100) : 0}% of days active · ${perfect} perfect</span>
-    <span class="yheat-legend tiny muted">less <i style="background:var(--surface3)"></i><i style="background:rgba(52,211,153,.25)"></i><i style="background:rgba(52,211,153,.45)"></i><i style="background:rgba(52,211,153,.7)"></i><i style="background:#34d399"></i> more</span></div></div>`;
+    <span class="yheat-legend tiny muted">less <i class="heat-0"></i><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i> more</span></div></div>`;
 }
 
 // Least-squares trend over the last 6 weeks of weigh-ins → kg/week and goal date.
@@ -109,7 +109,7 @@ function journalCard() {
   const st = S.get();
   const notes = Object.entries(st.days).filter(([, d]) => d.notes).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 5);
   return `<div class="card"><div class="row between"><div class="kicker">Journal</div><button class="btn sm" data-journal>${S.day().notes ? 'Edit today' : '+ Write'}</button></div>
-    ${notes.length ? notes.map(([k, d]) => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="tiny muted">${S.prettyDate(k)} ${d.mood != null ? ['', '', '', '', ''][d.mood] : ''}</div><div class="small" style="white-space:pre-wrap;margin-top:4px">${UI.esc(d.notes)}</div></div>`).join('')
+    ${notes.length ? notes.map(([k, d]) => `<div class="row-line"><div class="tiny muted">${S.prettyDate(k)} ${d.mood != null ? ['', '', '', '', ''][d.mood] : ''}</div><div class="small pre-wrap mt4">${UI.esc(d.notes)}</div></div>`).join('')
       : '<p class="muted small mt8">A line a day about what helped or got in the way. Patterns become obvious after a week.</p>'}</div>`;
 }
 
@@ -117,7 +117,7 @@ function insightsCard() {
   const r = insights();
   return `<div class="card cool glow"><div class="kicker">Your patterns</div>
     ${r.need ? `<p class="muted small">Log energy & mood on ${r.need} more day${r.need === 1 ? '' : 's'} to unlock personal insights — what actually makes <i>you</i> feel better.</p>`
-      : r.list.length ? r.list.map((x) => `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="fs-lg">${x.diff > 0 ? '' : ''}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
+      : r.list.length ? r.list.map((x) => `<div class="row row-line"><span class="fs-lg">${x.diff > 0 ? '' : ''}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
       : '<p class="muted small">No clear patterns yet. Keep logging — they usually appear after 1–2 weeks.</p>'}</div>`;
 }
 
@@ -131,7 +131,7 @@ function food() {
   <div class="card"><div class="row between"><div class="kicker">Calories · 7 days</div><span class="small muted">target ${tg.kcal}</span></div>${C.barChart(kc, { goal: tg.kcal, color: '#60a5fa' })}
     <p class="tiny muted">Target = estimated needs (${tg.tdee}) + ~300 kcal for slow gain. Build up gradually — no need to force it.</p></div>
   <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein, color: '#4ade80' })}</div>
-  <div class="card"><div class="kicker">Main meals per day</div><div class="row" style="justify-content:space-around">${days.map((k, i) => `<div class="tc"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
+  <div class="card"><div class="kicker">Main meals per day</div><div class="row jc-around">${days.map((k, i) => `<div class="tc"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
   <div class="section-title">Today’s meals <button class="link" data-logmeal>+ Log</button></div>
   <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${UI.ICON.meal}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty"><span class="e"></span>No meals logged yet</div>'}</div>`;
 }
@@ -178,7 +178,7 @@ function body() {
 function etaLine() {
   const tr = weightTrend(); const goal = S.get().profile.goalKgMin;
   if (!tr) return '';
-  if (tr.eta === 'reached') return `<p class="small mt8" style="color:var(--green);font-weight:700">Trend is in your goal zone. Now hold it.</p>`;
+  if (tr.eta === 'reached') return `<p class="small mt8 c-green fw7">Trend is in your goal zone. Now hold it.</p>`;
   if (!tr.eta) return `<p class="small mt8 muted">Trend ${tr.perWeek >= 0 ? '+' : ''}${tr.perWeek.toFixed(2)} kg/week — not climbing yet, so no goal date. One extra shake a day (≈+300 kcal) usually starts it moving.</p>`;
   const eta = /** @type {Date} */ (tr.eta);
   return `<p class="small mt8"><span>At ${tr.perWeek.toFixed(2)} kg/week you reach ${goal} kg by</span> <b>${eta.toLocaleDateString(S.uiLocale(), { day: 'numeric', month: 'long', year: eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b></p>`;

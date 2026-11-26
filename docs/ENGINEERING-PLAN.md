@@ -38,7 +38,7 @@ One way to build each thing.
   - colour roles
 
   No raw pixel values outside the scales.
-- [ ] Remove every inline `style="…"` from views (currently ~200) in favour of named classes.
+- [x] Remove every inline `style="…"` from views in favour of named classes. (Only data-driven values, SVG stops and the standalone print document stay inline.)
 - [ ] Component inventory with one implementation each: card, list row, stats strip, button (primary/secondary/ghost/sm), chip, segmented control, sheet, empty state, field. Delete duplicates (`.macro` → `.stat`, `.grid3` tiles).
 - [ ] Empty and zero states for every list and chart: an explanation and one action, never a bare "0" or "No data yet".
 - [ ] Motion spec: durations 150/250 ms, one easing; sheets and tab changes only; reduced-motion respected.

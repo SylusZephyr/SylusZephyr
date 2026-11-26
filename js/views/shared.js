@@ -67,7 +67,7 @@ export function mealSheet(onDone, preset = {}) {
   const html = () => `<h2>Log a meal</h2>
     <div class="seg mt12" id="slotseg">${Object.keys(SLOT_LABEL).map((s) => `<button data-slot="${s}" class="${s === slot ? 'on' : ''}">${SLOT_LABEL[s].split(' ')[0]}</button>`).join('')}</div>
     <div class="row mt12 gap8"><label class="searchbar grow">${UI.ICON.search}<input id="food-q" type="search" placeholder="Search food — naan, 鸡蛋, Snickers…" autocomplete="off"></label>
-      <button class="icon-btn" style="width:44px;height:44px;border-radius:12px" id="scan-btn" aria-label="Scan a barcode">${UI.ICON.barcode}</button></div>
+      <button class="icon-btn sz44" id="scan-btn" aria-label="Scan a barcode">${UI.ICON.barcode}</button></div>
     <div id="food-res"></div>
     <div id="meal-rest">
     ${st.myMeals.length ? `<div class="kicker mt16">My meals</div><div class="card tight m0">${st.myMeals.map((m, i) => entryRow(m, `data-my="${i}"`)).join('')}</div>` : ''}
@@ -79,7 +79,7 @@ export function mealSheet(onDone, preset = {}) {
     <div class="kicker mt16">Delivery (Meituan 清真)</div>
     <div class="chips">${DELIVERY.map((d) => `<button class="chip" data-del="${d.id}">${UI.esc(d.name)}</button>`).join('')}</div>
     <div class="kicker mt16">Something else</div>
-    <div class="field" style="margin-top:0"><input id="cust-name" placeholder="e.g. Lamb samsa ×2"></div>
+    <div class="field mt0"><input id="cust-name" placeholder="e.g. Lamb samsa ×2"></div>
     <div class="grid2 mt8"><input id="cust-kcal" type="number" inputmode="numeric" placeholder="kcal"><input id="cust-p" type="number" inputmode="numeric" placeholder="protein g (optional)"></div>
     <label class="row mt12 gap10"><input type="checkbox" id="cust-save" class="sz20"><span class="small">Save to My meals</span></label>
     <button class="btn block mt12" id="cust-add">Add</button></div>`;
@@ -103,7 +103,7 @@ export function mealSheet(onDone, preset = {}) {
         // Food search
         const q = sh.querySelector('#food-q'), res = sh.querySelector('#food-res'), rest = sh.querySelector('#meal-rest');
         let found = [], timer = null, seq = 0;
-        const row = (f, i) => `<button class="rwide" data-food="${i}"><div class="thumb" style="background:var(--surface2);width:48px;height:48px;font-size:24px">${f.image ? `<img src="${UI.esc(f.image)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px" loading="lazy" referrerpolicy="no-referrer">` : f.e}</div>
+        const row = (f, i) => `<button class="rwide" data-food="${i}"><div class="thumb thumb-sm">${f.image ? `<img src="${UI.esc(f.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="img-cover">` : f.e}</div>
           <div class="grow min0"><div class="ellipsis fw7">${UI.esc(f.name)}</div><div class="muted small ellipsis">${f.brand ? UI.esc(f.brand) + ' · ' : ''}${forPortion(f, f.portionG).kcal} kcal · ${UI.esc(f.portionLabel)}</div></div>
           <span class="pill ${f.source === 'Revive' ? 'amber' : 'blue'}">${f.source === 'Revive' ? 'Built-in' : 'Online'}</span></button>`;
         const paint = (loading) => {
@@ -119,9 +119,9 @@ export function mealSheet(onDone, preset = {}) {
         });
         const portion = (f) => {
           let grams = f.portionG;
-          const draw = () => { const n = forPortion(f, grams); return `<div class="card tight mt12"><div class="row">${f.image ? `<img src="${UI.esc(f.image)}" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover" referrerpolicy="no-referrer">` : ''}<div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g</div></div></div>
+          const draw = () => { const n = forPortion(f, grams); return `<div class="card tight mt12"><div class="row">${f.image ? `<img src="${UI.esc(f.image)}" alt="" referrerpolicy="no-referrer" class="img-44">` : ''}<div class="grow"><b>${UI.esc(f.name)}</b><div class="muted small">${f.kcal100} kcal · ${f.protein100} g protein per 100 g</div></div></div>
             <div class="chips mt12">${[0.5, 1, 1.5, 2].map((m) => `<button class="chip ${Math.abs(grams - f.portionG * m) < 0.5 ? 'on' : ''}" data-mult="${m}">${m === 1 ? '' : m + ' × '}${UI.esc(f.portionLabel)}</button>`).join('')}</div>
-            <div class="row mt12"><input id="food-g" type="number" inputmode="decimal" value="${Math.round(grams)}" style="width:110px"><span class="muted">grams</span><div class="grow te"><b class="fs-lg">${n.kcal}</b> kcal · <b>${n.protein}</b> g</div></div>
+            <div class="row mt12"><input id="food-g" type="number" inputmode="decimal" value="${Math.round(grams)}" class="w110"><span class="muted">grams</span><div class="grow te"><b class="fs-lg">${n.kcal}</b> kcal · <b>${n.protein}</b> g</div></div>
             <label class="row mt12 gap10"><input type="checkbox" id="food-save" class="sz20"><span class="small">Save to My meals</span></label>
             <div class="grid2 mt12"><button class="btn" data-back>Back</button><button class="btn primary" data-logfood>Log it</button></div></div>`; };
           const mount = () => {
@@ -236,7 +236,7 @@ export function checkinSheet(type, onDone) {
   const prev = st.checkins[wk]?.[type]?.answers || [];
   const answers = [...prev];
   const body = () => def.qs.map((q, i) => `<div class="card tight"><div class="mb8 fw7">${i + 1}. ${UI.esc(q.q)}</div>
-    <div class="col gap6">${q.a.map((a, j) => `<button class="chip ${answers[i] === j ? 'on' : ''}" data-q="${i}" data-a="${j}" style="justify-content:flex-start;white-space:normal;text-align:left">${UI.esc(a)}</button>`).join('')}</div></div>`).join('');
+    <div class="col gap6">${q.a.map((a, j) => `<button class="chip ${answers[i] === j ? 'on' : ''} chip-answer" data-q="${i}" data-a="${j}">${UI.esc(a)}</button>`).join('')}</div></div>`).join('');
   UI.openSheet(`<h2>${def.e} ${UI.esc(def.title)}</h2><p class="muted small mb12">${UI.esc(def.note)}</p><div id="ci-body">${body()}</div>
     <button class="btn primary block mt8" id="ci-save">Save check-in</button>`, {
     onMount: (sh, close) => {
