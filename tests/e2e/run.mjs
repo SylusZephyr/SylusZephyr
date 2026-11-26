@@ -68,9 +68,16 @@ await test('Today: water with undo, essentials, meal and drink logging', async (
   assert.equal(await p.evaluate(() => window.__revive.S.day().checks.outdoors), true);
   await p.click('[data-logmeal]'); await p.click('[data-quick="2"]'); await p.waitForTimeout(300);
   assert.equal(await p.evaluate(() => window.__revive.S.day().meals.length), 1);
-  await clear(p); await p.click('[data-drinks]'); await p.click('[data-mg="40"]'); await p.waitForTimeout(200);
-  assert.match(await p.evaluate(() => window.__revive.S.day().coffee[0]), /@40$/);
+  // One tap logs the usual cup; "Change" swaps it for another drink; Undo removes it.
+  await clear(p); await p.click('[data-drinks]'); await p.waitForTimeout(150);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().coffee.length), 1);
+  await p.click('.toast [data-extra]'); await p.click('[data-mg="40"]'); await p.waitForTimeout(200);
+  assert.deepEqual(await p.evaluate(() => window.__revive.S.day().coffee.map((c) => c.split('@')[1])), ['40']);
   assert.ok(await p.$('.caf-card'), 'caffeine card shows after a drink');
+  await clear(p); await p.click('[data-drinks]'); await p.waitForTimeout(150);
+  assert.match(await p.evaluate(() => window.__revive.S.day().coffee[1]), /@40$/, 'the next tap repeats the last drink');
+  await p.click('.toast [data-undo]'); await p.waitForTimeout(150);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().coffee.length), 1);
 });
 
 await test('Last night and the usual meal log in one tap from Today, with undo', async (p) => {

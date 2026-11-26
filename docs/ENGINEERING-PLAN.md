@@ -48,7 +48,7 @@ One way to build each thing.
 What people open the app for every day.
 
 - [x] Log a meal in ≤2 taps from Today (recents first, one-tap re-log).
-- [ ] Log water and coffee in 1 tap, with undo.
+- [x] Log water and coffee in 1 tap, with undo. (Coffee repeats the last drink; the toast offers Change.)
 - [x] Morning check: last night's sleep pre-filled from the plan, confirmed with one tap.
 - [ ] Reminders: verify that each scheduled notification fires on Android and iOS. Show the next reminder on Today.
 - [x] Training session: resume after interruption, and screen-off safe timing.
