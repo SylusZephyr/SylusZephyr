@@ -73,7 +73,7 @@ await test('Today: water with undo, essentials, meal and drink logging', async (
   assert.ok(await p.$('.caf-card'), 'caffeine card shows after a drink');
 });
 
-await test('Usual meal logs in one tap from Today, with undo', async (p) => {
+await test('Last night and the usual meal log in one tap from Today, with undo', async (p) => {
   await p.clock.install({ time: new Date('2026-11-24T10:40:00') });
   await p.goto(BASE); await p.waitForFunction(() => window.__revive);
   await p.evaluate(() => {
@@ -82,6 +82,14 @@ await test('Usual meal logs in one tap from Today, with undo', async (p) => {
     S.saveNow();
   });
   await p.reload(); await p.waitForSelector('#screen'); await clear(p);
+  // Last night as planned, one tap, undoable
+  await p.click('[data-usual="sleep"]'); await p.waitForTimeout(200);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().sleep.wake), '10:00');
+  assert.equal(await p.evaluate(() => window.__revive.S.day().checks.sleep), true);
+  await p.click('.undo-btn'); await p.waitForTimeout(200);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().sleep.wake), undefined);
+  assert.equal(await p.evaluate(() => window.__revive.S.day().checks.sleep), false);
+  await clear(p);
   assert.match(await p.textContent('.nx-row[data-key="nx-breakfast"]'), /Egg paratha/);
   await p.click('[data-usual="breakfast"]'); await p.waitForTimeout(200);
   assert.equal(await p.evaluate(() => window.__revive.S.day().meals.length), 1);

@@ -5,7 +5,7 @@ import * as G from '../gamify.js';
 import { RECIPE, DELIVERY } from '../data/recipes.js';
 import { CHECKINS, scoreCheckin } from '../data/content.js';
 import * as Region from '../region.js';
-import { currentSlot, SLOT_LABEL, SLOT_EMOJI } from '../plan.js';
+import { currentSlot, SLOT_LABEL, SLOT_EMOJI, sleepTargets } from '../plan.js';
 import { searchLocal, searchOnline, forPortion, lookupBarcode } from '../nutrition.js';
 import { scanBarcode } from '../scanner.js';
 import { art } from './cook.js';
@@ -163,18 +163,29 @@ export function sleepSheet(onDone) {
       let q = d.sleep.q ?? null;
       sh.querySelectorAll('[data-scale="q"] button').forEach((b) => b.onclick = () => { q = +b.dataset.v; sh.querySelectorAll('[data-scale="q"] button').forEach((x) => x.classList.toggle('on', x === b)); });
       sh.querySelector('#sl-save').onclick = (ev) => {
-        d.sleep.bed = sh.querySelector('#sl-bed').value; d.sleep.wake = sh.querySelector('#sl-wake').value; d.sleep.q = q;
-        d.sleep.morningErection = sh.querySelector('#sl-me').checked;
-        G.award('sleep_log', 15, ev);
-        // Auto-tick sleep plan if wake within 45 min of anchor.
-        const a = S.minutesOf(st.profile.wakeAnchor); const w = S.minutesOf(d.sleep.wake);
-        const diff = Math.abs(((w - a + 720 + 1440) % 1440) - 720);
-        if (diff <= 45) G.setEssential('sleep', true, ev);
-        S.save(); close(); onDone && onDone();
-        UI.toast(diff <= 45 ? 'On-anchor wake-up! Sleep plan ' : 'Sleep logged', '');
+        const onAnchor = saveSleep({ bed: sh.querySelector('#sl-bed').value, wake: sh.querySelector('#sl-wake').value, q, morningErection: sh.querySelector('#sl-me').checked }, ev);
+        close(); onDone && onDone();
+        UI.toast(onAnchor ? 'On-anchor wake-up! Sleep plan ' : 'Sleep logged', '');
       };
     },
   });
+}
+
+/** Record last night's sleep for today. Ticks the sleep essential when the wake-up is within 45 min
+ *  of the anchor; returns whether it was. */
+export function saveSleep({ bed, wake, q = null, morningErection = false }, ev) {
+  const st = S.get(); const d = S.day();
+  Object.assign(d.sleep, { bed, wake, q, morningErection });
+  G.award('sleep_log', 15, ev);
+  const diff = Math.abs(((S.minutesOf(wake) - S.minutesOf(st.profile.wakeAnchor) + 720 + 1440) % 1440) - 720);
+  if (diff <= 45) G.setEssential('sleep', true, ev);
+  S.save();
+  return diff <= 45;
+}
+
+/** Last night as planned: yesterday's target bedtime and the wake anchor. */
+export function plannedSleep() {
+  return { bed: sleepTargets(S.addDays(S.dayKey(), -1)).bed, wake: S.get().profile.wakeAnchor };
 }
 
 // Breathing session: in 4, hold 2 (optional), out 6.

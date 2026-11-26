@@ -40,7 +40,10 @@ export function upNext(now = new Date()) {
   const mt = P.mealTimes(); const t = P.sleepTargets(); const fasting = Pr.fasting(now);
   const add = (o) => items.push(o);
   const wake = S.minutesOf(st.profile.wakeAnchor);
-  if (!d.sleep.wake && dm(m) < dm(wake) + 300) add({ id: 'sleep', at: wake, icon: I.moon, t: 'Log last night', s: 'Bed and wake time', act: 'sleep', now: true });
+  if (!d.sleep.wake && dm(m) < dm(wake) + 300) {
+    const pl = Sh.plannedSleep();
+    add({ id: 'sleep', at: wake, icon: I.moon, t: 'Log last night', s: `<span>${S.prettyTime(pl.bed)} – ${S.prettyTime(pl.wake)}</span> <span>as planned?</span>`, act: 'sleep', now: true, quick: 'sleep' });
+  }
   for (const slot of ['breakfast', 'lunch', 'dinner']) {
     if (d.checks[slot]) continue;
     const at = S.minutesOf(mt[slot]); const late = dm(m) - dm(at);
@@ -240,8 +243,13 @@ export function bind(root, _, { rerender }) {
   root.querySelector('[data-sleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
   root.querySelector('[data-breath]')?.addEventListener('click', () => Sh.breathing({ onDone: rerender }));
   root.querySelector('[data-weekly]')?.addEventListener('click', () => weeklySheet(rerender));
-  // One tap logs the usual meal for that slot, with undo.
-  root.querySelectorAll('[data-usual]').forEach((b) => b.addEventListener('click', (ev) => {
+  // One tap logs last night as planned, or the usual meal for a slot; both with undo.
+  root.querySelectorAll('[data-usual="sleep"]').forEach((b) => b.addEventListener('click', (ev) => {
+    const before = { ...S.day().sleep }; const wasDone = !!S.day().checks.sleep;
+    Sh.saveSleep(Sh.plannedSleep(), ev); UI.haptic(12); rerender();
+    UI.undoToast('Sleep logged', () => { const d = S.day(); d.sleep = before; if (!wasDone) G.setEssential('sleep', false); G.revoke('sleep_log'); S.save(); rerender(); });
+  }));
+  root.querySelectorAll('[data-usual]:not([data-usual="sleep"])').forEach((b) => b.addEventListener('click', (ev) => {
     const entry = Sh.usualMeal(b.dataset.usual); if (!entry) return;
     Sh.logMeal(entry, ev); UI.haptic(12); rerender();
     UI.undoToast('Logged', () => {
