@@ -156,7 +156,7 @@ function detail(r) {
     <p class="tiny muted mt8">Tap an ingredient to mark it as in/out of your pantry. Chinese names help when shopping on Hema/Taobao.</p></div>
 
   ${(() => { const n = (st.recipeNotes || {})[r.id] || {}; return `<div class="section-title">Your verdict</div><div class="card tight">
-    <div class="row" role="group" aria-label="Your rating">${[1, 2, 3, 4, 5].map((i) => `<button class="star ${i <= (n.rating || 0) ? 'on' : ''}" data-rate="${i}" aria-label="${i} star${i > 1 ? 's' : ''}" aria-pressed="${i === n.rating}">${UI.ICON.star}</button>`).join('')}<span class="muted small ms-auto">${n.rating ? ['', 'Not for me', 'Meh', 'Good', 'Great', 'Favourite'][n.rating] : 'Rate it after cooking'}</span></div>
+    <div class="row wrap" role="group" aria-label="Your rating">${[1, 2, 3, 4, 5].map((i) => `<button class="star ${i <= (n.rating || 0) ? 'on' : ''}" data-rate="${i}" aria-label="${i} star${i > 1 ? 's' : ''}" aria-pressed="${i === n.rating}">${UI.ICON.star}</button>`).join('')}<span class="muted small ms-auto">${n.rating ? ['', 'Not for me', 'Meh', 'Good', 'Great', 'Favourite'][n.rating] : 'Rate it after cooking'}</span></div>
     <textarea id="r-note" rows="2" class="mt8" maxlength="300" placeholder="Your notes — less chili, extra 2 minutes, add cheese…">${UI.esc(n.note || '')}</textarea></div>`; })()}
 
   ${r.vars ? `<div class="section-title">Switch it up</div><div class="card tight">${r.vars.map((v) => `<div class="small row-line">${UI.esc(v)}</div>`).join('')}<p class="tiny faint mt8">Same easy method, different taste — so you never get bored.</p></div>` : ''}

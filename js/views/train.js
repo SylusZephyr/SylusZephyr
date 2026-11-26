@@ -62,8 +62,8 @@ export function render() {
   return `
   <div class="topbar"><div><div class="sub">Pelvic floor · week ${wk} of 12</div><h1>Train</h1></div></div>
 
-  <section class="card">
-    <div class="row gap16">
+  <section class="card cq">
+    <div class="row gap16 pf-head">
       ${UI.ring(Math.min(1, todayN / 3), 96, 10, todayN >= 3 ? 'var(--green)' : 'var(--a1)', `${todayN}/3`, 'today')}
       <div class="grow"><div class="kicker">${ph.name}</div><h3>${ph.reps} holds of ${ph.hold} seconds</h3>
         <p class="muted small mt8">Then ${ph.flicks} quick flicks and ${ph.reverse} reverse Kegels. About ${mins} min.</p></div>

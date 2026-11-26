@@ -981,3 +981,50 @@ button.list-item:last-child { border-bottom: 0; }
 
 /* Dialogs take focus on open for screen readers; the container itself needs no visible ring. */
 [role="dialog"]:focus { outline: none; }
+
+/* ---- Large text and narrow screens ----
+   Cards marked .cq adapt to their own width, so big system text, small phones and split screens
+   all reflow instead of clipping. */
+.cq { container-type: inline-size; }
+@container (max-width: 300px) {
+  .summary { grid-template-columns: 1fr; justify-items: center; gap: 14px; }
+  .summary .legend-v { width: 100%; }
+  .pf-head { flex-direction: column; align-items: center; text-align: center; }
+  .prayer-row { grid-template-columns: repeat(3, 1fr); row-gap: 10px; }
+}
+.chip { max-width: 100%; }
+.grid3 { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
+.week-dots { min-width: 0; }
+.week-dots .wd { min-width: 0; }
+.field label { overflow-wrap: anywhere; }
+.wrap { flex-wrap: wrap; }
+.check .label { min-width: 0; }
+.pos-fig { max-width: 100%; }
+.pos-fig svg { max-width: 100%; height: auto; }
+
+/* Every card adapts to its own width (see .cq above). */
+.card { container-type: inline-size; }
+@container (max-width: 300px) {
+  .grid4 { grid-template-columns: repeat(2, 1fr); }
+  .grid2:has(> .btn) { grid-template-columns: 1fr; }
+  .stats { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); row-gap: 12px; }
+  .stats .stat:nth-child(odd) { border-inline-start: 0; padding-inline-start: 0; }
+}
+@container (max-width: 220px) {
+  .prayer-row { grid-template-columns: repeat(2, 1fr); }
+}
+.screen { container-type: inline-size; }
+@container (max-width: 300px) {
+  .quick { grid-template-columns: repeat(2, 1fr); }
+}
+@container (max-width: 300px) {
+  .level-head { flex-direction: column; align-items: flex-start; }
+  .grid2:has(> .field) { grid-template-columns: 1fr; }
+}
+
+/* Only genuinely narrow containers wrap; at normal sizes rows keep their single-line layout. */
+@container (max-width: 300px) {
+  .row.between, .topbar, .summary-foot { flex-wrap: wrap; row-gap: 6px; column-gap: 12px; }
+  .chips:not(.scroll) .chip { white-space: normal; }
+  .check .label { overflow-wrap: anywhere; }
+}
