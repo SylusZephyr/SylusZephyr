@@ -273,11 +273,20 @@ await test('Stays fast with three years of history', async (p) => {
     for (let i = 0; i < 1095; i++) { const d = S.day(S.addDays(S.dayKey(), -i)); d.meals = Array.from({ length: 5 }, (_, j) => ({ id: `${i}-${j}`, slot: 'lunch', name: 'Chicken wrap', kcal: 500, protein: 30, time: '13:00' })); d.checks = { breakfast: true, lunch: true, dinner: true }; d.energy = 3; d.mood = 3; d.sleep = { bed: '00:30', wake: '08:30' }; d.coffee = ['09:00']; d.waterMl = 2000; }
     S.saveNow(); return Math.round(localStorage.getItem('revive.v1').length / 1024); });
   assert.ok(kb < 2500, `stored ${kb} KB`);
-  await p.reload(); await p.waitForSelector('.t-head');
+  // A low-end phone: 4x CPU slowdown. Budgets are 1.5 s to first paint and 100 ms per tab switch;
+  // the assertions allow 2x headroom for slower CI machines, so they catch regressions, not noise.
   const cdp = await p.context().newCDPSession(p); await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-  for (const h of ['today', 'cook', 'train', 'track', 'me']) {
-    const ms = await p.evaluate(async (h) => { const t = performance.now(); location.hash = h; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return performance.now() - t; }, h);
-    assert.ok(ms < 500, `${h} took ${Math.round(ms)} ms on a slow phone`);
+  await p.reload(); await p.waitForSelector('.t-head');
+  const fcp = await p.evaluate(() => performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? 0);
+  assert.ok(fcp > 0 && fcp < 3000, `first paint ${Math.round(fcp)} ms`);
+  for (const h of ['cook', 'train', 'track', 'me', 'today']) {
+    const times = [];
+    for (let i = 0; i < 3; i++) {
+      times.push(await p.evaluate(async (h) => { const t = performance.now(); location.hash = h; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return performance.now() - t; }, h));
+      await p.evaluate(() => { location.hash = 'today'; }); await p.waitForTimeout(80);
+    }
+    const best = Math.min(...times);
+    assert.ok(best < 200, `${h} took ${Math.round(best)} ms on a slow phone`);
   }
 });
 
