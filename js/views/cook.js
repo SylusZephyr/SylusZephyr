@@ -105,7 +105,7 @@ function main() {
   ${planTeaser()}`}
 
   <div class="chips scroll mb12 ${filt.q ? 'mt16' : ''}">${CATS.map(([id, l]) => `<button class="chip ${filt.cat === id ? 'on' : ''}" data-cat="${id}">${l}</button>`).join('')}</div>
-  <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : '<div class="empty span-all">No recipes match. Try another filter.</div>'}</div>
+  <div class="recipe-grid" id="rgrid">${list.length ? list.map(recipeCard).join('') : `<div class="span-all">${UI.emptyState({ icon: 'search', title: 'No recipes match', body: 'Try another category or fewer filters.' })}</div>`}</div>
 
   <a class="list-row mt16" href="#cook/delivery"><span class="ico">${UI.ICON.bag}</span><span class="grow"><b>Halal delivery picks</b><span class="small muted">Meituan and Ele.me orders that still hit your protein</span></span><span class="chev">${UI.ICON.chev}</span></a>`;
 }
@@ -174,7 +174,7 @@ function pantryView() {
   return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 class="h-sub">My pantry</h1><div class="sub">${pantry.size} of ${INGREDIENTS.length} items · tap to toggle</div></div></div>
   <label class="searchbar">${UI.ICON.search}<input id="pan-q" type="search" placeholder="Find an ingredient" value="${UI.esc(panQ)}" autocomplete="off"></label>
   ${ING_CATS.map((c) => { const list = INGREDIENTS.filter((i) => i.cat === c && match(i)); if (!list.length) return ''; const have = INGREDIENTS.filter((i) => i.cat === c && pantry.has(i.id)).length; const all = INGREDIENTS.filter((i) => i.cat === c).length;
-    return `<div class="section-title">${c}<span class="small muted">${have} of ${all}</span></div><div class="chips">${list.map((i) => `<button class="chip ${pantry.has(i.id) ? 'on' : ''}" data-pan="${i.id}">${UI.esc(i.name)}</button>`).join('')}</div>`; }).join('') || '<div class="empty">No ingredient matches.</div>'}
+    return `<div class="section-title">${c}<span class="small muted">${have} of ${all}</span></div><div class="chips">${list.map((i) => `<button class="chip ${pantry.has(i.id) ? 'on' : ''}" data-pan="${i.id}">${UI.esc(i.name)}</button>`).join('')}</div>`; }).join('') || UI.emptyState({ icon: 'search', title: 'No ingredient matches', body: 'Check the spelling, or try the Chinese name.' })}
   <div class="grid2 mt16"><button class="btn" data-clear>Clear all</button><a class="btn primary" href="#cook">Done</a></div>`;
 }
 
@@ -268,7 +268,7 @@ export function bind(root, parts, { rerender }) {
     q.addEventListener('input', () => {
       filt.q = q.value; const grid = root.querySelector('#rgrid'); const ql = filt.q.toLowerCase();
       const list = RECIPES.filter((r) => !ql || r.name.toLowerCase().includes(ql) || r.ing.some((i) => ING[i.id]?.name.toLowerCase().includes(ql)) || r.tags.join(' ').includes(ql));
-      morph(grid, list.length ? list.map(recipeCard).join('') : '<div class="empty span-all">Nothing found</div>');
+      morph(grid, list.length ? list.map(recipeCard).join('') : `<div class="span-all">${UI.emptyState({ icon: 'search', title: 'Nothing found', body: 'Try a dish or an ingredient, like “chicken” or “鸡蛋”.' })}</div>`);
     });
   }
   if (sub === 'r') {
@@ -378,6 +378,6 @@ function planView() {
       ${PLAN_SLOTS.map((sl) => { const r = RECIPE[d[sl]]; if (!r) return ''; return `<div class="row py4"><span class="slot-tag">${P.SLOT_LABEL[sl].split(' ')[0]}</span><a href="#cook/r/${r.id}" class="grow ellipsis plain">${r.emoji} ${UI.esc(r.name)}</a><button class="icon-btn sz32" data-swap="${i}:${sl}" aria-label="Swap meal">${UI.ICON.refresh}</button></div>`; }).join('')}
     </div>`; }).join('')}
     <div class="grid2 mt8"><button class="btn" data-genplan>Regenerate</button><button class="btn primary" data-planshop>Shopping list</button></div>`
-    : `<div class="empty"><span class="e"></span>No plan for this week yet.</div><button class="btn primary block" data-genplan>Generate my week</button>`}
+    : `${UI.emptyState({ icon: 'calendar', title: 'No plan for this week yet', body: 'Revive picks meals you can make from your pantry, with one shopping list.' })}<button class="btn primary block" data-genplan>Generate my week</button>`}
   <div class="notice mt12">Plans lean on your favourites and what’s in your pantry, with small variations so you don’t get bored. Tap the arrows to swap any meal.</div>`;
 }

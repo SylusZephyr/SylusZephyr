@@ -2,7 +2,7 @@
 /** @param {{ y: number, label?: string }[]} points @param {{ h?: number, color?: string, min?: number, max?: number, band?: number[], labels?: boolean, unit?: string, goal?: number }} [opts] */
 export function lineChart(points, { h = 140, color = '#ffb547', min, max, band, labels = true, unit = '', goal } = {}) {
   const W = 340; const H = h; const pl = 30, pr = 10, pt = 12, pb = 22;
-  if (!points.length) return `<div class="empty small"><span class="e"></span>No data yet</div>`;
+  if (!points.length) return `<p class="small muted chart-empty">Log a few days to see the trend here.</p>`;
   const ys = points.map((p) => p.y);
   let lo = min ?? Math.min(...ys, band ? band[0] : Infinity, goal ?? Infinity); let hi = max ?? Math.max(...ys, band ? band[1] : -Infinity, goal ?? -Infinity);
   if (lo === hi) { lo -= 1; hi += 1; }
@@ -45,7 +45,7 @@ export function barChart(bars, { h = 120, color = '#5aa9ff', max, goal } = {}) {
 /** @param {{ bed: number, wake: number, label: string }[]} nights @param {{ h?: number, target?: { bed: number, wake: number } }} [opts] */
 export function sleepChart(nights, { h = 160, target } = {}) {
   const W = 340; const H = h; const pl = 34, pr = 6, pt = 6, pb = 18;
-  if (!nights.length) return `<div class="empty small"><span class="e"></span>Log a few nights to see your pattern</div>`;
+  if (!nights.length) return `<p class="small muted chart-empty">Log a few nights to see your pattern here.</p>`;
   const AX0 = 18 * 60; const SPAN = 20 * 60; // 18:00 → 14:00
   const toAx = (hhmm) => ((((hhmm - AX0) % 1440) + 1440) % 1440);
   // Fixed row height: one night is a thin bar, not a blob that fills the chart.
