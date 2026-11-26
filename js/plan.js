@@ -25,7 +25,7 @@ export function sleepTargets(k = S.dayKey()) {
   const ideal = (wake - p.sleepNeedMin + 1440) % 1440;
   const start = S.minutesOf(p.currentBedtime);
   const started = p.bedShiftStartedOn || k;
-  const days = Math.max(0, Math.round((S.keyToDate(k) - S.keyToDate(started)) / 86400000));
+  const days = Math.max(0, S.daysBetween(started, k));
   const shift = Math.floor(days / 3) * 15;
   // distance from start back to ideal (going earlier), in minutes, modulo a day
   const gap = ((start - ideal) + 1440) % 1440;
@@ -87,7 +87,7 @@ export function sleepDurationMin(bed, wake) {
 
 export function programWeek() {
   const st = S.get(); const start = st.programStart || S.dayKey(new Date(st.createdAt));
-  const days = Math.round((S.keyToDate(S.dayKey()) - S.keyToDate(start)) / 86400000);
+  const days = S.daysBetween(start, S.dayKey());
   return Math.floor(days / 7) + 1;
 }
 

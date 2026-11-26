@@ -57,7 +57,7 @@ export function enhance(root = document) {
   root.querySelectorAll('.field').forEach((f) => {
     const label = f.querySelector(':scope > label'); const input = f.querySelector('input, select, textarea');
     if (!label || !input) return;
-    if (input.id) label.htmlFor = input.id; else if (!input.getAttribute('aria-label')) input.setAttribute('aria-label', textOf(label));
+    if (input.id) /** @type {HTMLLabelElement} */ (/** @type {unknown} */ (label)).htmlFor = input.id; else if (!input.getAttribute('aria-label')) input.setAttribute('aria-label', textOf(label));
   });
   root.querySelectorAll('input[placeholder]:not([aria-label]):not([id])').forEach((i) => i.setAttribute('aria-label', i.placeholder));
 
@@ -103,7 +103,7 @@ export function start() {
   new MutationObserver((muts) => {
     for (const m of muts) {
       // When a dialog closes, give focus back to whatever opened it.
-      for (const n of m.removedNodes) if (n.nodeType === 1 && n.querySelector?.('[role="dialog"]') && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
+      for (const n of m.removedNodes) if (n.nodeType === 1 && /** @type {Element} */ (n).querySelector('[role="dialog"]') && lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
       if (m.type === 'childList') m.addedNodes.forEach((n) => pending.add(n.nodeType === 1 ? n : n.parentElement));
       else pending.add(m.target);
     }

@@ -2,7 +2,7 @@
 // The version is a hash of every cached file, so any real change ships a fresh cache.
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -10,7 +10,7 @@ const walk = (dir) => readdirSync(join(root, dir)).flatMap((f) => {
   const p = join(dir, f);
   return statSync(join(root, p)).isDirectory() ? walk(p) : [p];
 });
-const files = ['index.html', 'manifest.webmanifest', 'privacy.html', ...walk('css'), ...walk('js'), ...walk('icons'), ...walk('img'), ...walk('fonts').filter((f) => f.endsWith('.woff2'))]
+const files = ['index.html', 'manifest.webmanifest', 'privacy.html', ...walk('css'), ...walk('js').filter((f) => !f.endsWith('.d.ts')), ...walk('icons'), ...walk('img'), ...walk('fonts').filter((f) => f.endsWith('.woff2'))]
   .map((f) => f.split('\\').join('/')).sort();
 const hash = createHash('sha256');
 for (const f of files) hash.update(f).update(readFileSync(join(root, f)));

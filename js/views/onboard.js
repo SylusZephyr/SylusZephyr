@@ -31,7 +31,7 @@ const STEPS = [
   () => `<h1 class="mb8">Prayer times</h1>
       <p class="muted">Revive can show the five daily prayers on Today and switch to suhoor and iftar meals in Ramadan. It works out the times on your phone — no location access needed.</p>
       <div class="field"><label>Your city</label><select id="ob-city">${Pr.CITIES.map((c) => `<option value="${c.id}" ${draft.city === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}</select></div>
-      <div class="grid2 mt16"><button class="btn ${draft.prayer === true ? 'primary' : ''}" data-pr="1" aria-pressed="${draft.prayer === true}">Show prayer times</button><button class="btn ${draft.prayer === false ? 'primary' : ''}" data-pr="0" aria-pressed="${draft.prayer === false}">Not now</button></div>
+      <div class="grid2 mt16"><button class="btn primary" data-pr="1">Show prayer times</button><button class="btn" data-pr="0">Not now</button></div>
       <p class="muted small mt12">You can change this any time in Me → Prayer times & Ramadan.</p>`,
   () => `<h1 class="mb8">What’s in your kitchen?</h1><p class="muted">Tap what you have now. Revive will suggest meals from it. You can change this anytime in Cook.</p>
       <div class="chips mt16">${INGREDIENTS.filter((i) => ['Protein', 'Dairy', 'Bread & staples', 'Fruit & veg'].includes(i.cat)).slice(0, 36).map((i) => `<button class="chip ${draft.pantry.has(i.id) ? 'on' : ''}" data-ing="${i.id}">${i.e} ${UI.esc(i.name)}</button>`).join('')}</div>`,
@@ -49,13 +49,17 @@ const STEPS = [
 
 export function render() {
   const last = step === STEPS.length - 1;
-  return `<div class="ob-ambient"></div><main class="screen onboard" style="padding-bottom:120px">
+  const body = STEPS[step]();
+  // On the prayer step the two choices move on by themselves, so there is no Continue to get stuck on.
+  const choice = body.includes('data-pr=');
+  const needsAck = body.includes('id="ob-ack"');
+  return `<main class="screen onboard" style="padding-bottom:120px">
     <div class="row mb12" style="gap:6px">${STEPS.map((_, i) => `<i style="flex:1;height:4px;border-radius:2px;background:${i <= step ? 'var(--text)' : 'var(--surface3)'}"></i>`).join('')}</div>
-    ${STEPS[step]()}
+    ${body}
     ${last ? '' : `<div style="position:fixed;left:0;right:0;bottom:0;padding:16px 16px calc(var(--safe-bottom) + 18px);background:linear-gradient(transparent, var(--bg) 30%)">
       <div style="max-width:560px;margin:0 auto" class="row">
         ${step > 0 ? '<button class="btn" id="ob-back">Back</button>' : ''}
-        <button class="btn primary grow" id="ob-next">${step === 0 ? 'Let’s start' : 'Continue'}</button></div></div>`}
+        ${choice ? '' : `<button class="btn primary grow" id="ob-next" ${needsAck ? 'disabled' : ''}>${step === 0 ? 'Let’s start' : 'Continue'}</button>`}</div></div>`}
   </main>`;
 }
 
@@ -72,12 +76,12 @@ export function bind(root, done) {
     const id = c.dataset.ing; draft.pantry.has(id) ? draft.pantry.delete(id) : draft.pantry.add(id); c.classList.toggle('on'); UI.haptic(6);
   }));
   root.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.lang === locale) return; setLocale(b.dataset.lang); location.reload(); }));
-  root.querySelectorAll('[data-pr]').forEach((b) => b.addEventListener('click', () => { collect(); draft.prayer = b.dataset.pr === '1'; rer(); }));
+  root.querySelectorAll('[data-pr]').forEach((b) => b.addEventListener('click', () => { collect(); draft.prayer = b.dataset.pr === '1'; step++; rer(); }));
+  const ack = root.querySelector('#ob-ack');
+  ack?.addEventListener('change', () => { root.querySelector('#ob-next').disabled = !ack.checked; });
   root.querySelector('#ob-back')?.addEventListener('click', () => { collect(); step--; rer(); });
   root.querySelector('#ob-next')?.addEventListener('click', () => {
     collect();
-    if (root.querySelector('#ob-city') && draft.prayer == null) { UI.toast('Choose “Show prayer times” or “Not now”'); return; }
-    if (root.querySelector('#ob-ack') && !root.querySelector('#ob-ack').checked) { UI.toast('Please tick “I understand”', ''); return; }
     step++; rer();
   });
   const finish = () => {

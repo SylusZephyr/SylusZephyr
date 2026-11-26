@@ -44,7 +44,7 @@ async function scanWithCamera() {
       <div class="scan-bottom"><button class="btn" data-type>Type the number instead</button></div>
     </div>`, {
       onMount: (w, close) => {
-        const video = w.querySelector('video'); video.srcObject = stream;
+        const video = /** @type {HTMLVideoElement} */ (/** @type {unknown} */ (w.querySelector('video'))); video.srcObject = stream;
         w.querySelector('[data-x]').onclick = () => stop(close, null);
         w.querySelector('[data-type]').onclick = () => { stop(close, undefined); };
         const tick = async () => {

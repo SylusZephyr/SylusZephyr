@@ -20,6 +20,7 @@ const FEELS = [
 const TIMES = [{ v: 5, l: '≤5 min' }, { v: 15, l: '≤15 min' }, { v: 30, l: '≤30 min' }];
 const BUDGETS = [{ v: 8, l: '≤¥8' }, { v: 15, l: '≤¥15' }, { v: 99, l: 'Any' }];
 
+/** @param {{ slot?: string, feel?: string, mins?: number, budget?: number }} [filters] */
 export function suggest({ slot, feel, mins, budget } = {}) {
   const pantry = new Set(S.get().pantry); const st = S.get(); const fastingNow = Pr.fasting();
   return RECIPES.map((r) => {
@@ -50,9 +51,9 @@ const methodPill = (m) => m === 'airfryer' ? '<span class="pill amber method">Ai
 export function art(r, { eager = false } = {}) {
   const p = PHOTOS[r.id];
   if (!p) {
-    // No photo yet: a quiet monogram tile tinted with the dish's colour, not a giant emoji.
-    const mono = r.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter((w) => w.length > 2 && !/^(the|and|with|air|fryer|quick|cheat|big|easy)$/i.test(w)).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-    return { cls: 'mono-tile', style: `--tint:${r.bg[0]}`, emoji: `<span class="mono">${mono}</span>` };
+    // No photo yet: a soft tile in the dish's own colour with a line icon, never initials.
+    const drink = /shake|smoothie|lassi|milk/i.test(r.name);
+    return { cls: 'mono-tile', style: `--tint:${r.bg[0]}`, emoji: `<span class="mono" aria-hidden="true">${drink ? UI.ICON.cup : UI.ICON.meal}</span>` };
   }
   return { cls: 'has-photo', style: 'background:var(--surface2)', emoji: `<img class="ph" src="${p.src}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="720" height="540">` };
 }
@@ -180,7 +181,7 @@ function pantryView() {
 function deliveryView() {
   return `<div class="topbar"><a class="icon-btn" href="#cook" aria-label="Back">${UI.ICON.back}</a><div class="grow"><h1 style="font-size:24px">Halal delivery</h1><div class="sub">Meituan 美团 · Ele.me 饿了么</div></div></div>
   <div class="notice mb12">Search <b>清真</b> in the app and sort by rating. Ask for <b>少盐</b> (less salt) and <b>加蛋 / 加肉</b> (extra egg / meat) for protein. Ordering still counts — eating something is the win.</div>
-  ${DELIVERY.map((d) => `<div class="card tight deliv"><div class="row" style="align-items:flex-start;gap:14px"><div class="dthumb ${PHOTOS[d.id] ? 'has-photo' : 'mono-tile'}" style="--tint:${d.bg?.[0] || '#555'}">${PHOTOS[d.id] ? `<img class="ph" src="${PHOTOS[d.id].src}" alt="" loading="lazy" decoding="async">` : `<span class="mono">${UI.esc(d.name.replace(/[^A-Za-z ]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase())}</span>`}</div>
+  ${DELIVERY.map((d) => `<div class="card tight deliv"><div class="row" style="align-items:flex-start;gap:14px"><div class="dthumb ${PHOTOS[d.id] ? 'has-photo' : 'mono-tile'}" style="--tint:${d.bg?.[0] || '#555'}">${PHOTOS[d.id] ? `<img class="ph" src="${PHOTOS[d.id].src}" alt="" loading="lazy" decoding="async">` : `<span class="mono" aria-hidden="true">${UI.ICON.bag}</span>`}</div>
     <div class="grow"><b>${UI.esc(d.name)}</b><div class="small muted">${UI.esc(d.zh)}</div><div class="small mt8">~¥${d.cost} · ${d.kcal} kcal · ${d.protein} g protein</div></div></div>
     <p class="small muted mt8">${UI.esc(d.tip)}</p>
     <div class="row mt12" style="gap:8px"><button class="btn sm grow" data-copy="${UI.esc(d.zh)}">Copy search</button><button class="btn sm grow" data-ate-del="${d.id}">${UI.ICON.check}<span>I ate this</span></button></div></div>`).join('')}`;

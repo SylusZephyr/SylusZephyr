@@ -3,13 +3,13 @@ import * as UI from '../ui.js';
 import * as G from '../gamify.js';
 import * as Sh from './shared.js';
 import * as Region from '../region.js';
-import { PF_PHASES, PF_EDU, pfPhase, RED_FLAGS } from '../data/content.js';
+import { PF_PHASES, PF_EDU, pfPhase } from '../data/content.js';
 
 export function pfWeek() {
   const st = S.get(); const ss = st.pf.sessions;
   if (st.pf.manualWeek) return st.pf.manualWeek;
   if (!ss.length) return 1;
-  const first = ss[0].date; const days = Math.round((S.keyToDate(S.dayKey()) - S.keyToDate(first)) / 86400000);
+  const first = ss[0].date; const days = S.daysBetween(first, S.dayKey());
   return Math.min(12, Math.floor(days / 7) + 1);
 }
 
@@ -93,7 +93,7 @@ export function render() {
 
   <div class="section-title">Walking</div>
   <section class="card ${w.cleared ? '' : 'danger'}">
-    <div class="row between"><div class="kicker" style="margin:0">${w.cleared ? `Level ${w.level} of ${CARDIO.length}` : 'Gentle walks only until a doctor clears you'}</div><span class="small muted">${w.hit} of 5 days</span></div>
+    <div class="row between"><div class="kicker" style="margin:0">${w.cleared ? `Level ${w.level} of ${CARDIO.length}` : 'Gentle walks only until a doctor clears you'}</div><span class="small muted" style="white-space:nowrap">${w.hit} of 5 days</span></div>
     <h3 class="mt8">${w.c.min} minutes a day</h3><p class="small muted">${UI.esc(w.c.t)}.${w.cleared && w.level < CARDIO.length ? ` Five days on target this week moves you to ${CARDIO[w.level].min} minutes.` : ''}</p>
     <div class="walk-week mt12">${w.days.map((k, i) => `<div class="ww ${k === S.dayKey() ? 'today' : ''}"><div class="col-bar"><i style="height:${Math.min(100, Math.round(w.mins[i] / w.c.min * 100))}%" class="${w.mins[i] >= w.c.min ? 'hit' : ''}"></i></div><span>${S.prettyDate(k, { weekday: 'narrow' })}</span></div>`).join('')}</div>
     <div class="grid3 mt12">${[5, 10, 15].map((m) => `<button class="btn sm" data-walk="${m}">+${m} min</button>`).join('')}</div>
@@ -136,7 +136,7 @@ function runSession(rerender) {
       const paint = () => {
         const s = seq[idx];
         w.querySelector('#tr-label').textContent = s.label; w.querySelector('#tr-sub').textContent = s.sub;
-        w.querySelector('#tr-count').textContent = left;
+        w.querySelector('#tr-count').textContent = String(left);
         w.querySelector('#tr-bar').style.width = `${(elapsed / total) * 100}%`;
         w.querySelector('#tr-left').textContent = `${Math.floor((total - elapsed) / 60)}:${S.pad((total - elapsed) % 60)} left`;
       };
@@ -159,7 +159,7 @@ function runSession(rerender) {
         paint();
       };
       w.querySelector('[data-x]').onclick = () => { clearInterval(iv); try { wake && wake.release(); } catch (e) {} close(); };
-      w.querySelector('[data-p]').onclick = (e) => { paused = !paused; e.currentTarget.innerHTML = paused ? UI.ICON.play : UI.ICON.pause; };
+      w.querySelector('[data-p]').onclick = (e) => { paused = !paused; /** @type {HTMLElement} */ (e.currentTarget).innerHTML = paused ? UI.ICON.play : UI.ICON.pause; };
       enter(); paint(); iv = setInterval(tick, 1000);
     },
   });

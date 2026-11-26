@@ -55,7 +55,7 @@ export function route() {
 }
 export function go(hash) { if (location.hash === '#' + hash) render(); else location.hash = hash; }
 
-let lastScroll = {};
+const lastScroll = {};
 export function render({ keepScroll = false } = {}) {
   const app = UI.$('#app');
   const st = S.get();
@@ -84,7 +84,7 @@ export function render({ keepScroll = false } = {}) {
   translateTree(UI.$('#app'));
   countUp();
   try { Progress.evaluate(); Progress.checkMoments(); } catch (e) { logError(e, 'progress'); }
-  document.querySelectorAll('img.ph').forEach((img) => { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
+  document.querySelectorAll('img.ph').forEach((el) => { const img = /** @type {HTMLImageElement} */ (/** @type {unknown} */ (el)); if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
 }
 
 // Numbers that changed since the last render roll up to their new value.
@@ -95,7 +95,7 @@ function countUp() {
     lastCounts[key] = to;
     if (from == null || from === to || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const t0 = performance.now(), dur = 600;
-    const step = (t) => { const p = Math.min(1, (t - t0) / dur); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+    const step = (t) => { const p = Math.min(1, (t - t0) / dur); el.textContent = String(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)))); if (p < 1) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   });
 }
@@ -209,7 +209,7 @@ setInterval(() => { if (document.visibilityState === 'visible' && S.dayKey() !==
 // Keyboard (PC): 1–5 switch tabs, Esc closes sheets/overlays.
 const IS_DESKTOP = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
 document.addEventListener('keydown', (e) => {
-  const tag = (e.target.tagName || '').toLowerCase();
+  const tag = (/** @type {HTMLElement} */ (e.target).tagName || '').toLowerCase();
   if (e.key === 'k' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); import('./views/search.js').then((m) => m.open()); return; }
   if (['input', 'textarea', 'select'].includes(tag) || e.ctrlKey || e.metaKey || e.altKey) return;
   const lock = document.querySelector('.lock .keypad');
@@ -230,12 +230,12 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Photos fade in once decoded (capture phase catches load events from any image).
-document.addEventListener('load', (e) => { if (e.target.classList?.contains('ph')) e.target.classList.add('loaded'); }, true);
+document.addEventListener('load', (e) => { const t = /** @type {HTMLElement} */ (e.target); if (t.classList?.contains('ph')) t.classList.add('loaded'); }, true);
 
 // Phones: swipe left/right on the page to move between tabs.
 let swipe = null;
 document.addEventListener('touchstart', (e) => {
-  const t = e.touches[0]; const el = e.target;
+  const t = e.touches[0]; const el = /** @type {HTMLElement} */ (e.target);
   if (e.touches.length > 1 || document.querySelector('#overlay-root > *') || el.closest('input, textarea, select, .stories, .chips.scroll, .seg, .scale, .heat, .tabbar, .keypad')) { swipe = null; return; }
   swipe = { x: t.clientX, y: t.clientY, t: Date.now() };
 }, { passive: true });

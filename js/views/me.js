@@ -9,8 +9,7 @@ import * as Cloud from '../cloud.js';
 import { PHOTOS } from '../data/photos.js';
 import * as ShareCard from '../sharecard.js';
 import { RECIPE, DELIVERY } from '../data/recipes.js';
-import { TIPS, RED_FLAGS, DOCTOR_QUESTIONS, CHECKINS } from '../data/content.js';
-import { pfWeek } from './train.js';
+import { TIPS, RED_FLAGS, DOCTOR_QUESTIONS } from '../data/content.js';
 import * as Pr from '../prayer.js';
 import * as Caf from '../caffeine.js';
 import * as Theme from '../theme.js';
@@ -51,7 +50,7 @@ let accountRerender = null;
 let codeSent = false;
 
 function account() {
-  const st = Cloud.status; const cfg = Cloud.getConfig();
+  const st = Cloud.status;
   const head = `<div class="topbar">${back()}<div class="grow"><h1 style="font-size:24px">Account & sync</h1><div class="sub">${st.user ? 'Signed in' : 'Optional — the app works fully without an account'}</div></div></div>`;
   if (!st.configured) return head + `
     <div class="card glow"><div class="kicker">Cloud sync</div><h3>Connect your Revive cloud</h3>
@@ -85,7 +84,7 @@ function credits() {
   const rows = Object.entries(PHOTOS).map(([id, p]) => ({ name: RECIPE[id]?.name || DELIVERY.find((d) => d.id === id)?.name || id, ...p }));
   return `<div class="topbar">${back('me/settings')}<div class="grow"><h1 style="font-size:24px">Photo credits</h1><div class="sub">Free-licence photos from Wikimedia Commons</div></div></div>
   <div class="card tight">${rows.length ? rows.map((r) => `<div class="list-item"><div class="li-ico" style="background:url('${r.src}') center/cover"></div><div class="grow" style="min-width:0"><b>${UI.esc(r.name)}</b><div class="muted small">${UI.esc(r.credit)}</div><a class="tiny" href="${UI.esc(r.page)}" target="_blank" rel="noopener">Source</a>${r.licence_url ? ` · <a class="tiny" href="${UI.esc(r.licence_url)}" target="_blank" rel="noopener">Licence</a>` : ''}</div></div>`).join('') : '<div class="empty small">No photos bundled.</div>'}</div>
-  <p class="tiny faint">Photos were resized and cropped to fit. Illustrated cards are original artwork.</p>`;
+  <p class="tiny faint">Photos were resized and cropped to fit.</p>`;
 }
 
 const back = (to = 'me') => `<a class="icon-btn" href="#${to}">${UI.ICON.back}</a>`;
@@ -458,6 +457,7 @@ export function bind(root, parts, { rerender }) {
     root.querySelectorAll('[data-libsave]').forEach((b) => b.onclick = () => { const id = b.dataset.libsave; const i = st.savedTips.indexOf(id); if (i >= 0) st.savedTips.splice(i, 1); else st.savedTips.push(id); S.save(); rerender(); });
   }
   if (sub === 'prayer') {
+    /** @returns {{ enabled?: boolean, city?: string, notify?: boolean, fastAlerts?: boolean }} */
     const pr = () => (st.prayer = st.prayer || {});
     const set = (patch) => { Object.assign(pr(), patch); S.save(); window.__syncReminders?.(true); rerender(); };
     root.querySelector('[data-prnotify]').onclick = () => set({ notify: !pr().notify });

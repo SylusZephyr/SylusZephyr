@@ -217,5 +217,5 @@ export function upcomingAlerts(days = 7, from = new Date()) {
       out.push({ at: at(day, t.maghrib + 150), title: 'Late meal or shake', body: 'You need a second real meal before suhoor to keep gaining.', route: 'cook' });
     }
   }
-  return out.sort((a, b) => a.at - b.at);
+  return out.sort((a, b) => +a.at - +b.at);
 }

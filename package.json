@@ -1,13 +1,15 @@
 {
   "name": "revive",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "private": true,
   "description": "Revive \u2014 private recovery companion (iOS app + web/PWA)",
   "scripts": {
     "build:web": "node scripts/gen-sw.mjs && node scripts/build-web.mjs",
     "sync": "npm run build:web && npx cap sync ios",
     "test": "node scripts/smoke-test.mjs",
-    "test:e2e": "node tests/e2e/run.mjs"
+    "test:e2e": "node tests/e2e/run.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc -p ."
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
@@ -28,7 +30,11 @@
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",
     "@capacitor/cli": "^8.6.0",
+    "@eslint/js": "^9.14.0",
+    "axe-core": "4.14.0",
+    "eslint": "^9.14.0",
+    "globals": "^15.12.0",
     "playwright": "1.63.0",
-    "axe-core": "4.14.0"
+    "typescript": "^5.6.3"
   }
 }

@@ -18,9 +18,8 @@ export function render() {
 function lastNDays(n) { const out = []; for (let i = n - 1; i >= 0; i--) out.push(S.addDays(S.dayKey(), -i)); return out; }
 
 function overview() {
-  const st = S.get(); const days = lastNDays(35); const wk = P.programWeek();
+  const st = S.get(); const wk = P.programWeek();
   const prog = P.PROGRAM[Math.min(3, wk - 1)];
-  const firstWd = (S.keyToDate(days[0]).getDay() + 6) % 7;
   const avg7 = lastNDays(7).reduce((s, k) => s + G.essentialsDone(k), 0) / 7;
   return `
   <div class="card"><div class="stats">
@@ -63,8 +62,8 @@ export function weightTrend(ws = S.get().weights, goal = S.get().profile.goalKgM
   const sorted = [...ws].sort((a, b) => a.date.localeCompare(b.date));
   if (sorted.length < 2) return null;
   const lastDate = S.keyToDate(sorted.at(-1).date);
-  const recent = sorted.filter((w) => (lastDate - S.keyToDate(w.date)) / 864e5 <= 42);
-  const pts = (recent.length >= 2 ? recent : sorted.slice(-2)).map((w) => ({ x: (S.keyToDate(w.date) - lastDate) / 864e5, y: w.kg }));
+  const recent = sorted.filter((w) => (lastDate.getTime() - S.keyToDate(w.date).getTime()) / 864e5 <= 42);
+  const pts = (recent.length >= 2 ? recent : sorted.slice(-2)).map((w) => ({ x: (S.keyToDate(w.date).getTime() - lastDate.getTime()) / 864e5, y: w.kg }));
   const n = pts.length; const mx = pts.reduce((a, p) => a + p.x, 0) / n; const my = pts.reduce((a, p) => a + p.y, 0) / n;
   const sxx = pts.reduce((a, p) => a + (p.x - mx) ** 2, 0);
   if (!sxx) return null;
@@ -147,13 +146,13 @@ function sleep() {
   const onAnchor = devs.filter((d) => d <= 30).length;
   return `
   <div class="card glow"><div class="kicker">Your plan</div>
-    <div class="grid3 mt8"><div class="macro"><b>${S.prettyTime(t.wake)}</b><span>wake anchor</span></div><div class="macro"><b>${S.prettyTime(t.bed)}</b><span>bed tonight</span></div><div class="macro"><b>${S.prettyTime(t.ideal)}</b><span>ideal bed</span></div></div>
+    <div class="stats mt12"><div class="stat"><b>${S.prettyTime(t.wake)}</b><span>Wake anchor</span></div><div class="stat"><b>${S.prettyTime(t.bed)}</b><span>Bed tonight</span></div><div class="stat"><b>${S.prettyTime(t.ideal)}</b><span>Ideal bedtime</span></div></div>
     <p class="small muted mt12">${t.reached ? 'You’ve reached your ideal bedtime — hold it steady.' : `Bedtime moves 15 min earlier every 3 days · ~${t.daysLeft} days to go.`} Wind-down starts ${S.prettyTime(t.windDown)}.</p>
     <button class="btn sm mt12" data-sleepset>Adjust plan</button></div>
-  <div class="card"><div class="kicker">Last 14 nights</div>${C.sleepChart(nights.slice(-10), { target: { bed: S.minutesOf(t.bed), wake: S.minutesOf(t.wake) } })}
-    <div class="grid3 mt12"><div class="macro"><b>${nights.length ? `${Math.floor(avgDur / 60)}h${Math.round(avgDur % 60)}` : '—'}</b><span>avg sleep</span></div>
-    <div class="macro"><b>${avgDev != null ? `±${Math.round(avgDev)}m` : '—'}</b><span>wake drift</span></div>
-    <div class="macro"><b>${onAnchor}/${nights.length}</b><span>on anchor</span></div></div></div>
+  <div class="card"><div class="kicker">Last 14 nights</div>${C.sleepChart(nights, { target: { bed: S.minutesOf(t.bed), wake: S.minutesOf(t.wake) } })}
+    <div class="stats mt16"><div class="stat"><b>${nights.length ? `${Math.floor(avgDur / 60)}<small>h</small> ${Math.round(avgDur % 60)}<small>m</small>` : '—'}</b><span>Average sleep</span></div>
+    <div class="stat"><b>${avgDev != null ? `±${Math.round(avgDev)}<small> min</small>` : '—'}</b><span>Wake drift</span></div>
+    <div class="stat"><b>${onAnchor}<small> / ${nights.length}</small></b><span>On anchor</span></div></div></div>
   ${t.reached && onAnchor >= 5 && S.minutesOf(st.profile.wakeAnchor) > 7 * 60 ? `<div class="card cool glow"><div class="kicker">Level up your sleep </div><h3>Ready for the next step?</h3><p class="muted small">You hit your bedtime and woke on-anchor ${onAnchor} times recently. Move everything 30 min earlier — wake ${S.prettyTime(S.fmtMin(S.minutesOf(st.profile.wakeAnchor) - 30))}.</p><button class="btn cool block mt12" data-earlier>Shift 30 min earlier</button></div>` : ''}
   <button class="btn block" data-logsleep>Log last night</button>
   <div class="notice mt12">Wake drift = how far your wake-up time is from your anchor, on average. Get it under ±30 min first — that’s what fixes a random schedule.</div>`;
@@ -163,13 +162,13 @@ function body() {
   const st = S.get(); const ws = [...st.weights].sort((a, b) => a.date.localeCompare(b.date));
   const pts = ws.map((w) => ({ y: w.kg, label: S.prettyDate(w.date, { day: 'numeric', month: 'short' }) }));
   const first = ws[0]; const last = ws.at(-1);
-  const weeks = first && last ? Math.max(1, (S.keyToDate(last.date) - S.keyToDate(first.date)) / (7 * 86400000)) : 1;
+  const weeks = first && last ? Math.max(1, S.daysBetween(first.date, last.date) / 7) : 1;
   const rate = first && last && ws.length > 1 ? (last.kg - first.kg) / weeks : null;
   const toGoal = last ? Math.max(0, st.profile.goalKgMin - last.kg) : null;
   const bmi = last ? last.kg / ((st.profile.heightCm / 100) ** 2) : null;
   return `
-  <div class="grid3"><div class="macro"><b>${last ? last.kg.toFixed(1) : '—'}</b><span>kg now</span></div><div class="macro"><b>${bmi ? bmi.toFixed(1) : '—'}</b><span>BMI</span></div><div class="macro"><b>${toGoal != null ? toGoal.toFixed(1) : '—'}</b><span>kg to ${st.profile.goalKgMin}</span></div></div>
-  <div class="card mt12"><div class="kicker">Weight · goal zone ${st.profile.goalKgMin}–${st.profile.goalKgMax} kg</div>${C.lineChart(pts, { band: [st.profile.goalKgMin, st.profile.goalKgMax], unit: '' })}
+  <div class="card"><div class="stats"><div class="stat"><b>${last ? last.kg.toFixed(1) : '—'}<small> kg</small></b><span>Now</span></div><div class="stat"><b>${bmi ? bmi.toFixed(1) : '—'}</b><span>BMI</span></div><div class="stat"><b>${toGoal != null ? toGoal.toFixed(1) : '—'}<small> kg</small></b><span>To ${st.profile.goalKgMin} kg</span></div></div></div>
+  <div class="card"><div class="kicker">Weight · goal zone ${st.profile.goalKgMin}–${st.profile.goalKgMax} kg</div>${C.lineChart(pts, { band: [st.profile.goalKgMin, st.profile.goalKgMax], unit: '' })}
     ${etaLine()}
     <p class="small mt8" style="color:${rate == null ? 'var(--muted)' : rate > 0.4 ? 'var(--amber)' : rate >= 0.05 ? 'var(--green)' : 'var(--muted)'}">${rate == null ? 'Weigh in weekly to see your trend.' : `<span>${rate >= 0 ? '+' : '−'}${Math.abs(rate).toFixed(2)} kg/week</span> · <span>${rate > 0.4 ? 'faster than planned — fine, but no need to push' : rate >= 0.05 ? 'right on track (0.1–0.25 target)' : 'flat — add a daily shake'}</span>`}</p></div>
   <button class="btn primary block" data-weigh>Weigh in</button>
@@ -181,7 +180,8 @@ function etaLine() {
   if (!tr) return '';
   if (tr.eta === 'reached') return `<p class="small mt8" style="color:var(--green);font-weight:700">Trend is in your goal zone. Now hold it.</p>`;
   if (!tr.eta) return `<p class="small mt8 muted">Trend ${tr.perWeek >= 0 ? '+' : ''}${tr.perWeek.toFixed(2)} kg/week — not climbing yet, so no goal date. One extra shake a day (≈+300 kcal) usually starts it moving.</p>`;
-  return `<p class=\"small mt8\"><span>At ${tr.perWeek.toFixed(2)} kg/week you reach ${goal} kg by</span> <b>${tr.eta.toLocaleDateString(S.uiLocale(), { day: 'numeric', month: 'long', year: tr.eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b></p>`;
+  const eta = /** @type {Date} */ (tr.eta);
+  return `<p class="small mt8"><span>At ${tr.perWeek.toFixed(2)} kg/week you reach ${goal} kg by</span> <b>${eta.toLocaleDateString(S.uiLocale(), { day: 'numeric', month: 'long', year: eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</b></p>`;
 }
 
 function sxCard() {
