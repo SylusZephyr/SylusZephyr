@@ -906,3 +906,5 @@ button.list-item:last-child { border-bottom: 0; }
 /* Photo-less recipe tiles: one line icon sized to the tile. */
 .mono-tile .mono { display: grid; place-items: center; width: 34%; max-width: 72px; aspect-ratio: 1; }
 .mono-tile .mono svg { width: 100%; height: 100%; stroke-width: 1.4; opacity: .9; }
+
+.btn.sm { white-space: nowrap; flex-shrink: 0; }

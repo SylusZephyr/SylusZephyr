@@ -45,13 +45,14 @@ export function sleepChart(nights, { h = 160, target } = {}) {
   if (!nights.length) return `<div class="empty small"><span class="e"></span>Log a few nights to see your pattern</div>`;
   const AX0 = 18 * 60; const SPAN = 20 * 60; // 18:00 → 14:00
   const toAx = (hhmm) => ((((hhmm - AX0) % 1440) + 1440) % 1440);
-  const rowH = (H - pt - pb) / nights.length;
+  // Fixed row height: one night is a thin bar, not a blob that fills the chart.
+  const rowH = (H - pt - pb) / Math.max(7, nights.length);
   const X = (m) => pl + (m / SPAN) * (W - pl - pr);
   const hours = [20, 0, 4, 8, 12];
   return `<svg class="chart" viewBox="0 0 ${W} ${H}">
     ${hours.map((hh) => { const x = X(toAx(hh * 60)); return `<line x1="${x}" x2="${x}" y1="${pt}" y2="${H - pb}" stroke="rgba(255,255,255,.06)"/><text x="${x}" y="${H - 5}" text-anchor="middle">${hh === 0 ? '12a' : hh === 12 ? '12p' : hh > 12 ? (hh - 12) + 'p' : hh + 'a'}</text>`; }).join('')}
     ${target ? `<rect x="${X(toAx(target.bed))}" y="${pt}" width="${Math.max(0, X(toAx(target.wake)) - X(toAx(target.bed)))}" height="${H - pt - pb}" fill="rgba(167,139,250,0.08)"/>` : ''}
-    ${nights.map((n, i) => { const a = toAx(n.bed), b = toAx(n.wake); const y = pt + i * rowH + rowH * 0.2; const x1 = X(a), x2 = X(b >= a ? b : a); return `<text x="${pl - 4}" y="${y + rowH * 0.45}" text-anchor="end">${n.label}</text><rect x="${x1}" y="${y}" width="${Math.max(2, x2 - x1)}" height="${rowH * 0.6}" rx="${rowH * 0.3}" fill="url(#sl)"/>`; }).join('')}
+    ${nights.map((n, i) => { const a = toAx(n.bed), b = toAx(n.wake); const y = pt + i * rowH + rowH * 0.2; const x1 = X(a), x2 = X(b >= a ? b : a); return `<text x="${pl - 4}" y="${y + rowH * 0.45}" text-anchor="end">${n.label}</text><rect x="${x1}" y="${y}" width="${Math.max(2, x2 - x1)}" height="${rowH * 0.6}" rx="${Math.min(4, rowH * 0.3)}" fill="url(#sl)"/>`; }).join('')}
     <defs><linearGradient id="sl" x1="0" x2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#5aa9ff"/></linearGradient></defs>
   </svg>`;
 }
