@@ -58,7 +58,7 @@ What people open the app for every day.
 
 - [ ] State size and render time stay within budget with 3 years of data (already tested), and with 10 years.
 - [x] Storage quota errors are handled, with export offered.
-- [ ] Crash and error log viewer in Settings (local only).
+- [x] Crash and error log viewer in Settings (local only).
 - [ ] Accessibility: screen-reader pass of every flow; text size 200% without overlap.
 - [ ] Low-end Android: first paint < 1.5 s and tab switch < 100 ms at 4× CPU slowdown.
 

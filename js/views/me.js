@@ -91,6 +91,21 @@ function credits() {
 const back = (to = 'me') => `<a class="icon-btn" href="#${to}">${UI.ICON.back}</a>`;
 const item = (href, ico, title, subt) => `<a class="list-item plain" href="#${href}"><div class="li-ico">${ico}</div><div class="grow"><b>${title}</b>${subt ? `<div class="muted small">${subt}</div>` : ''}</div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></a>`;
 
+// Errors the app caught, newest first. Kept only in this browser's storage (last 20), never uploaded.
+function errorLog() { try { return JSON.parse(localStorage.getItem('revive.errors') || '[]').reverse(); } catch (e) { return []; } }
+function errorLogSheet(rerender) {
+  const list = errorLog();
+  const row = (e) => `<div class="row-line"><div class="row between"><b class="small">${UI.esc(e.where || 'app')}</b><span class="tiny muted">${UI.esc(new Date(e.at).toLocaleString(S.uiLocale()))}</span></div><div class="small mt4 pre-wrap" data-no-tr>${UI.esc(e.msg || '')}</div></div>`;
+  UI.openSheet(`<h2>Error log</h2><p class="small muted mt8">Problems the app caught and recovered from. They stay on this device; copy them only if you want to report one.</p>
+    ${list.length ? `<div class="mt12">${list.map(row).join('')}</div><div class="grid2 mt16"><button class="btn" data-errclear>Clear</button><button class="btn primary" data-errcopy>Copy</button></div>`
+      : UI.emptyState({ icon: 'check', title: 'No errors recorded', body: 'Nothing has gone wrong on this device.' })}`, {
+    onMount: (sh, close) => {
+      sh.querySelector('[data-errcopy]')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(JSON.stringify(list, null, 2)); UI.toast('Copied'); } catch (e) { UI.toast('Could not copy'); } });
+      sh.querySelector('[data-errclear]')?.addEventListener('click', () => { try { localStorage.removeItem('revive.errors'); } catch (e) {} close(); UI.toast('Error log cleared'); rerender(); });
+    },
+  });
+}
+
 // The recap row opens last month's recap once there is one; a new user sees when their first arrives.
 function recapRow() {
   const r = Progress.monthData(Progress.lastMonthKey());
@@ -312,6 +327,7 @@ function settings() {
   <div class="grid2 mt12"><button class="btn" data-export>Export file</button><label class="btn pointer">Import file<input type="file" accept=".json,application/json" data-import hidden></label></div>
   <button class="btn danger block mt12" data-reset>Delete all data</button>
   <a class="list-item mt12 plain" href="#me/account"><div class="li-ico">${UI.ICON.me}</div><div class="grow"><b>Cloud sync</b><div class="muted small">${Cloud.getConfig() ? 'Connected project' : 'Optional · connect your own Supabase project'}</div></div></a>
+  <button class="list-item" data-errlog><div class="li-ico">${UI.ICON.pulse}</div><div class="grow"><b>Error log</b><div class="muted small">${errorLog().length ? `<span>${errorLog().length} recorded</span> · <span>stays on this device</span>` : 'No errors recorded'}</div></div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></button>
   <button class="list-item" data-diag><div class="li-ico">${UI.ICON.list}</div><div class="grow"><b>Copy diagnostics</b><div class="muted small">Version, language and recent errors for support. No health data.</div></div></button>
   <a class="list-item plain" href="#me/credits"><div class="li-ico">${UI.ICON.share}</div><div class="grow"><b>Photo credits</b></div></a>
   <a class="list-item plain" href="privacy.html" target="_blank" rel="noopener"><div class="li-ico">${UI.ICON.lock}</div><div class="grow"><b>Privacy policy</b></div></a>
@@ -490,6 +506,7 @@ export function bind(root, parts, { rerender }) {
       p.weeklyBudget = +root.querySelector('#p-b').value || p.weeklyBudget; p.startKg = +root.querySelector('#p-s').value || p.startKg;
       S.save(); UI.toast('Profile saved', ''); rerender();
     };
+    root.querySelector('[data-errlog]')?.addEventListener('click', () => errorLogSheet(rerender));
     root.querySelector('[data-diag]')?.addEventListener('click', async () => {
       let errors = []; try { errors = JSON.parse(localStorage.getItem('revive.errors') || '[]').slice(-10); } catch (e) {}
       const info = { app: 'Revive', version: APP_VERSION, schema: S.SCHEMA_VERSION, locale: document.documentElement.lang, region: Region.regionCode(),
