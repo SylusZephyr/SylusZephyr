@@ -5,6 +5,7 @@ import * as G from '../gamify.js';
 import { RECIPE, DELIVERY } from '../data/recipes.js';
 import { CHECKINS, scoreCheckin } from '../data/content.js';
 import * as Region from '../region.js';
+import * as Native from '../native.js';
 import { currentSlot, SLOT_LABEL, SLOT_EMOJI, sleepTargets } from '../plan.js';
 import { searchLocal, searchOnline, forPortion, lookupBarcode } from '../nutrition.js';
 import { scanBarcode } from '../scanner.js';
@@ -169,6 +170,15 @@ export function sleepSheet(onDone) {
       };
     },
   });
+}
+
+/** Save all data as a JSON file: the native share sheet on phones, a download elsewhere. */
+export async function exportBackup() {
+  const st = S.get(); st.lastExportAt = Date.now(); S.save();
+  const name = `revive-${S.dayKey()}.json`;
+  if (await Native.shareFile(name, S.exportJSON(), 'Revive data')) return;
+  const blob = new Blob([S.exportJSON()], { type: 'application/json' }); const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
 }
 
 /** Record last night's sleep for today. Ticks the sleep essential when the wake-up is within 45 min

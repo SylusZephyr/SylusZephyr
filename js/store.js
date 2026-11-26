@@ -182,16 +182,23 @@ function deepMerge(base, over) {
 let saveTimer = null;
 let persistHook = null;
 export function setPersistHook(fn) { persistHook = fn; }
-let quotaWarned = false;
+// Storage health, for the UI: 'ok', 'trimmed' (saved after dropping old details) or 'full' (not saved).
+let storageState = 'ok';
+export const storageStatus = () => storageState;
+const setStorage = (next) => {
+  if (next === storageState) return;
+  storageState = next;
+  window.dispatchEvent(new CustomEvent('revive:storage', { detail: next }));
+};
 function write() {
   let json = JSON.stringify(state);
-  try { localStorage.setItem(KEY, json); }
+  try { localStorage.setItem(KEY, json); if (storageState === 'full') setStorage('ok'); }
   catch (e) {
     // Storage full: trim bulky per-day details older than a year, then retry once.
     compact(365);
     json = JSON.stringify(state);
-    try { localStorage.setItem(KEY, json); }
-    catch (err) { if (!quotaWarned) { quotaWarned = true; window.dispatchEvent(new CustomEvent('revive:storage-full')); } }
+    try { localStorage.setItem(KEY, json); setStorage('trimmed'); }
+    catch (err) { setStorage('full'); }
   }
   if (persistHook) persistHook(json);
 }
