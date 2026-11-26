@@ -121,7 +121,7 @@ function prayerCard() {
   const fast = Pr.fasting(now) ? Pr.fastWindow(now) : null;
   if (!cfg.enabled && !fast) return '';
   const nx = Pr.next(now); const list = Pr.todayList(now);
-  return `<div class="card prayer-card">
+  return `<div class="card prayer-card cq">
     ${fast ? `<div class="row between"><div class="kicker">${Pr.isRamadanDate(now) ? `Ramadan${Pr.hijri(now) ? `, day ${Pr.hijri(now).day}` : ''}` : 'Fasting'}</div><span class="small muted">${Pr.countdown(fast.lengthMin)} fast</span></div>
       <h3>${fast.state === 'fasting' ? `Iftar in ${Pr.countdown(fast.toIftar)}` : fast.state === 'suhoor' ? `Suhoor ends in ${Pr.countdown(fast.toSuhoorEnd)}` : 'Fast complete'}</h3>
       <div class="lvlbar mt8 fastbar"><i style="width:${Math.round(fast.pct * 100)}%"></i></div>
@@ -160,7 +160,7 @@ export function render(_, { night }) {
     <h1>${greeting()}</h1>
   </header>
   <div class="t-grid"><div class="t-col">
-  <section class="card">
+  <section class="card cq">
     <div class="summary">
       ${rings(ringVals)}
       <div class="legend-v">
