@@ -51,19 +51,19 @@ What people open the app for every day.
 - [ ] Log water and coffee in 1 tap, with undo.
 - [x] Morning check: last night's sleep pre-filled from the plan, confirmed with one tap.
 - [ ] Reminders: verify that each scheduled notification fires on Android and iOS. Show the next reminder on Today.
-- [ ] Training session: resume after interruption, and screen-off safe timing.
+- [x] Training session: resume after interruption, and screen-off safe timing.
 - [ ] Weekly summary that says what changed and what to do next week, in one screen.
 
 ## Phase 4 — Scale and reliability
 
 - [ ] State size and render time stay within budget with 3 years of data (already tested), and with 10 years.
-- [ ] Storage quota errors are handled, with export offered.
+- [x] Storage quota errors are handled, with export offered.
 - [ ] Crash and error log viewer in Settings (local only).
 - [ ] Accessibility: screen-reader pass of every flow; text size 200% without overlap.
 - [ ] Low-end Android: first paint < 1.5 s and tab switch < 100 ms at 4× CPU slowdown.
 
 ## Phase 5 — Release engineering
 
-- [ ] CHANGELOG.md generated from releases.
-- [ ] Version bump script that updates every place the version lives.
+- [x] CHANGELOG.md generated from releases.
+- [x] Version bump script that updates every place the version lives.
 - [ ] Signed release builds published on version tags.
