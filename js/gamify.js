@@ -176,17 +176,39 @@ export function weeklyReviewData(wk) {
   const water = days.filter((k) => (st.days[k]?.waterMl || 0) >= 1500).length;
   const pct = ess / 49;
   const grade = pct >= 0.85 ? 'S' : pct >= 0.7 ? 'A' : pct >= 0.5 ? 'B' : pct >= 0.3 ? 'C' : 'D';
-  return { logged: logged.length, ess, secured, meals, pf, xp, water, grade };
+  const perEss = Object.fromEntries(ESSENTIALS.map((e) => [e.id, days.filter((k) => st.days[k]?.checks?.[e.id]).length]));
+  return { logged: logged.length, ess, secured, meals, pf, xp, water, grade, perEss };
+}
+
+// One concrete thing to do next week, aimed at the essential done least often.
+export const FOCUS = {
+  breakfast: 'Eat breakfast within an hour of waking, even if it is small — a shake or eggs and bread counts.',
+  lunch: 'Set a lunch time and keep one ready-to-eat option in the fridge for busy days.',
+  dinner: 'Eat dinner before 9 pm on at least 5 days. Batch-cook twice this week.',
+  fluids: 'Drink 1.5 L on at least 5 days. Keep a bottle where you eat and refill it at each meal.',
+  sleep: 'Get up at your anchor time every day, weekends too. Bedtime follows once the wake time is fixed.',
+  outdoors: 'Step outside for 10 minutes before noon on 5 days. Daylight early sets your body clock.',
+  caffeine: 'Switch to decaf or tea after your coffee cutoff on at least 5 days.',
+};
+
+/** Last week against the week before, plus the one focus for the coming week. */
+export function weekInsight(wk) {
+  const now = weeklyReviewData(wk); const before = weeklyReviewData(S.addDays(wk, -7));
+  const weakest = ESSENTIALS.map((e) => e.id).sort((a, b) => now.perEss[a] - now.perEss[b])[0];
+  return { now, before, comparable: before.logged >= 2, focus: weakest, focusText: FOCUS[weakest], focusDays: now.perEss[weakest] };
 }
 export async function maybeWeeklyReview() {
   const st = S.get(); const thisWk = S.weekKey(); const lastWk = S.addDays(thisWk, -7);
   if (st.game.reviewed === thisWk) return;
   st.game.reviewed = thisWk; S.save();
-  const r = weeklyReviewData(lastWk);
+  const w = weekInsight(lastWk); const r = w.now;
   if (r.logged < 2) return;
+  const delta = (a, b) => (!w.comparable || a === b ? '' : `<em class="${a > b ? 'up' : 'down'}">${a > b ? '+' : '−'}${Math.abs(a - b)}</em>`);
+  const cell = (v, prev, label) => `<div><b>${v}${delta(v, prev)}</b><span>${label}</span></div>`;
   await UI.celebrate({
     rarity: 'Last week', title: `${r.secured} of 7 days on track`,
-    body: `<div class="review-grid"><div><b>${r.meals}</b><span>main meals</span></div><div><b>${r.water}</b><span>days 1.5 L+</span></div><div><b>${r.pf}</b><span>pelvic-floor sessions</span></div></div>`,
+    body: `<div class="review-grid">${cell(r.meals, w.before.meals, 'main meals')}${cell(r.water, w.before.water, 'days 1.5 L+')}${cell(r.pf, w.before.pf, 'pelvic-floor sessions')}</div>
+      <div class="review-focus"><div class="kicker">Focus this week</div><p>${w.focusText}</p><p class="tiny muted"><span>${ESSENTIALS.find((e) => e.id === w.focus).label}</span> · <span>${w.focusDays} of 7 days last week</span></p></div>`,
     btn: 'Start this week',
   });
 }

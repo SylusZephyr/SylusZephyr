@@ -79,7 +79,9 @@ export function enhance(root = document) {
     const title = textOf(d.querySelector('h1, h2, h3')); if (title) d.setAttribute('aria-label', title);
     if (!d.hasAttribute('tabindex')) d.setAttribute('tabindex', '-1');
     lastFocus = document.activeElement;
-    setTimeout(() => { const first = d.querySelector('input, textarea, select, button.primary, button'); (first || d).focus({ preventScroll: true }); }, 60);
+    // Focus the dialog itself (screen readers announce its label); Tab then moves into it. Focusing
+    // the first button instead drew a focus ring on touch devices that had never used a keyboard.
+    setTimeout(() => { const field = d.querySelector('[autofocus]'); (field || d).focus({ preventScroll: true }); }, 60);
   });
 }
 
