@@ -296,6 +296,26 @@ await test('A screen error shows recovery instead of a blank app', async (p) => 
   assert.match(await p.textContent('[data-errlog]'), /No errors recorded/);
 }, { allowErrors: true });
 
+await test('Large text (1.6x) on a narrow phone: nothing runs off screen', async (p) => {
+  await p.setViewportSize({ width: 360, height: 740 });
+  await ready(p);
+  const off = [];
+  for (const h of ['today', 'cook', 'cook/r/egg_paratha', 'cook/pantry', 'train', 'track', 'me', 'me/settings', 'me/medical']) {
+    await go(p, h);
+    await p.evaluate(() => document.documentElement.style.setProperty('--zoom', '1.6'));
+    await p.waitForTimeout(100);
+    off.push(...(await p.evaluate((route) => {
+      const vw = document.documentElement.clientWidth; const out = [];
+      for (const el of document.querySelectorAll('#screen *')) {
+        if (el.closest('svg, .carousel, .chips.scroll, .seg, .yheat') || el.children.length || !el.textContent.trim()) continue;
+        const r = el.getBoundingClientRect(); if (r.width && r.right > vw + 1) out.push(`${route}: "${el.textContent.trim().slice(0, 30)}" +${Math.round(r.right - vw)}px`);
+      }
+      return out;
+    }, h)));
+  }
+  assert.deepEqual(off, []);
+});
+
 await test('Random taps across the app cause no errors', async (p) => {
   await ready(p);
   for (const h of ['today', 'cook', 'train', 'track', 'me', 'me/settings']) {
