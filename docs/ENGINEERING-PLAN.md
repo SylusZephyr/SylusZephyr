@@ -24,8 +24,8 @@ Mistakes should be caught by machines, not by the user.
 - [x] Type-check all JavaScript with `tsc --checkJs` (JSDoc types for the state shape). CI fails on any error.
 - [x] ESLint with a strict rule set (no unused variables, no implicit globals, eqeqeq). CI fails on any warning.
 - [ ] Visual regression: baseline screenshots of every screen and sheet, at phone and desktop width, in 3 languages. CI fails when a pixel diff goes over the threshold without an updated baseline.
-- [ ] Computed-style snapshot tool (`scripts/style-snapshot.mjs`) committed, for safe CSS refactors.
-- [ ] Check that every UI string has a translation (no English left in zh/ur on any screen or sheet, not only main screens).
+- [x] Computed-style snapshot tool (`scripts/style-snapshot.mjs`) committed, for safe CSS refactors.
+- [x] Check that every UI string has a translation (no English left in zh/ur on any screen or sheet, not only main screens).
 
 ## Phase 2 — Design system
 

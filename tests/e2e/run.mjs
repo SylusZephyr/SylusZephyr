@@ -109,14 +109,45 @@ await test('Track and Me screens render', async (p) => {
   await go(p, 'track'); for (const t of ['food', 'sleep', 'body', 'checkins']) { await p.click(`[data-tab="${t}"]`); await p.waitForTimeout(120); }
 });
 
-await test('Chinese translates every main screen', async (p) => {
-  await ready(p, { locale: 'zh' });
-  for (const h of ['today', 'cook', 'train', 'track', 'me']) {
-    await go(p, h);
-    const left = await p.evaluate(() => { const out = []; const w = document.createTreeWalker(document.querySelector('#screen'), NodeFilter.SHOW_TEXT); while (w.nextNode()) { const t = w.currentNode.nodeValue.trim(); if (/[A-Za-z]{4}/.test(t) && !/Revive|Wajid|Supabase|iPhone|Windows|OLED|ISNA|UTC|PHQ|XP/.test(t)) out.push(t); } return out; });
-    assert.deepEqual(left, [], `${h} still has English: ${left.join(" / ")}`);
+// Every route, Track tab and sheet, in Chinese and Urdu: no English left on screen.
+// Allowed: brand and product names, photo authors, URLs, and text already mixed with CJK/Arabic script.
+const ROUTES = ['today', 'cook', 'cook/delivery', 'cook/pantry', 'cook/plan', 'cook/shop', 'cook/r/egg_paratha', 'cook/r/egg_muffins', 'train', 'track',
+  'me', 'me/account', 'me/credits', 'me/medical', 'me/prayer', 'me/settings', 'me/summary', 'me/badges', 'me/saved', 'me/reminders', 'me/install'];
+const SHEET_BUTTONS = ['[data-logmeal]', '[data-drinks]', '[data-filters]', '[data-search]', '[data-weigh]', '[data-logsleep]', '[data-ci]', '[data-recap]', '[data-sleepset]'];
+const ALLOWED = 'Revive|Wajid|Supabase|iPhone|Windows|Android|OLED|ISNA|UTC|PHQ|XP|Face ID|Hello|Google|Meituan|Ele\\.me|Hema|CC BY|CC0|Public domain|Commons|Wikimedia|Open Food Facts|PIN|BMI|kcal|GitHub|JSON|ICS|PDF|Kegel|Safari|Microsoft Edge|^Esc$';
+const untranslated = (p) => p.evaluate((allowed) => {
+  const ok = new RegExp(allowed); const out = [];
+  for (const root of [document.querySelector('#app'), document.querySelector('#overlay-root')]) {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (w.nextNode()) {
+      const t = w.currentNode.nodeValue.replace(/\s+/g, ' ').trim(); const el = w.currentNode.parentElement;
+      if (!el || el.closest('script,style,svg,textarea,[data-no-tr],.chart')) continue;
+      if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') continue;
+      if (/[A-Za-z]{3}/.test(t) && !/[㐀-鿿؀-ۿ]/.test(t) && !ok.test(t) && !/^https?:/.test(t)) out.push(t);
+    }
   }
-});
+  return out;
+}, ALLOWED);
+
+for (const loc of ['zh', 'ur']) {
+  await test(`${loc === 'zh' ? 'Chinese' : 'Urdu'}: every screen and sheet is translated`, async (p) => {
+    await ready(p, { locale: loc });
+    const left = new Map();
+    const note = async (where) => { for (const t of await untranslated(p)) if (!left.has(t)) left.set(t, where); };
+    for (const r of ROUTES) {
+      await go(p, r); await note(r);
+      if (r === 'track') for (const t of ['food', 'sleep', 'body', 'checkins']) { await p.click(`[data-tab="${t}"]`); await p.waitForTimeout(150); await note(`track/${t}`); }
+      for (const sel of SHEET_BUTTONS) {
+        const n = await p.$$eval(`#screen ${sel}`, (els) => els.length);
+        for (let i = 0; i < n; i++) {
+          await go(p, r); const el = (await p.$$(`#screen ${sel}`))[i]; if (!el) continue;
+          await el.click(); await p.waitForTimeout(300); await note(`${r} ${sel}`); await clear(p);
+        }
+      }
+    }
+    assert.deepEqual([...left].map(([t, w]) => `${w}: ${t}`), []);
+  });
+}
 
 await test('Urdu switches to right-to-left', async (p) => {
   await ready(p, { locale: 'ur' });
