@@ -223,5 +223,5 @@ const SCALE_ENDS = { energy: ['Drained', 'Full of energy'], mood: ['Low', 'Great
 export function scaleButtons(name, n, current, labels = null, emoji = false) {
   const ends = emoji ? SCALE_ENDS[name] : null;
   return `<div class="scale" data-scale="${name}">${Array.from({ length: n }, (_, i) =>
-    `<button data-v="${i}" class="${current === i ? 'on' : ''}" aria-label="${i + 1} of ${n}${ends && i === 0 ? ', ' + ends[0] : ends && i === n - 1 ? ', ' + ends[1] : ''}">${labels && !emoji ? labels[i] : i + 1}</button>`).join('')}</div>${ends ? `<div class="row between tiny muted" style="margin-top:6px"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}`;
+    `<button data-v="${i}" class="${current === i ? 'on' : ''}" aria-label="${i + 1} of ${n}${ends && i === 0 ? ', ' + ends[0] : ends && i === n - 1 ? ', ' + ends[1] : ''}">${labels && !emoji ? labels[i] : i + 1}</button>`).join('')}</div>${ends ? `<div class="row between tiny muted mt6"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}`;
 }

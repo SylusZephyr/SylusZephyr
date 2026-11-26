@@ -63,7 +63,7 @@ export function render() {
   <div class="topbar"><div><div class="sub">Pelvic floor · week ${wk} of 12</div><h1>Train</h1></div></div>
 
   <section class="card">
-    <div class="row" style="gap:16px">
+    <div class="row gap16">
       ${UI.ring(Math.min(1, todayN / 3), 96, 10, todayN >= 3 ? 'var(--green)' : 'var(--a1)', `${todayN}/3`, 'today')}
       <div class="grow"><div class="kicker">${ph.name}</div><h3>${ph.reps} holds of ${ph.hold} seconds</h3>
         <p class="muted small mt8">Then ${ph.flicks} quick flicks and ${ph.reverse} reverse Kegels. About ${mins} min.</p></div>
@@ -88,7 +88,7 @@ export function render() {
     ${PF_PHASES.map((p) => { const active = p.weeks.includes(wk); const done = Math.max(...p.weeks) < wk; return `<div class="list-item">
       <div class="li-ico" style="${active ? 'background:var(--text);color:#0b0c0e' : done ? 'background:var(--green);color:#0b0c0e' : ''}">${done ? UI.ICON.check : active ? UI.ICON.play : UI.ICON.lock}</div>
       <div class="grow"><b>${p.name}</b> <span class="muted small">· weeks ${p.weeks[0]}–${p.weeks.at(-1)}</span><div class="muted small">${p.reps} × ${p.hold}s holds · ${p.flicks} flicks · ${p.pos.toLowerCase()}</div></div></div>`; }).join('')}
-    <div class="row between" style="padding:12px 2px 4px"><span class="small muted">Program week</span><div class="row"><button class="icon-btn sz32" data-wk="-1" aria-label="Previous week">${UI.ICON.minus}</button><b style="min-width:20px;text-align:center">${wk}</b><button class="icon-btn sz32" data-wk="1" aria-label="Next week">${UI.ICON.plus}</button></div></div>
+    <div class="row between stepper-row"><span class="small muted">Program week</span><div class="row"><button class="icon-btn sz32" data-wk="-1" aria-label="Previous week">${UI.ICON.minus}</button><b class="num-cell">${wk}</b><button class="icon-btn sz32" data-wk="1" aria-label="Next week">${UI.ICON.plus}</button></div></div>
   </section>
 
   <div class="section-title">Walking</div>
@@ -129,7 +129,7 @@ function runSession(rerender) {
 
   UI.fullscreen(`<div class="trainer">
     <div class="row between w100"><button class="icon-btn" data-x>${UI.ICON.close}</button><div class="muted small" id="tr-left"></div><button class="icon-btn" data-p>${UI.ICON.pause}</button></div>
-    <div class="lvlbar" style="width:100%;margin-top:14px"><i id="tr-bar" style="width:0%"></i></div>
+    <div class="lvlbar w100 mt14"><i id="tr-bar" style="width:0%"></i></div>
     <div class="orb-wrap"><div class="orb" id="orb"><svg class="orb-ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92"/></svg><div class="count" id="tr-count"></div></div></div>
     <div class="phase" id="tr-label"></div><div class="meta mt8" id="tr-sub"></div>
     <p class="tiny faint mt16 tc">Keep breathing. Buttocks, thighs and stomach stay loose.</p>
