@@ -49,7 +49,8 @@ h2,
 h3 { margin: 0; }
 h4 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
 p { margin: 0; }
-a { color: var(--blue); }
+a { color: var(--text); text-decoration-color: color-mix(in srgb, var(--text) 40%, transparent); text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
 
 /* ---------- Layout ---------- */
 #app { min-height: 100vh; }
@@ -630,7 +631,7 @@ textarea { background: var(--surface2); border-radius: 10px; }
 .chip.swatch.on { background: var(--surface3); color: var(--text); box-shadow: inset 0 0 0 1px var(--line2); }
 
 /* Monogram tile for recipes without a photo */
-.mono-tile, .ccard .ph-wrap.mono-tile, .dthumb.mono-tile { background: color-mix(in srgb, var(--tint, #444) 22%, var(--surface2)); display: flex; align-items: center; justify-content: center; }
+.mono-tile, .ccard .ph-wrap.mono-tile, .dthumb.mono-tile, .rcard .hero.mono-tile, .rwide .thumb.mono-tile, .hero-lg.mono-tile { background: radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--tint, #444) 38%, var(--surface2)), color-mix(in srgb, var(--tint, #444) 10%, var(--surface2))); display: flex; align-items: center; justify-content: center; }
 .mono-tile .mono { font-weight: 700; letter-spacing: 0.04em; color: color-mix(in srgb, var(--tint, #888) 55%, #fff); font-size: 22px; }
 .hero-lg.mono-tile .mono { font-size: 64px; }
 .rcard .hero.mono-tile .mono { font-size: 34px; }
@@ -901,3 +902,7 @@ button.list-item:last-child { border-bottom: 0; }
 
 .quick-est { justify-content: space-between; gap: 8px; padding-inline: 14px; white-space: nowrap; text-align: start; }
 .quick-est span:first-child { overflow: hidden; text-overflow: ellipsis; }
+
+/* Photo-less recipe tiles: one line icon sized to the tile. */
+.mono-tile .mono { display: grid; place-items: center; width: 34%; max-width: 72px; aspect-ratio: 1; }
+.mono-tile .mono svg { width: 100%; height: 100%; stroke-width: 1.4; opacity: .9; }

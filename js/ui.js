@@ -108,13 +108,15 @@ const toastQueue = [];
 let toastActive = 0;
 export function toast(msg, icon) {
   msg = String(msg).replace(EMOJI, '').replace(/\s{2,}/g, ' ').trim();
+  // The same message twice in a row (a double tap, a repeated save) shows once.
+  if (toastQueue.some((q) => q[0] === msg) || [...document.querySelectorAll('#toast-root .toast')].some((t) => t.dataset.msg === msg)) return;
   toastQueue.push([msg, icon]); pumpToasts();
 }
 function pumpToasts() {
   const root = $('#toast-root'); if (!root) return;
   while (toastActive < 2 && toastQueue.length) {
     const [msg, icon] = toastQueue.shift(); toastActive++;
-    const el = document.createElement('div'); el.className = 'toast';
+    const el = document.createElement('div'); el.className = 'toast'; el.dataset.msg = msg;
     el.innerHTML = `<span>${esc(msg)}</span>`;
     root.appendChild(el);
     setTimeout(() => { el.remove(); toastActive--; pumpToasts(); }, 2700);

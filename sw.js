@@ -1,5 +1,5 @@
 // Offline-first service worker. Bump VERSION on every release.
-const VERSION = 'revive-f47ec16044d9';
+const VERSION = 'revive-40773bda6930';
 const ASSETS = [
   './',
   'css/app.css',
@@ -51,7 +51,9 @@ const ASSETS = [
   'img/food/late_kebab_rice.webp',
   'img/food/malai_tikka.webp',
   'img/food/mango_lassi.webp',
+  'img/food/mango_parfait.webp',
   'img/food/masala_fish.webp',
+  'img/food/masala_fries.webp',
   'img/food/mushroom_toastie.webp',
   'img/food/naan_egg_cheese.webp',
   'img/food/nugget_wrap.webp',

@@ -47,9 +47,13 @@ const go = async (page, hash) => { await page.evaluate((h) => { location.hash = 
 
 await test('onboarding reaches Today', async (p) => {
   await p.goto(BASE); await p.waitForSelector('#ob-next');
-  for (let i = 0; i < 8 && await p.$('#ob-next'); i++) {
-    if (await p.$('[data-pr="0"]')) await p.click('[data-pr="0"]');
-    if (await p.$('#ob-ack')) await p.check('#ob-ack');
+  for (let i = 0; i < 10 && await p.$('#ob-next, [data-pr]'); i++) {
+    // The prayer step has no Continue: picking an answer moves on.
+    if (await p.$('[data-pr="0"]')) { await p.click('[data-pr="0"]'); await p.waitForTimeout(150); continue; }
+    if (await p.$('#ob-ack')) {
+      assert.equal(await p.$eval('#ob-next', (b) => b.disabled), true, 'Continue waits for "I understand"');
+      await p.check('#ob-ack');
+    }
     await p.click('#ob-next'); await p.waitForTimeout(150);
   }
   await p.click('#ob-skip'); await p.waitForSelector('.t-head');

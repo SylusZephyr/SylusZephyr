@@ -93,7 +93,7 @@ export function render() {
 
   <div class="section-title">Walking</div>
   <section class="card ${w.cleared ? '' : 'danger'}">
-    <div class="row between"><div class="kicker" style="margin:0">${w.cleared ? `Level ${w.level} of ${CARDIO.length}` : 'Gentle walks only until a doctor clears you'}</div><span class="small muted">${w.hit} of 5 days</span></div>
+    <div class="row between"><div class="kicker" style="margin:0">${w.cleared ? `Level ${w.level} of ${CARDIO.length}` : 'Gentle walks only until a doctor clears you'}</div><span class="small muted" style="white-space:nowrap">${w.hit} of 5 days</span></div>
     <h3 class="mt8">${w.c.min} minutes a day</h3><p class="small muted">${UI.esc(w.c.t)}.${w.cleared && w.level < CARDIO.length ? ` Five days on target this week moves you to ${CARDIO[w.level].min} minutes.` : ''}</p>
     <div class="walk-week mt12">${w.days.map((k, i) => `<div class="ww ${k === S.dayKey() ? 'today' : ''}"><div class="col-bar"><i style="height:${Math.min(100, Math.round(w.mins[i] / w.c.min * 100))}%" class="${w.mins[i] >= w.c.min ? 'hit' : ''}"></i></div><span>${S.prettyDate(k, { weekday: 'narrow' })}</span></div>`).join('')}</div>
     <div class="grid3 mt12">${[5, 10, 15].map((m) => `<button class="btn sm" data-walk="${m}">+${m} min</button>`).join('')}</div>

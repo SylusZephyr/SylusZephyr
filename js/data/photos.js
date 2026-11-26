@@ -431,5 +431,17 @@ export const PHOTOS = {
   "credit": "Shumayla Zafri · CC BY-SA 4.0",
   "page": "https://commons.wikimedia.org/wiki/File:Sweet_lassi_with_roohafza.JPG",
   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
+ },
+ "masala_fries": {
+  "src": "img/food/masala_fries.webp",
+  "credit": "Horacio Cambeiro · CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:French_fries_and_fried_egg_side_by_side_on_a_plate.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/3.0"
+ },
+ "mango_parfait": {
+  "src": "img/food/mango_parfait.webp",
+  "credit": "Tokumeigakarinoaoshima · CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Mini_stop_Apple_Mango_Parfait.jpg",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/4.0"
  }
 };
