@@ -90,6 +90,14 @@ function credits() {
 const back = (to = 'me') => `<a class="icon-btn" href="#${to}">${UI.ICON.back}</a>`;
 const item = (href, ico, title, subt) => `<a class="list-item plain" href="#${href}"><div class="li-ico">${ico}</div><div class="grow"><b>${title}</b>${subt ? `<div class="muted small">${subt}</div>` : ''}</div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></a>`;
 
+// The recap row opens last month's recap once there is one; a new user sees when their first arrives.
+function recapRow() {
+  const r = Progress.monthData(Progress.lastMonthKey());
+  if (r.logged) return `<button class="list-item" data-recap><div class="li-ico">${UI.ICON.calendar}</div><div class="grow"><b>Monthly recap</b><div class="muted small">${r.label}</div></div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></button>`;
+  const now = S.keyToDate(S.dayKey()); const first = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return `<div class="list-item"><div class="li-ico">${UI.ICON.calendar}</div><div class="grow"><b>Monthly recap</b><div class="muted small"><span>First one arrives</span> <span>${S.prettyDate(S.dayKey(first), { day: 'numeric', month: 'long' })}</span></div></div></div>`;
+}
+
 function main() {
   const st = S.get(); const lv = G.levelInfo(); const nb = Object.keys(st.game.badges).length;
   const qs = (st.medical.questions || []); const open = qs.filter((q) => !q.done).length;
@@ -108,7 +116,7 @@ function main() {
     </div>
   </div>
   <div class="card tight">
-    <button class="list-item" data-recap><div class="li-ico">${UI.ICON.calendar}</div><div class="grow"><b>Monthly recap</b><div class="muted small">${Progress.monthData(Progress.lastMonthKey()).label}</div></div><span class="chev">${UI.ICON.chev.replace('<svg', '<svg width="18" height="18"')}</span></button>
+    ${recapRow()}
     ${item('me/badges', UI.ICON.star, 'Milestones', `${nb} of ${G.BADGES.length} reached`)}
   </div>
   <div class="card tight">

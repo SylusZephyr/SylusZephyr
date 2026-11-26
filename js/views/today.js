@@ -79,8 +79,8 @@ function cafCard(k) {
   const tone = sum.safeAtBed ? 'var(--green)' : 'var(--coral)';
   return `<div class="card mt12 caf-card">
     <div class="row between"><div class="kicker">Caffeine</div><span class="pill ${sum.overLimit ? 'coral' : ''}">${sum.total} mg today</span></div>
-    <div class="grid2 mt8"><div class="macro"><b>≈${sum.now} mg</b><span>right now</span></div>
-      <div class="macro"><b style="color:${tone}">≈${sum.atBed} mg</b><span>at bed (${S.prettyTime(sum.bedClock)})</span></div></div>
+    <div class="stats mt12"><div class="stat"><b>≈${sum.now}<small> mg</small></b><span>Right now</span></div>
+      <div class="stat"><b style="color:${tone}">≈${sum.atBed}<small> mg</small></b><span>At bed (${S.prettyTime(sum.bedClock)})</span></div></div>
     ${Caf.curveSvg(k)}
     <p class="small muted mt8">${sum.safeAtBed
       ? (sum.ifOneMore >= Caf.SLEEP_SAFE_MG ? `Another cup now would leave ≈${sum.ifOneMore} mg at your ${S.prettyTime(sum.bedClock)} bedtime — enough to delay sleep.` : `You have room: one more cup still clears before ${S.prettyTime(sum.bedClock)}.`)

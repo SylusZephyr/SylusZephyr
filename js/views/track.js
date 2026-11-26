@@ -188,8 +188,8 @@ function sxCard() {
   const log = (S.get().sxLog || []).filter((x) => x.date >= S.addDays(S.dayKey(), -28));
   const n = log.length; const pct = (f) => n ? Math.round(log.filter(f).length / n * 100) : 0;
   return `<div class="card"><div class="row between"><div><div class="kicker">Private log · 28 days</div><div class="tiny muted">${n} entries</div></div><button class="btn sm primary" data-sx>+ Log</button></div>
-    ${n ? `<div class="grid3 mt12"><div class="macro"><b>${pct((x) => x.firm >= 3)}%</b><span>firm enough</span></div><div class="macro"><b>${pct((x) => x.kept === 2)}%</b><span>kept it</span></div><div class="macro"><b>${pct((x) => x.semen === 2)}%</b><span>dry</span></div></div>
-    <div class="grid2 mt8"><div class="macro"><b>${pct((x) => x.time <= 1)}%</b><span>under 2 min</span></div><div class="macro"><b>${pct((x) => x.anxious)}%</b><span>felt pressure</span></div></div>` : '<p class="muted small mt8">Optional. Log after any sexual activity — it shows your doctor patterns (e.g. solo vs partner, dry orgasms) that questionnaires miss.</p>'}</div>`;
+    ${n ? `<div class="stats mt16"><div class="stat"><b>${pct((x) => x.firm >= 3)}%</b><span>Firm enough</span></div><div class="stat"><b>${pct((x) => x.kept === 2)}%</b><span>Kept it</span></div><div class="stat"><b>${pct((x) => x.semen === 2)}%</b><span>Dry</span></div></div>
+    <div class="stats mt16"><div class="stat"><b>${pct((x) => x.time <= 1)}%</b><span>Under 2 min</span></div><div class="stat"><b>${pct((x) => x.anxious)}%</b><span>Felt pressure</span></div><div class="stat"></div></div>` : '<p class="muted small mt8">Optional. Log after any sexual activity — it shows your doctor patterns (e.g. solo vs partner, dry orgasms) that questionnaires miss.</p>'}</div>`;
 }
 
 function checkins() {
