@@ -9,6 +9,7 @@ import * as Train from './views/train.js';
 import * as Track from './views/track.js';
 import * as Me from './views/me.js';
 import * as Onboard from './views/onboard.js';
+import * as Sh from './views/shared.js';
 import * as Native from './native.js';
 import { reminderList } from './ics.js';
 import * as Cloud from './cloud.js';
@@ -137,7 +138,19 @@ function crashCard() {
 let errorToastShown = false;
 window.addEventListener('error', (e) => { logError(e.error || e.message, 'window'); if (!errorToastShown) { errorToastShown = true; UI.toast('Something went wrong — your data is safe', ''); } });
 window.addEventListener('unhandledrejection', (e) => logError(e.reason, 'promise'));
-window.addEventListener('revive:storage-full', () => UI.toast('Phone storage is almost full — older details were trimmed', ''));
+// Storage problems are never silent: trimming is announced, and a failed save asks for a backup.
+window.addEventListener('revive:storage', (e) => {
+  const state = /** @type {CustomEvent} */ (e).detail;
+  if (state === 'trimmed') UI.toast('Storage was nearly full — details older than a year were trimmed', '');
+  if (state === 'full') {
+    UI.openSheet(`<h2>Your phone’s storage is full</h2>
+      <p class="muted mt8">New entries can’t be saved until some space is freed. Save a backup file now so nothing is lost, then free space on your phone.</p>
+      <button class="btn primary block mt16" data-backup-now>Save backup file</button>`, {
+      onMount: (sh, close) => { sh.querySelector('[data-backup-now]').onclick = async () => { await Sh.exportBackup(); close(); }; },
+    });
+  }
+  if (state === 'ok') UI.toast('Saving again', '');
+});
 if (S.loadIssues.includes('recovered-corrupt')) setTimeout(() => UI.toast('Saved data could not be read. A copy was kept and the app started fresh.', ''), 800);
 if (S.loadIssues.includes('storage-unavailable')) setTimeout(() => UI.toast('Private browsing blocks storage — progress will not be saved', ''), 800);
 

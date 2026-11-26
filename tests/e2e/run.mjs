@@ -99,6 +99,20 @@ await test('Last night and the usual meal log in one tap from Today, with undo',
   assert.equal(await p.evaluate(() => window.__revive.S.day().checks.breakfast), false);
 });
 
+await test('A full phone never loses entries silently', async (p) => {
+  await ready(p);
+  await p.evaluate(() => {
+    const real = Storage.prototype.setItem; window.__realSet = real;
+    Storage.prototype.setItem = function (k, v) { if (k === 'revive.v1') throw new DOMException('full', 'QuotaExceededError'); return real.call(this, k, v); };
+  });
+  await p.click('[data-water]'); await p.waitForTimeout(400);
+  assert.match(await p.textContent('#overlay-root'), /storage is full/i, 'asks for a backup when saving fails');
+  assert.ok(await p.$('[data-backup-now]'));
+  await p.evaluate(() => { Storage.prototype.setItem = window.__realSet; }); await clear(p);
+  await p.click('[data-water]'); await p.waitForTimeout(400);
+  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('revive.v1')).days[window.__revive.S.dayKey()].waterMl), 500, 'both entries saved once space is back');
+});
+
 await test('Re-rendering updates in place: nodes, focus and handlers survive', async (p) => {
   await ready(p);
   const before = await p.evaluate(() => { window.__keep = document.querySelector('#screen .card'); return !!window.__keep; });
@@ -125,6 +139,25 @@ await test('Cook: filters, categories, recipe and cook mode', async (p) => {
 await test('Train: guided session starts and closes', async (p) => {
   await ready(p); await go(p, 'train'); await p.click('[data-pf]'); await p.waitForSelector('.trainer');
   await p.click('.trainer [data-x]'); assert.equal(await p.$('.trainer'), null);
+});
+
+await test('Train: timing follows the clock and pauses when the app is hidden', async (p) => {
+  await p.clock.install({ time: new Date('2026-11-24T12:00:00') });
+  await ready(p); await go(p, 'train'); await p.click('[data-pf]'); await p.waitForSelector('.trainer');
+  const left = () => p.textContent('#tr-left');
+  const start = await left();
+  await p.clock.runFor(3000);
+  const after3 = await left(); assert.notEqual(after3, start, 'counts down');
+  // Leave the app: the session pauses and the time left stays put
+  await p.evaluate(() => { Object.defineProperty(document, 'hidden', { value: true, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  const paused = await left();
+  await p.clock.runFor(20000);
+  assert.equal(await left(), paused, 'no time passes while hidden');
+  assert.match(await p.textContent('#tr-label'), /Paused/);
+  await p.evaluate(() => { Object.defineProperty(document, 'hidden', { value: false, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await p.click('.trainer [data-p]'); await p.clock.runFor(2000);
+  assert.notEqual(await left(), paused, 'resumes after play');
+  await p.click('.trainer [data-x]');
 });
 
 await test('Track and Me screens render', async (p) => {

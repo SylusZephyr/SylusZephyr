@@ -15,6 +15,7 @@ import * as Caf from '../caffeine.js';
 import * as Theme from '../theme.js';
 import * as Progress from '../progress.js';
 import * as Region from '../region.js';
+import * as Sh from './shared.js';
 import { APP_VERSION } from '../config.js';
 import { LANGUAGES, locale, setLocale } from '../i18n.js';
 
@@ -506,12 +507,7 @@ export function bind(root, parts, { rerender }) {
     if (ca) { ca.oninput = () => Theme.set({ accent: 'custom', custom: ca.value }); ca.onchange = () => rerender(); }
     root.querySelectorAll('[data-bg]').forEach((b) => b.onclick = () => { Theme.set({ bg: b.dataset.bg }); rerender(); });
     root.querySelectorAll('[data-fs]').forEach((b) => b.onclick = () => { Theme.set({ size: b.dataset.fs }); rerender(); });
-    root.querySelector('[data-export]').onclick = async () => {
-      st.lastExportAt = Date.now(); S.save();
-      if (await Native.shareFile(`revive-${S.dayKey()}.json`, S.exportJSON(), 'Revive data')) { rerender(); return; }
-      const blob = new Blob([S.exportJSON()], { type: 'application/json' }); const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob); a.download = `revive-${S.dayKey()}.json`; document.body.appendChild(a); a.click(); a.remove();
-    };
+    root.querySelector('[data-export]').onclick = async () => { await Sh.exportBackup(); rerender(); };
     root.querySelector('[data-import]').onchange = async (e) => {
       const f = e.target.files[0]; if (!f) return;
       try { const txt = await f.text(); if (await UI.confirmSheet('Replace all data?', 'This overwrites everything in Revive with the file’s contents.', 'Import', true)) { S.importJSON(txt); UI.toast('Imported', ''); location.hash = 'today'; } }
