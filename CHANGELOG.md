@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.3.0
+- Weekly review: each number shows its change from the week before, and one concrete focus for the coming week targets the essential you managed least often.
+- Empty screens: every empty list and chart explains what to do, with one action where it helps (for example, Log a meal).
+- Styling: the last one-off inline styles became named classes. Text alignment now follows reading direction, which is correct in Urdu.
+- Dialogs: opening a panel no longer draws a focus ring on phones, and the keyboard only opens where typing is the point.
+
 ## 7.2.0
 - Today: one tap logs the meal you usually have in a slot, and confirms last night's sleep as planned. Both can be undone.
 - Training: hold and rest times come from the clock, so a locked screen can't stretch or skip them. Leaving the app pauses the session.
