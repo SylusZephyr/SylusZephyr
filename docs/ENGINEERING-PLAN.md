@@ -61,7 +61,7 @@ What people open the app for every day.
 - [x] Crash and error log viewer in Settings (local only).
 - [ ] Accessibility: screen-reader pass of every flow; text size 200% without overlap.
   - Progress: at 1.6× text on a 360px phone no screen overflows (e2e enforced). At 2× full-UI zoom, 5 cards still clip slightly. Screen-reader pass not done yet.
-- [ ] Low-end Android: first paint < 1.5 s and tab switch < 100 ms at 4× CPU slowdown.
+- [x] Low-end Android: first paint < 1.5 s and tab switch < 100 ms at 4× CPU slowdown. (Measured: first paint 150–260 ms; tab switches 10–50 ms, with 3 years of history too. e2e enforces it with 2× headroom.)
 
 ## Phase 5 — Release engineering
 
