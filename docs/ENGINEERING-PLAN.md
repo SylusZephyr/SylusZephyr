@@ -71,3 +71,5 @@ What people open the app for every day.
 - [x] CHANGELOG.md generated from releases.
 - [x] Version bump script that updates every place the version lives.
 - [ ] Signed release builds published on version tags.
+  - Done: a `v*` tag builds all apps and publishes a GitHub Release with the signed APK. The CI step that restores the signing key never ran (its `if` read an env var it could not see); that is fixed. A tag without the key now fails loudly instead of publishing an uninstallable APK.
+  - To do: the owner adds the four `ANDROID_*` secrets (docs/SETUP.md, "Signed releases"); then tag v7.6.0 to confirm.

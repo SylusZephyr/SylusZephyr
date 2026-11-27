@@ -75,3 +75,21 @@ Repository secrets (**Settings → Secrets and variables → Actions**):
 | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_BASE64`, `APPLE_TEAM_ID` | iOS / TestFlight |
 
 Set the repository **variable** `IOS_ENABLED=true` once the Apple secrets exist.
+
+### Signed releases
+
+A version tag builds every app and publishes a GitHub Release:
+
+```bash
+node scripts/bump-version.mjs 7.6.0   # then merge the release PR
+git tag v7.6.0 && git push origin v7.6.0
+```
+
+The Android APK in the release is signed with the upload key from the four `ANDROID_*` secrets.
+Without them, a tag build stops at **Check release signing** and publishes nothing, because an
+unsigned APK cannot be installed.
+
+Keep `revive-upload.jks` and its passwords somewhere safe outside the repository, such as a
+password manager. Every future update must be signed with this same key. A phone refuses to
+install an update signed with a different key, and the only way back is to uninstall the app,
+which deletes its data.
