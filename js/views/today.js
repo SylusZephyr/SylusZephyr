@@ -94,6 +94,15 @@ function cafCard(k) {
   </div>`;
 }
 
+function usualDrinkMg() {
+  const st = S.get();
+  for (let i = 0; i <= 14; i++) {
+    const c = st.days[S.addDays(S.dayKey(), -i)]?.coffee || [];
+    if (c.length) return Caf.parse(c.at(-1)).mg;
+  }
+  return Caf.cupMg();
+}
+
 function drinkSheet(onDone, onRemove) {
   const d = S.day();
   UI.openSheet(`<h2>Log a drink</h2><p class="muted small mt8">Your usual cup is ${Caf.cupMg()} mg. Change it in Settings.</p>
@@ -232,13 +241,17 @@ export function bind(root, _, { rerender }) {
     rerender();
     UI.undoToast(`Water ${(d.waterMl / 1000).toFixed(2).replace(/0$/, '')} L`, () => { d.waterMl = Math.max(0, d.waterMl - 250); if (d.waterMl < 1500 && d.checks.fluids) G.setEssential('fluids', false); S.save(); rerender(); }, 4000);
   });
-  const addCoffee = (mg) => {
+  const removeLast = () => { d.coffee.pop(); S.save(); rerender(); };
+  const addCoffee = (mg, { offerChange = false } = {}) => {
     d.coffee.push(mg == null || mg === Caf.cupMg() ? S.hm() : `${S.hm()}@${mg}`);
     if (P.isAfterCutoff(S.hm()) && mg !== 5 && d.checks.caffeine) G.setEssential('caffeine', false);
     UI.haptic(8); S.save(); rerender();
-    UI.undoToast(P.isAfterCutoff(S.hm()) && mg !== 5 ? 'Logged — past your cutoff' : 'Logged', () => { d.coffee.pop(); S.save(); rerender(); }, 4000);
+    const msg = P.isAfterCutoff(S.hm()) && mg !== 5 ? 'Logged — past your cutoff' : `${mg ?? Caf.cupMg()} mg logged`;
+    // "Change" swaps the drink just logged for another one from the list.
+    UI.undoToast(msg, removeLast, 4000, offerChange ? { label: 'Change', run: () => { removeLast(); drinkSheet(addCoffee, removeLast); } } : null);
   };
-  root.querySelector('[data-drinks]')?.addEventListener('click', () => drinkSheet(addCoffee, () => { d.coffee.pop(); S.save(); rerender(); }));
+  // One tap logs the usual drink: the most recent one in the last two weeks, else the usual cup.
+  root.querySelector('[data-drinks]')?.addEventListener('click', () => addCoffee(usualDrinkMg(), { offerChange: true }));
   root.querySelector('[data-logmeal]')?.addEventListener('click', () => Sh.mealSheet(rerender));
   root.querySelector('[data-sleep]')?.addEventListener('click', () => Sh.sleepSheet(rerender));
   root.querySelector('[data-breath]')?.addEventListener('click', () => Sh.breathing({ onDone: rerender }));
