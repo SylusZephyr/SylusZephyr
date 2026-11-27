@@ -54,14 +54,14 @@ function account() {
   const st = Cloud.status;
   const head = `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Account & sync</h1><div class="sub">${st.user ? 'Signed in' : 'Optional — the app works fully without an account'}</div></div></div>`;
   if (!st.configured) return head + `
-    <div class="card glow"><div class="kicker">Cloud sync</div><h3>Connect your Revive cloud</h3>
+    <div class="card"><div class="kicker">Cloud sync</div><h3>Connect your Revive cloud</h3>
       <p class="muted small">Sync runs on your own private Supabase project, so your data never sits on anyone else’s server. Paste the two values from Supabase → Project Settings → API.</p>
       <div class="field"><label>Project URL</label><input id="cfg-url" placeholder="https://xxxx.supabase.co" autocomplete="off" autocapitalize="off"></div>
       <div class="field"><label>Anon public key</label><input id="cfg-key" placeholder="eyJhbGciOi…" autocomplete="off" autocapitalize="off"></div>
       <button class="btn primary block mt16" data-cfgsave>Connect</button></div>
     <div class="notice">Setup takes about 5 minutes — see docs/SETUP.md in the project.</div>`;
   if (!st.user) return head + `
-    <div class="card glow"><div class="kicker">Sign in</div><h3>Keep every device in step</h3>
+    <div class="card"><div class="kicker">Sign in</div><h3>Keep every device in step</h3>
       <p class="muted small">Log a meal on your phone, see it on your PC instantly. Your data stays private to your account.</p>
       ${codeSent ? `<div class="field"><label>6-digit code sent to ${UI.esc(authEmail)}</label><input id="au-code" inputmode="numeric" maxlength="8" placeholder="123456" autocomplete="one-time-code"></div>
         <button class="btn primary block mt12" data-verify>Verify & sign in</button><button class="btn ghost block mt8" data-resend>Use a different email</button>`
@@ -73,7 +73,7 @@ function account() {
     ${st.error ? `<div class="notice c-coral">${UI.esc(st.error)}</div>` : ''}
     <button class="btn ghost block mt12 small" data-cfgclear>Disconnect cloud project</button>`;
   return head + `
-    <div class="card glow tc"><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
+    <div class="card tc"><h3 class="mt8">${UI.esc(st.user.email || 'Signed in')}</h3>
       <p class="muted small">${st.user.provider === 'google' ? 'Google account' : 'Email account'} · ${st.online ? (st.syncing ? 'Syncing…' : st.lastSync ? 'Last synced ' + ago(st.lastSync) : 'Connecting…') : 'Offline — changes will sync when you reconnect'}</p>
       <div class="grid2 mt16"><button class="btn" data-syncnow>Sync now</button><button class="btn danger" data-signout>Sign out</button></div></div>
     ${st.error ? `<div class="notice c-coral">${UI.esc(st.error)}</div>` : ''}
@@ -84,7 +84,7 @@ function account() {
 function credits() {
   const rows = Object.entries(PHOTOS).map(([id, p]) => ({ name: RECIPE[id]?.name || DELIVERY.find((d) => d.id === id)?.name || id, ...p }));
   return `<div class="topbar">${back('me/settings')}<div class="grow"><h1 class="h-sub">Photo credits</h1><div class="sub">Free-licence photos from Wikimedia Commons</div></div></div>
-  <div class="card tight">${rows.length ? rows.map((r) => `<div class="list-item"><div class="li-ico" style="background:url('${r.src}') center/cover"></div><div class="grow min0"><b>${UI.esc(r.name)}</b><div class="muted small">${UI.esc(r.credit)}</div><a class="tiny" href="${UI.esc(r.page)}" target="_blank" rel="noopener">Source</a>${r.licence_url ? ` · <a class="tiny" href="${UI.esc(r.licence_url)}" target="_blank" rel="noopener">Licence</a>` : ''}</div></div>`).join('') : '<div class="empty small">No photos bundled.</div>'}</div>
+  <div class="card tight">${rows.length ? rows.map((r) => `<div class="list-item"><div class="li-ico" style="background:url('${r.src}') center/cover"></div><div class="grow min0"><b>${UI.esc(r.name)}</b><div class="muted small">${UI.esc(r.credit)}</div><a class="tiny" href="${UI.esc(r.page)}" target="_blank" rel="noopener">Source</a>${r.licence_url ? ` · <a class="tiny" href="${UI.esc(r.licence_url)}" target="_blank" rel="noopener">Licence</a>` : ''}</div></div>`).join('') : UI.emptyState({ icon: 'list', title: 'No photos bundled.' })}</div>
   <p class="tiny faint">Photos were resized and cropped to fit.</p>`;
 }
 
@@ -165,7 +165,7 @@ function medical() {
   <div class="card tight">${m.visits.length ? [...m.visits].reverse().map((v) => `<div class="list-item"><div class="li-ico">${UI.ICON.doctor}</div><div class="grow"><b>${S.prettyDate(v.date)}${v.who ? ' · ' + UI.esc(v.who) : ''}</b><div class="muted small pre-wrap">${UI.esc(v.notes)}</div></div><button class="icon-btn" data-delvisit="${v.id}">${UI.ICON.trash}</button></div>`).join('') : UI.emptyState({ icon: 'doctor', title: 'No visits yet', body: 'Add a visit after you see your doctor, with what they said.' })}</div>
 
   <div class="section-title">Lab results <button class="link" data-addlab>+ Add</button></div>
-  <div class="card tight">${m.labs.length ? [...m.labs].sort((a, b) => b.date.localeCompare(a.date)).map((l) => `<div class="list-item"><div class="li-ico">${UI.ICON.pulse}</div><div class="grow"><b>${UI.esc(l.name)}: ${UI.esc(l.value)} ${UI.esc(l.unit)}</b><div class="muted small">${S.prettyDate(l.date)}${l.ref ? ` · typical ${UI.esc(l.ref)}` : ''}</div></div><button class="icon-btn" data-dellab="${l.id}">${UI.ICON.trash}</button></div>`).join('') : '<div class="empty small">Add results when you get them. Ranges are typical guides — labs differ, your doctor interprets them.</div>'}</div>
+  <div class="card tight">${m.labs.length ? [...m.labs].sort((a, b) => b.date.localeCompare(a.date)).map((l) => `<div class="list-item"><div class="li-ico">${UI.ICON.pulse}</div><div class="grow"><b>${UI.esc(l.name)}: ${UI.esc(l.value)} ${UI.esc(l.unit)}</b><div class="muted small">${S.prettyDate(l.date)}${l.ref ? ` · typical ${UI.esc(l.ref)}` : ''}</div></div><button class="icon-btn" data-dellab="${l.id}">${UI.ICON.trash}</button></div>`).join('') : UI.emptyState({ icon: 'pulse', title: 'No lab results yet', body: 'Add results when you get them. Ranges are typical guides — labs differ, your doctor interprets them.' })}</div>
 
   <div class="card"><div class="kicker">Supplements — what’s worth it</div>
     <div class="small lh16">Vitamin D / B12 — if a test or diet suggests a need<br>Iron — only if deficiency is confirmed<br>Zinc — from food (meat, eggs, nuts); avoid high doses<br>Protein powder — optional convenience<br>“Testosterone boosters” — avoid unverified products<br>Sildenafil/tadalafil — not without a doctor, especially with your exertion symptoms</div></div>

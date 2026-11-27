@@ -29,6 +29,8 @@ async function capture(file) {
       await p.goto(BASE + '#' + h); await p.reload(); await p.waitForTimeout(600);
       await p.evaluate(() => document.querySelectorAll('#overlay-root > *, .toast').forEach((e) => e.remove()));
       if (click) { await p.click(click).catch(() => {}); await p.waitForTimeout(500); }
+      // Focus lands asynchronously after a sheet opens; leave it out so two runs compare equal.
+      await p.evaluate(() => /** @type {HTMLElement} */ (document.activeElement)?.blur?.());
       out[label + ':' + h + (click || '')] = await p.evaluate(() => {
         const res = {}; const path = (el) => { const a = []; for (let e = el; e && e !== document.body; e = e.parentElement) a.unshift(e.tagName + ':' + [...e.parentElement.children].indexOf(e)); return a.join('/'); };
         for (const el of document.body.querySelectorAll('*')) { if (el.closest('svg') && el.tagName !== 'svg') continue; const cs = getComputedStyle(el); const o = {}; for (const k of cs) if (!k.startsWith('transition') && !k.startsWith('animation')) o[k] = cs.getPropertyValue(k); o['::before'] = getComputedStyle(el, '::before').content + getComputedStyle(el, '::before').background; o['@class'] = String(el.className?.baseVal ?? el.className); res[path(el)] = o; }

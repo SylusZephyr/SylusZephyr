@@ -61,9 +61,9 @@ export function showLock(onUnlock) {
       <div class="dots" id="pin-dots">${'<i></i>'.repeat(4)}</div>
       <div class="keypad">
         ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button data-k="${n}">${n}</button>`).join('')}
-        ${st.lock.faceId ? `<button data-face class="fs-xl">${UI.ICON.face}</button>` : '<button class="empty"></button>'}
+        ${st.lock.faceId ? `<button data-face class="fs-xl" aria-label="Unlock with Face ID">${UI.ICON.face}</button>` : '<span class="kp-gap" aria-hidden="true"></span>'}
         <button data-k="0">0</button>
-        <button data-del class="fs-md">⌫</button>
+        <button data-del class="fs-md" aria-label="Delete">⌫</button>
       </div>
     </div>`, {
     onMount: (w, closeFn) => {
@@ -91,7 +91,7 @@ export function setupSheet(onDone) {
   let first = null; let pin = '';
   UI.openSheet(`<h2>Set a 4-digit PIN</h2><p class="muted small" id="pin-msg">Choose a PIN you will remember.</p>
     <div class="row mt16 jcc"><div class="dots lock-dots row gap16" id="sdots">${'<i class="pin-dot"></i>'.repeat(4)}</div></div>
-    <div class="row mt16 jcc"><div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button data-k="${n}">${n}</button>`).join('')}<button class="empty"></button><button data-k="0">0</button><button data-del class="fs-md">⌫</button></div></div>`, {
+    <div class="row mt16 jcc"><div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button data-k="${n}">${n}</button>`).join('')}<span class="kp-gap" aria-hidden="true"></span><button data-k="0">0</button><button data-del class="fs-md" aria-label="Delete">⌫</button></div></div>`, {
     onMount: (sh, close) => {
       const dots = sh.querySelector('#sdots'); const msg = sh.querySelector('#pin-msg');
       const paint = () => /** @type {HTMLElement[]} */ ([...dots.children]).forEach((d, i) => { d.style.background = i < pin.length ? 'var(--amber)' : 'transparent'; d.style.borderColor = i < pin.length ? 'var(--amber)' : 'var(--muted)'; });

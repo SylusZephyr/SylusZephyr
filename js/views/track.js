@@ -115,7 +115,7 @@ function journalCard() {
 
 function insightsCard() {
   const r = insights();
-  return `<div class="card cool glow"><div class="kicker">Your patterns</div>
+  return `<div class="card"><div class="kicker">Your patterns</div>
     ${r.need ? `<p class="muted small">Log energy & mood on ${r.need} more day${r.need === 1 ? '' : 's'} to unlock personal insights — what actually makes <i>you</i> feel better.</p>`
       : r.list.length ? r.list.map((x) => `<div class="row row-line"><span class="fs-lg">${x.diff > 0 ? '' : ''}</span><div class="grow small">On days you <b>${x.t}</b>, your ${x.metric} averages <b>${x.a.toFixed(1)}</b>/5 vs ${x.b.toFixed(1)}/5</div></div>`).join('') + '<p class="tiny faint mt8">Patterns, not proof — but your own data is the best motivator.</p>'
       : '<p class="muted small">No clear patterns yet. Keep logging — they usually appear after 1–2 weeks.</p>'}</div>`;
@@ -145,7 +145,7 @@ function sleep() {
   const avgDev = devs.length ? devs.reduce((a, b) => a + b, 0) / devs.length : null;
   const onAnchor = devs.filter((d) => d <= 30).length;
   return `
-  <div class="card glow"><div class="kicker">Your plan</div>
+  <div class="card"><div class="kicker">Your plan</div>
     <div class="stats mt12"><div class="stat"><b>${S.prettyTime(t.wake)}</b><span>Wake anchor</span></div><div class="stat"><b>${S.prettyTime(t.bed)}</b><span>Bed tonight</span></div><div class="stat"><b>${S.prettyTime(t.ideal)}</b><span>Ideal bedtime</span></div></div>
     <p class="small muted mt12">${t.reached ? 'You’ve reached your ideal bedtime — hold it steady.' : `Bedtime moves 15 min earlier every 3 days · ~${t.daysLeft} days to go.`} Wind-down starts ${S.prettyTime(t.windDown)}.</p>
     <button class="btn sm mt12" data-sleepset>Adjust plan</button></div>
@@ -153,7 +153,7 @@ function sleep() {
     <div class="stats mt16"><div class="stat"><b>${nights.length ? `${Math.floor(avgDur / 60)}<small>h</small> ${Math.round(avgDur % 60)}<small>m</small>` : '—'}</b><span>Average sleep</span></div>
     <div class="stat"><b>${avgDev != null ? `±${Math.round(avgDev)}<small> min</small>` : '—'}</b><span>Wake drift</span></div>
     <div class="stat"><b>${onAnchor}<small> / ${nights.length}</small></b><span>On anchor</span></div></div></div>
-  ${t.reached && onAnchor >= 5 && S.minutesOf(st.profile.wakeAnchor) > 7 * 60 ? `<div class="card cool glow"><div class="kicker">Level up your sleep </div><h3>Ready for the next step?</h3><p class="muted small">You hit your bedtime and woke on-anchor ${onAnchor} times recently. Move everything 30 min earlier — wake ${S.prettyTime(S.fmtMin(S.minutesOf(st.profile.wakeAnchor) - 30))}.</p><button class="btn cool block mt12" data-earlier>Shift 30 min earlier</button></div>` : ''}
+  ${t.reached && onAnchor >= 5 && S.minutesOf(st.profile.wakeAnchor) > 7 * 60 ? `<div class="card"><div class="kicker">Level up your sleep </div><h3>Ready for the next step?</h3><p class="muted small">You hit your bedtime and woke on-anchor ${onAnchor} times recently. Move everything 30 min earlier — wake ${S.prettyTime(S.fmtMin(S.minutesOf(st.profile.wakeAnchor) - 30))}.</p><button class="btn secondary block mt12" data-earlier>Shift 30 min earlier</button></div>` : ''}
   <button class="btn block" data-logsleep>Log last night</button>
   <div class="notice mt12">Wake drift = how far your wake-up time is from your anchor, on average. Get it under ±30 min first — that’s what fixes a random schedule.</div>`;
 }
