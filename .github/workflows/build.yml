@@ -59,7 +59,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       # The baselines are rendered with these fonts; the test names them, so no other fallback is used.
-      - run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-core
+      - run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-core fonts-noto-color-emoji
       - run: npm run test:visual
       - if: failure()
         uses: actions/upload-artifact@v4

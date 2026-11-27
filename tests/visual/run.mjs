@@ -4,9 +4,9 @@
 //   npm run test:visual -- --update  accept the current rendering as the new baselines
 //
 // Rendering must not depend on the machine. The clock, the data and Math.random are fixed,
-// motion is off, and the fonts are named explicitly. Install Noto CJK and Noto core, the same
-// Debian/Ubuntu packages CI installs (fonts-noto-cjk, fonts-noto-core), so no system fallback
-// font is ever chosen.
+// motion is off, and the browser gets its own font configuration (fonts.conf): only the Noto
+// fonts, with fixed anti-aliasing and no hinting. Install the same Debian/Ubuntu packages CI
+// installs: fonts-noto-cjk, fonts-noto-core and fonts-noto-color-emoji.
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
@@ -107,7 +107,10 @@ async function check(name, png) {
 
 await rm(OUT_DIR, { recursive: true, force: true });
 await mkdir(OUT_DIR, { recursive: true }); await mkdir(BASE_DIR, { recursive: true });
-const browser = await chromium.launch();
+const browser = await chromium.launch({
+  env: { ...process.env, FONTCONFIG_FILE: fileURLToPath(new URL('./fonts.conf', import.meta.url)) },
+  args: ['--font-render-hinting=none', '--disable-lcd-text', '--force-color-profile=srgb', '--disable-gpu'],
+});
 for (const [width, vp, screens, sheets] of [['phone', devices['iPhone 13'], SCREENS, SHEETS], ['desktop', { viewport: { width: 1280, height: 860 } }, DESKTOP_SCREENS, []]]) {
   for (const locale of LOCALES) {
     const { ctx, p } = await open(browser, vp, locale);
