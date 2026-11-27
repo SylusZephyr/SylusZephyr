@@ -49,6 +49,22 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
 
+  visual:
+    name: Visual regression (screens and sheets, 3 languages)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # The baselines are rendered with these fonts; the test names them, so no other fallback is used.
+      - run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-core
+      - run: npm run test:visual
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: visual-diffs, path: tests/visual/out/, retention-days: 14 }
+
   android:
     name: Android (APK + AAB)
     runs-on: ubuntu-latest
