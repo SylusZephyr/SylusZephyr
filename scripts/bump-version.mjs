@@ -1,5 +1,5 @@
 // Sets the app version everywhere it lives.  usage: node scripts/bump-version.mjs 7.2.0
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +19,10 @@ const cfg = join(root, 'js/config.js');
 const src = readFileSync(cfg, 'utf8');
 if (!/APP_VERSION = '[^']+'/.test(src)) { console.error('APP_VERSION not found in js/config.js'); process.exit(1); }
 writeFileSync(cfg, src.replace(/APP_VERSION = '[^']+'/, `APP_VERSION = '${v}'`)); console.log('updated js/config.js');
+
+// iOS shows MARKETING_VERSION in TestFlight and the App Store.
+const pbx = join(root, 'ios/App/App.xcodeproj/project.pbxproj');
+if (existsSync(pbx)) { writeFileSync(pbx, readFileSync(pbx, 'utf8').replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${v};`)); console.log('updated ios project'); }
 
 // The offline cache key hashes app files, so it changes with the version.
 await import('./gen-sw.mjs');
