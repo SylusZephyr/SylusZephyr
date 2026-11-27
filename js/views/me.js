@@ -217,7 +217,7 @@ function summary() {
     <h2>Questions</h2><ol>${(st.medical.questions || []).filter((q) => !q.done).map((q) => `<li>${UI.esc(q.q)}</li>`).join('')}</ol>`;
   return `<div class="topbar">${back()}<div class="grow"><h1 class="h-sub">Doctor summary</h1><div class="sub">Show on your phone or print / save as PDF</div></div></div>
   <div class="grid2 mb12"><button class="btn primary" data-print>Print / PDF</button><button class="btn" data-sharesum>Share text</button></div>
-  <div class="card summary-doc" style="background:#fff;color:#111;font-size:13px;line-height:1.45">${html.replace(/<h2>/g, '<h3 style="margin-top:14px;border-bottom:1px solid #ccc;font-size:14px">').replace(/<\/h2>/g, '</h3>').replace(/<table>/g, '<table style="width:100%;border-collapse:collapse;font-size:12px" border="1" cellpadding="4">')}</div>
+  <div class="card summary-doc" style="background:#fff;color:#111;font-size:13px;line-height:1.45">${html.replace(/<h2>/g, '<h3 style="margin-top:14px;border-bottom:1px solid #ccc;font-size:14px">').replace(/<\/h2>/g, '</h3>').replace(/<table>/g, '<div class="table-scroll"><table style="width:100%;border-collapse:collapse;font-size:12px" border="1" cellpadding="4">').replace(/<\/table>/g, '</table></div>')}</div>
   <template id="print-html">${html}</template>`;
 }
 
