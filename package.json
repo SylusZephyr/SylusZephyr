@@ -1,6 +1,6 @@
 {
   "name": "revive",
-  "version": "7.3.0",
+  "version": "7.4.0",
   "private": true,
   "description": "Revive — private recovery companion (iOS app + web/PWA)",
   "scripts": {
