@@ -215,6 +215,23 @@ for (const loc of ['zh', 'ur']) {
   });
 }
 
+// Runs as the phone app would: a Capacitor shell with no plugins, so nothing is really scheduled.
+await test('Today shows the next reminder only when notifications are on, in every language', async (p) => {
+  await p.addInitScript(() => { window.Capacitor = { isNativePlatform: () => true, Plugins: {} }; });
+  const set = async (patch) => { await p.evaluate((patch) => { const S = window.__revive.S; Object.assign(S.get(), patch); S.saveNow(); }, patch); await p.reload(); await p.waitForSelector('#screen'); await p.waitForTimeout(300); await clear(p); };
+  await ready(p);
+  assert.equal(await p.$('.nx-foot'), null, 'hidden while notifications are off');
+  await set({ nativeReminders: true });
+  assert.match(await p.textContent('.nx-foot'), /Next reminder · \S.*\d/);
+  await p.click('.nx-foot'); await p.waitForTimeout(250);
+  assert.equal(await p.evaluate(() => location.hash), '#me/reminders');
+  for (const locale of ['zh', 'ur']) {
+    await p.evaluate((l) => { location.hash = 'today'; window.__revive.S.get().settings.locale = l; }, locale); await set({});
+    assert.ok(await p.$('.nx-foot'), `${locale}: shown`);
+    assert.deepEqual(await untranslated(p), [], `${locale}: translated`);
+  }
+});
+
 await test('Urdu switches to right-to-left', async (p) => {
   await ready(p, { locale: 'ur' });
   assert.equal(await p.evaluate(() => document.documentElement.dir), 'rtl');

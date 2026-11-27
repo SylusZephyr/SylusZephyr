@@ -11,13 +11,12 @@ import * as Me from './views/me.js';
 import * as Onboard from './views/onboard.js';
 import * as Sh from './views/shared.js';
 import * as Native from './native.js';
-import { reminderList } from './ics.js';
+import * as Reminders from './reminders.js';
 import * as Cloud from './cloud.js';
 import * as A11y from './a11y.js';
-import { t, locale, dir, loadCatalog, translateTree } from './i18n.js';
+import { t, tr, locale, dir, loadCatalog, translateTree } from './i18n.js';
 import { applyRemoteContent } from './content.js';
 import * as Theme from './theme.js';
-import * as Prayer from './prayer.js';
 import * as Progress from './progress.js';
 import { merge } from './sync.js';
 import { morph, bindScope } from './morph.js';
@@ -172,38 +171,13 @@ function onForeground() {
 // Reminders. Wake, wind-down and bedtime repeat daily. Everything else is scheduled as one-off
 // alerts for the next three days, so anything already done today is simply left out.
 // iOS keeps at most 64 pending alerts: 3 repeating + ~30 day alerts + ~24 prayer/fasting alerts.
-const REPEATING = ['wake', 'winddown', 'bed'];
-function doneAlready(id, d, st) {
-  if (['breakfast', 'lunch', 'dinner'].includes(id)) return !!d.checks[id];
-  if (id === 'snack') return (d.meals || []).some((m) => m.slot === 'snack');
-  if (id === 'water1') return (d.waterMl || 0) >= st.profile.waterGoalMl * 0.4;
-  if (id === 'water2') return (d.waterMl || 0) >= st.profile.waterGoalMl * 0.8;
-  if (id === 'kegel1') return (d.pf || 0) >= 1;
-  if (id === 'kegel2') return (d.pf || 0) >= 2;
-  return false;
-}
 export async function syncReminders(force = false) {
   const st = S.get();
   if (!Native.isNative || !st.onboarded || !st.nativeReminders) return;
   if (!force && st.remindersSyncedFor === S.dayKey()) return;
-  st.reminderPrefs = st.reminderPrefs || {};
-  const ROUTE = { breakfast: 'cook', lunch: 'cook', dinner: 'cook', snack: 'cook', prep: 'cook/r/overnight_oats', kegel1: 'train', kegel2: 'train', bed: 'today', winddown: 'today' };
-  const fastingNow = Prayer.fasting();
-  // While fasting, daytime meal / water / coffee reminders would be wrong — the fasting alerts replace them.
-  const FAST_OFF = ['breakfast', 'lunch', 'snack', 'dinner', 'water1', 'water2', 'coffee'];
-  const list = reminderList().map((r) => ({ ...r, route: ROUTE[r.id] || 'today', on: (st.reminderPrefs[r.id] ?? r.on) && !(fastingNow && FAST_OFF.includes(r.id)) }));
-  const n = await Native.scheduleReminders(list.filter((r) => REPEATING.includes(r.id)));
-  const today = S.dayKey(); const timed = [];
-  for (let i = 0; i < 3; i++) {
-    const k = S.addDays(today, i); const d = st.days[k] || { checks: {}, meals: [] };
-    for (const r of list) {
-      if (!r.on || REPEATING.includes(r.id) || (i === 0 && doneAlready(r.id, d, st))) continue;
-      const at = S.keyToDate(k); const m = S.minutesOf(r.time);
-      at.setMinutes(m + (m < S.DAY_ROLLOVER_HOUR * 60 ? 1440 : 0));
-      timed.push({ at, title: r.title, body: r.desc, route: r.route });
-    }
-  }
-  await Native.scheduleTimed([...timed, ...Prayer.upcomingAlerts(3)]);
+  const { repeating, timed } = Reminders.plan(new Date(), 3, tr);
+  const n = await Native.scheduleReminders(repeating);
+  await Native.scheduleTimed(timed);
   st.remindersSyncedFor = S.dayKey(); S.save();
   return n + timed.length;
 }

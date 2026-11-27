@@ -51,6 +51,8 @@ What people open the app for every day.
 - [x] Log water and coffee in 1 tap, with undo. (Coffee repeats the last drink; the toast offers Change.)
 - [x] Morning check: last night's sleep pre-filled from the plan, confirmed with one tap.
 - [ ] Reminders: verify that each scheduled notification fires on Android and iOS. Show the next reminder on Today.
+  - Done: Today shows the next notification the phone holds (tapping it opens Reminders). The scheduler and Today read one plan (`js/reminders.js`), and notifications are now sent in the app's language (unit-tested for every reminder, prayer and fasting alert in zh/ur).
+  - To do: confirm on a real Android phone and iPhone that each one fires.
 - [x] Training session: resume after interruption, and screen-off safe timing.
 - [x] Weekly summary that says what changed and what to do next week, in one screen.
 

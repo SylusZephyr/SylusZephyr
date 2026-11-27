@@ -11,22 +11,26 @@ function planned(slot) {
   const idx = (S.keyToDate(S.dayKey()).getDay() + 6) % 7; return RECIPE[wp.days?.[idx]?.[slot]] || null;
 }
 const EMOJI = /^(?:\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*\s*)+/u;
+/** @typedef {{id: string, on: boolean, time: string, title: string, desc: string, dish?: string, alt?: string}} Reminder */
+/** @returns {Reminder[]} */
 export function reminderList() { return rawReminders().map((r) => ({ ...r, title: r.title.replace(EMOJI, '') })); }
+/** @returns {Reminder[]} */
 function rawReminders() {
   const p = S.get().profile; const t = sleepTargets(); const m = mealTimes();
-  const plan = (slot, fallback) => (planned(slot) ? `Planned: ${planned(slot).name}. Log it in Revive.` : fallback);
+  // A meal reminder names today's planned recipe; `alt` is the text for days the plan does not cover.
+  const meal = (slot, alt) => { const r = planned(slot); return { dish: r?.name, alt, desc: r ? `Planned: ${r.name}. Log it in Revive.` : alt }; };
   const wake = S.minutesOf(p.wakeAnchor);
   return [
     { id: 'wake', on: true, time: p.wakeAnchor, title: '⏰ Wake up — same time every day', desc: 'Open the curtains or step outside for 10 minutes of daylight.' },
-    { id: 'breakfast', on: true, time: m.breakfast, title: '🍳 Breakfast time', desc: plan('breakfast', 'Egg paratha, overnight oats or a shake — something within 2 hours of waking.') },
+    { id: 'breakfast', on: true, time: m.breakfast, title: '🍳 Breakfast time', ...meal('breakfast', 'Egg paratha, overnight oats or a shake — something within 2 hours of waking.') },
     { id: 'water1', on: true, time: S.fmtMin(wake + 180), title: '💧 Drink a glass of water', desc: 'Refill your bottle.' },
     { id: 'kegel1', on: true, time: S.fmtMin(wake + 120), title: '💪 Pelvic-floor session (3 min)', desc: 'Open Revive → Train.' },
     { id: 'coffee', on: true, time: S.fmtMin(S.minutesOf(p.caffeineCutoff) - 30), title: '☕ Last call for coffee', desc: 'Caffeine cutoff in 30 minutes.' },
-    { id: 'lunch', on: true, time: m.lunch, title: '🌯 Lunch time', desc: plan('lunch', 'A wrap, a rice bowl or a Meituan halal order.') },
+    { id: 'lunch', on: true, time: m.lunch, title: '🌯 Lunch time', ...meal('lunch', 'A wrap, a rice bowl or a Meituan halal order.') },
     { id: 'snack', on: true, time: m.snack, title: '🥤 Shake / snack', desc: 'Banana PB shake, protein milk + dates.' },
     { id: 'water2', on: true, time: S.fmtMin(wake + 420), title: '💧 Water check', desc: 'Aim for 2 L today.' },
     { id: 'kegel2', on: true, time: S.fmtMin(wake + 480), title: '💪 Pelvic-floor session (3 min)', desc: 'Open Revive → Train.' },
-    { id: 'dinner', on: true, time: m.dinner, title: '🍛 Dinner time', desc: plan('dinner', 'Air-fryer chicken curry with paratha, or anything with protein.') },
+    { id: 'dinner', on: true, time: m.dinner, title: '🍛 Dinner time', ...meal('dinner', 'Air-fryer chicken curry with paratha, or anything with protein.') },
     { id: 'prep', on: true, time: S.fmtMin(S.minutesOf(t.windDown) - 30), title: '🥣 Prep tomorrow’s breakfast', desc: 'Overnight oats jar or marinate chicken in a bag.' },
     { id: 'winddown', on: true, time: t.windDown, title: '🌙 Wind-down starts', desc: 'Dim lights, screens down, breathing session in Revive.' },
     { id: 'bed', on: true, time: t.bed, title: '🛌 Bedtime target', desc: 'Lights out. Phone away from the bed.' },
