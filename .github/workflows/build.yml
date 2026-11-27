@@ -56,8 +56,10 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with: { node-version: '${{ env.NODE_VERSION }}', cache: npm }
+      # Cache Gradle downloads: without it every run fetches the whole dependency tree from Maven
+      # Central, which rate-limits busy CI runners (HTTP 429) and fails the build.
       - uses: actions/setup-java@v5
-        with: { distribution: temurin, java-version: '21' }
+        with: { distribution: temurin, java-version: '21', cache: gradle, cache-dependency-path: 'android/**/*.gradle*' }
       - run: npm ci
       - run: npm run build:web && npx cap sync android
       - name: Restore signing key

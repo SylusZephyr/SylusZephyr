@@ -1,0 +1,37 @@
+name: Web app (GitHub Pages)
+
+# Publishes the web app on every push to main. On iPhone: open the site in Safari,
+# Share → Add to Home Screen. It runs offline and keeps all data on the device.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: '22', cache: npm }
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:web
+      - uses: actions/configure-pages@v5
+        with: { enablement: true }
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: www }
+      - id: deployment
+        uses: actions/deploy-pages@v4
