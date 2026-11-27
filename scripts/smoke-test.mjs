@@ -181,6 +181,35 @@ await test('pending alerts stay under the iOS limit of 64', async () => {
   assert.ok(reminderList().every((r) => !/\p{Extended_Pictographic}/u.test(r.title)), 'no emoji in titles');
 });
 
+await test('every notification is translated, in every state', async () => {
+  // Notifications are drawn by the OS, so the e2e crawl never sees them.
+  const R = await import('../js/reminders.js'); const { translator } = await import('../js/i18n.js');
+  const { RECIPES } = await import('../js/data/recipes.js');
+  const st = S.get(); const saved = JSON.stringify({ prayer: st.prayer, weekPlan: st.weekPlan });
+  const plan = { week: S.weekKey(), days: Array.from({ length: 7 }, () => ({ breakfast: RECIPES[0].id, lunch: RECIPES[1].id, dinner: RECIPES[2].id })) };
+  const missing = new Set();
+  for (const code of ['zh', 'ur']) {
+    const tr = translator((await import(`../js/locales/${code}.js`)).default);
+    for (const ramadan of ['on', 'off']) for (const wp of [null, plan]) {
+      st.prayer = { enabled: true, notify: true, city: 'beijing', ramadan }; st.weekPlan = wp;
+      const { repeating, timed } = R.plan(new Date(), 3, tr);
+      for (const x of [...repeating.map((r) => ({ title: r.title, body: r.desc })), ...timed]) {
+        for (const s of [x.title, x.body]) if (/[A-Za-z]{3,}/.test(s.replace(/Revive/g, ''))) missing.add(`${code}: ${s}`);
+      }
+    }
+  }
+  Object.assign(st, JSON.parse(saved));
+  assert.deepEqual([...missing], []);
+});
+
+await test('the next reminder is the earliest one still to come', async () => {
+  const R = await import('../js/reminders.js');
+  const now = new Date(); now.setHours(23, 50, 0, 0);
+  const n = R.next(now); assert.ok(n && n.at > now, 'something is always next');
+  const { timed } = R.plan(now, 2);
+  assert.ok(timed.every((x) => x.at <= now || x.at >= n.at), 'nothing earlier was skipped');
+});
+
 await test('migration 2 → 3 drops retired coins, chests and quests', () => {
   const v2 = { version: 2, profile: {}, game: { xp: 120, coins: 40, lootOpened: { a: 1 } }, days: { '2026-01-01': { quests: [{ id: 'q' }], readTips: ['x'], meals: [], checks: { breakfast: true } } } };
   const out = S.migrate(v2);

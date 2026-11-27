@@ -624,6 +624,11 @@ textarea { background: var(--surface2); border-radius: var(--r-md); }
 .nx .s { font-size: var(--fs-sm); color: var(--muted); margin-top: 1px; }
 .nx .when { font-size: var(--fs-sm); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .nx.now .when { color: var(--text); font-weight: 600; }
+.nx-foot { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: var(--fs-sm); color: var(--muted); min-width: 0; }
+.nx-foot, .nx-foot:hover { text-decoration: none; }
+.nx-foot svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.nx-foot .what { color: var(--text); }
+.nx-foot .when { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
 .qk { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 6px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; }

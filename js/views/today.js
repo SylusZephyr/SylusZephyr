@@ -9,6 +9,8 @@ import * as Caf from '../caffeine.js';
 import * as Pr from '../prayer.js';
 import * as Progress from '../progress.js';
 import * as Cloud from '../cloud.js';
+import * as Native from '../native.js';
+import * as Reminders from '../reminders.js';
 
 const I = UI.ICON;
 const nowMin = (d = new Date()) => d.getHours() * 60 + d.getMinutes();
@@ -68,6 +70,16 @@ export function upNext(now = new Date()) {
   if (!Cloud.status.user && ageDays > 14 && sinceBackup > 30) extra.push({ id: 'backup', icon: I.share, t: 'Back up your progress', s: 'Save a file in case this phone is lost', act: 'backup', anytime: true });
   if (d.energy == null && dm(m) > dm(wake) + 240) extra.push({ id: 'energy', icon: I.mood, t: 'How do you feel?', s: 'Energy and mood, 10 seconds', act: 'energy', anytime: true });
   return [...upcoming.slice(0, 3), ...extra].slice(0, 5);
+}
+
+// The next notification the phone will show, so people can trust reminders are set.
+// Only when they are: on the web, alerts live in the calendar file, which the app can't see.
+function nextReminderRow(now = new Date()) {
+  const st = S.get(); if (!Native.isNative || !st.nativeReminders) return '';
+  const r = Reminders.next(now); if (!r) return '';
+  const tomorrow = S.dayKey(r.at) !== S.dayKey(now);
+  const time = S.prettyTime(S.fmtMin(r.at.getHours() * 60 + r.at.getMinutes()));
+  return `<a class="nx-foot" href="#me/reminders" data-key="nx-reminder">${I.clock}<span class="grow ellipsis"><span>Next reminder</span> · <span class="what">${UI.esc(r.title.split(' · ')[0])}</span></span><span class="when">${tomorrow ? '<span>Tomorrow</span> ' : ''}${time}</span></a>`;
 }
 
 function weekDue() {
@@ -197,6 +209,7 @@ export function render(_, { night }) {
   <section class="card">
     <div class="kicker mb8">Up next</div>
     <div class="next-list">${next.map((x) => `<div class="nx-row" data-key="nx-${x.id}"><button class="nx ${x.now || x.soon ? 'now' : ''}" data-act="${x.act}"><span class="ico">${x.icon}</span><span class="grow"><div class="t">${x.t}</div><div class="s">${x.s}</div></span>${x.quick ? '' : `<span class="when">${x.anytime ? 'Today' : x.now ? 'Now' : S.prettyTime(S.fmtMin(x.at))}</span>`}</button>${x.quick ? `<button class="btn sm primary nx-quick" data-usual="${x.quick}">Log</button>` : ''}</div>`).join('') || '<p class="small muted">Nothing else scheduled today.</p>'}</div>
+    ${nextReminderRow()}
   </section>
   </div><div class="t-col">
   ${challengeCard()}

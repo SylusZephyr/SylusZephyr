@@ -36,14 +36,17 @@ export async function loadCatalog() {
 const NUM = /\d+(?:[.,]\d+)?/g;
 // Translate one piece of English text. Numbers are carried over in order, or by position
 // with {1}, {2}… when a language needs them in a different order.
-export function tr(text) {
-  if (!catalog || !text) return text;
-  const nums = text.match(NUM) || [];
-  const key = text.replace(NUM, '#');
-  const hit = catalog[key];
-  if (hit == null) return text;
-  let i = 0;
-  return hit.replace(/\{(\d)\}|#/g, (m, n) => (n ? nums[+n - 1] ?? '' : nums[i++] ?? ''));
+export function tr(text) { return catalog ? translator(catalog)(text) : text; }
+/** A tr() bound to one catalog, for text built outside the visible screen (notifications, tests). */
+export function translator(cat) {
+  return (text) => {
+    if (!text) return text;
+    const nums = text.match(NUM) || [];
+    const hit = cat[text.replace(NUM, '#')];
+    if (hit == null) return text;
+    let i = 0;
+    return hit.replace(/\{(\d)\}|#/g, (m, n) => (n ? nums[+n - 1] ?? '' : nums[i++] ?? ''));
+  };
 }
 
 // Legacy key-based lookups used by a few screens.

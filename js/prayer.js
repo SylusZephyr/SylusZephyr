@@ -208,7 +208,7 @@ export function upcomingAlerts(days = 7, from = new Date()) {
     if (cfg.enabled && p.notify) {
       for (const pr of PRAYERS) {
         if (pr.id === 'sunrise' || t[pr.id] == null) continue;
-        out.push({ at: at(day, t[pr.id]), title: `${pr.label} · ${S.fmtMin(t[pr.id])}`, body: `${cfg.cityName.split(' ')[0]} — time for ${pr.label}.`, route: 'today' });
+        out.push({ at: at(day, t[pr.id]), title: `${pr.label} · ${S.fmtMin(t[pr.id])}`, body: `Time for ${pr.label}.`, route: 'today' });
       }
     }
     if (fasting(day) && p.fastAlerts !== false) {
