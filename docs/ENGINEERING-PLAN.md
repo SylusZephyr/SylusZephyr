@@ -64,6 +64,7 @@ What people open the app for every day.
 - [ ] Accessibility: screen-reader pass of every flow; text size 200% without overlap.
   - Text at 200%: done. At 2× on a 360 px phone (180 px of layout), nothing on 15 screens runs off screen or is clipped by a card (e2e enforced). Data tables in the doctor summary scroll sideways. The desktop app in a narrow window drops the sidebar's keyboard hints from the tab bar.
   - Screen reader (automated): every control on 13 screens and 6 sheets has a name, each screen has one h1, and sheets announce their title as a modal dialog (fixed; e2e enforced). A manual VoiceOver pass on a real iPhone is still to do.
+  - axe-core WCAG 2.1 A/AA is clean on all 21 routes and the main sheets in English, and on the five tabs in Chinese and Urdu (e2e enforced; a contrast drop on `.muted` fails it).
 - [x] Low-end Android: first paint < 1.5 s and tab switch < 100 ms at 4× CPU slowdown. (Measured: first paint 150–260 ms; tab switches 10–50 ms, with 3 years of history too. e2e enforces it with 2× headroom.)
 
 ## Phase 5 — Release engineering

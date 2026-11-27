@@ -238,13 +238,25 @@ await test('Urdu switches to right-to-left', async (p) => {
   assert.match(await p.textContent('nav.tabbar'), /آج/);
 });
 
-await test('Accessibility: no WCAG A/AA violations', async (p) => {
+// axe-core, WCAG 2.1 A/AA: every route and the main sheets in English, and the five tabs in
+// Chinese and Urdu (script, direction and font change contrast and layout).
+await test('Accessibility: no WCAG 2.1 A/AA violations on any screen, sheet or language', async (p) => {
+  const bad = [];
+  const scan = async (where) => {
+    await p.addScriptTag({ path: axePath });
+    const v = await p.evaluate(async () => (await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa'] })).violations.map((x) => `${x.id} (${x.nodes.length})`));
+    if (v.length) bad.push(`${where}: ${v.join(', ')}`);
+  };
   await ready(p);
-  for (const h of ['today', 'cook', 'cook/r/egg_paratha', 'train', 'track', 'me', 'me/settings', 'me/prayer']) {
-    await go(p, h); await p.addScriptTag({ path: axePath });
-    const v = await p.evaluate(async () => (await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa'] })).violations.map((x) => `${x.id} (${x.nodes.length})`));
-    assert.deepEqual(v, [], h);
+  for (const h of ROUTES) { await go(p, h); await scan(h); }
+  for (const [h, sel] of [['today', '[data-logmeal]'], ['today', '[data-search]'], ['cook', '[data-filters]'], ['me/settings', '[data-errlog]']]) {
+    await go(p, h); await p.click(`#screen ${sel}`); await p.waitForSelector('.sheet'); await scan(`${h} ${sel}`); await clear(p);
   }
+  for (const loc of ['zh', 'ur']) {
+    await ready(p, { locale: loc });
+    for (const h of ['today', 'cook', 'train', 'track', 'me']) { await go(p, h); await scan(`${loc} ${h}`); }
+  }
+  assert.deepEqual(bad, []);
 });
 
 await test('Screen reader: every control is named, one heading per screen, sheets announce their title', async (p) => {
