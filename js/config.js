@@ -1,5 +1,5 @@
 // Kept in step with package.json by the unit tests.
-export const APP_VERSION = '7.4.0';
+export const APP_VERSION = '7.5.0';
 
 // Cloud settings. Fill these in once your Supabase project exists (see docs/SETUP.md),
 // or paste them in the app under Me → Account → Connect project.
