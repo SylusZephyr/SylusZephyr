@@ -39,7 +39,7 @@ One way to build each thing.
 
   No raw pixel values outside the scales.
 - [x] Remove every inline `style="…"` from views in favour of named classes. (Only data-driven values, SVG stops and the standalone print document stay inline.)
-- [ ] Component inventory with one implementation each: card, list row, stats strip, button (primary/secondary/ghost/sm), chip, segmented control, sheet, empty state, field. Delete duplicates (`.macro` → `.stat`, `.grid3` tiles).
+- [x] Component inventory with one implementation each: card, list row, stats strip, button (primary/secondary/ghost/sm), chip, segmented control, sheet, empty state, field. Delete duplicates (`.macro` → `.stat`, `.grid3` tiles). (See `docs/COMPONENTS.md`. 75 selectors that were defined two or three times, as later "override" copies, are now one rule each. Component rules that had drifted outside the cascade layer are back inside it. Dead variants are gone: glow and cool cards, the green button, and the mobile tab pill. There is one empty state. `npm test` fails on a duplicate selector or an unused class. A computed-style snapshot of 32 screen states showed no visible change.)
 - [x] Empty and zero states for every list and chart: an explanation and one action, never a bare "0" or "No data yet".
 - [x] Motion spec: tokens `--dur-fast` 150 ms, `--dur` 250 ms, `--dur-slow` 400 ms (progress fills), one `--ease`; reduce-motion makes them instant. (23 durations / 10 easings → 3 / 1; content-timed breathing and timers keep their own.)
 

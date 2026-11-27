@@ -210,6 +210,30 @@ await test('the next reminder is the earliest one still to come', async () => {
   assert.ok(timed.every((x) => x.at <= now || x.at >= n.at), 'nothing earlier was skipped');
 });
 
+// CSS stays one implementation per component: no selector is defined twice in the same
+// context (a later "override" copy is how styles drift), and no class is styled that nothing uses.
+await test('stylesheet: one rule per selector, no unused classes', async () => {
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const css = readFileSync(new URL('../css/app.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const stack = []; const seen = new Set(); const dups = []; let head = '';
+  for (const tok of css.match(/[{};]|[^{};]+/g)) {
+    if (tok === '{') {
+      const h = head.trim().replace(/\s+/g, ' '); head = '';
+      if (!h.startsWith('@')) {
+        const key = stack.filter((x) => !/^@(layer|font-face|keyframes)/.test(x)).join(' / ') + ' | ' + h;
+        if (!stack.some((x) => x.startsWith('@keyframes'))) { if (seen.has(key)) dups.push(key); seen.add(key); }
+      }
+      stack.push(h);
+    } else if (tok === '}') { stack.pop(); head = ''; } else if (tok === ';') head = ''; else head += tok;
+  }
+  assert.deepEqual(dups, [], 'defined twice');
+  const walk = (d) => readdirSync(new URL(d, import.meta.url), { withFileTypes: true }).flatMap((e) => e.isDirectory() ? (['vendor', 'locales', 'data'].includes(e.name) ? [] : walk(`${d}${e.name}/`)) : e.name.endsWith('.js') ? [`${d}${e.name}`] : []);
+  const code = ['../index.html', ...walk('../js/')].map((f) => readFileSync(new URL(f, import.meta.url), 'utf8')).join('\n');
+  const classes = new Set(css.replace(/url\([^)]*\)/g, '').match(/\.[a-zA-Z][\w-]*/g).map((c) => c.slice(1)));
+  const unused = [...classes].filter((c) => !new RegExp(`(?<![\\w-])${c}(?![\\w-])`).test(code));
+  assert.deepEqual(unused, [], 'styled but never used');
+});
+
 await test('migration 2 → 3 drops retired coins, chests and quests', () => {
   const v2 = { version: 2, profile: {}, game: { xp: 120, coins: 40, lootOpened: { a: 1 } }, days: { '2026-01-01': { quests: [{ id: 'q' }], readTips: ['x'], meals: [], checks: { breakfast: true } } } };
   const out = S.migrate(v2);
