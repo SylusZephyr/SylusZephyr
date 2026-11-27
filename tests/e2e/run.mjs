@@ -230,6 +230,36 @@ await test('Accessibility: no WCAG A/AA violations', async (p) => {
   }
 });
 
+await test('Screen reader: every control is named, one heading per screen, sheets announce their title', async (p) => {
+  await ready(p);
+  const problems = [];
+  const check = (where) => p.evaluate((w) => {
+    const out = [];
+    for (const el of document.querySelectorAll('#app button, #app a[href], #app input, #app select, #overlay-root button, #overlay-root a[href], #overlay-root input, #overlay-root select')) {
+      if ((!el.offsetParent && getComputedStyle(el).position !== 'fixed') || el.type === 'hidden' || el.closest('[aria-hidden="true"]')) continue;
+      const lab = el.id && document.querySelector(`label[for="${el.id}"]`);
+      const n = (el.getAttribute('aria-label') || lab?.textContent || el.closest('label')?.textContent || el.textContent || el.getAttribute('placeholder') || el.title || '').replace(/\s+/g, ' ').trim();
+      if (!n) out.push(`${w}: unnamed ${el.tagName.toLowerCase()} ${el.outerHTML.slice(0, 60)}`);
+    }
+    return out;
+  }, where);
+  for (const h of ['today', 'cook', 'cook/r/egg_paratha', 'cook/pantry', 'cook/plan', 'train', 'track', 'me', 'me/settings', 'me/medical']) {
+    await go(p, h); await p.waitForTimeout(150);
+    problems.push(...await check(h));
+    const h1 = await p.$$eval('#screen h1', (els) => els.length);
+    if (h1 !== 1) problems.push(`${h}: ${h1} h1 headings`);
+  }
+  for (const sel of ['[data-logmeal]', '[data-search]', '[data-drinks]']) {
+    await go(p, 'today'); await p.click(sel); await p.waitForTimeout(350);
+    if (sel === '[data-drinks]') { await p.click('.toast [data-extra]'); await p.waitForTimeout(350); }
+    const d = await p.evaluate(() => { const x = [...document.querySelectorAll('[role="dialog"]')].at(-1); return x && { label: x.getAttribute('aria-label'), modal: x.getAttribute('aria-modal') }; });
+    if (!d?.label || d.modal !== 'true') problems.push(`${sel}: dialog ${JSON.stringify(d)}`);
+    problems.push(...await check(`sheet ${sel}`));
+    await clear(p);
+  }
+  assert.deepEqual(problems, []);
+});
+
 await test('Hostile text in any field is shown as text, never run', async (p) => {
   await ready(p);
   const X = '<img src=x onerror="window.__xss=1"><b id="inj">x</b>';

@@ -74,7 +74,7 @@ export function enhance(root = document) {
 
   // Dialogs
   root.querySelectorAll('.sheet, .celebrate .box, .cookmode, .trainer, .lock').forEach((d) => {
-    if (d.getAttribute('role') === 'dialog') return;
+    if (d.dataset.a11yDialog) return; d.dataset.a11yDialog = '1';
     d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true');
     const title = textOf(d.querySelector('h1, h2, h3')); if (title) d.setAttribute('aria-label', title);
     if (!d.hasAttribute('tabindex')) d.setAttribute('tabindex', '-1');
