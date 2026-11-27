@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.5.0
+- Notifications arrive in the app's language. Until now reminders, prayer times and Ramadan alerts were always in English.
+- Today shows the next reminder the phone will give, at the foot of Up next. Tap it to change your reminders.
+- Meal reminders for tomorrow no longer name today's planned recipe.
+- Screen readers: every pop-up panel is announced by its title as a dialog, and every button has a name. A test checks all screens.
+
 ## 7.4.0
 - Coffee in one tap: the tile logs your usual drink. The confirmation offers Change, to pick another drink, and Undo.
 - Large text: with big system text or on a small phone, cards stack and rows wrap instead of running off screen. No screen overflows at 1.6× text on a 360 px phone.
