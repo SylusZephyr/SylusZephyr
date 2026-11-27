@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.4.0
+- Coffee in one tap: the tile logs your usual drink. The confirmation offers Change, to pick another drink, and Undo.
+- Large text: with big system text or on a small phone, cards stack and rows wrap instead of running off screen. No screen overflows at 1.6× text on a 360 px phone.
+- Motion: animations use three durations and one smooth easing, and the phone's reduce-motion setting makes them instant.
+- Settings: an error log lists any problems the app caught. It stays on the device, with Copy and Clear.
+- Performance is measured and enforced on a slow phone: first paint and tab switches stay within budget, with 10 years of history too.
+
 ## 7.3.0
 - Weekly review: each number shows its change from the week before, and one concrete focus for the coming week targets the essential you managed least often.
 - Empty screens: every empty list and chart explains what to do, with one action where it helps (for example, Log a meal).
