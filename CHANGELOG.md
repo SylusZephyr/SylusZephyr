@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.6.0
+- Text at 200%: no screen runs off the side or clips its text, even on a small phone. Today's summary stacks, delivery cards put the photo above the dish name, and the doctor summary's tables scroll sideways.
+- Windows: in a narrow window, the bottom tab bar no longer squeezes in the sidebar's keyboard hints and note, which pushed it off screen.
+- PIN keypad: screen readers no longer read out the empty placeholder key, and the Face ID and delete keys have names.
+- Empty Credits and Lab results lists use the same empty state as every other list.
+- Under the hood: each component has one implementation, and CI compares screenshots of every screen in all three languages.
+
 ## 7.5.0
 - Notifications arrive in the app's language. Until now reminders, prayer times and Ramadan alerts were always in English.
 - Today shows the next reminder the phone will give, at the foot of Up next. Tap it to change your reminders.
