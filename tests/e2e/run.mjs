@@ -359,24 +359,51 @@ await test('A screen error shows recovery instead of a blank app', async (p) => 
   assert.match(await p.textContent('[data-errlog]'), /No errors recorded/);
 }, { allowErrors: true });
 
-await test('Large text (1.6x) on a narrow phone: nothing runs off screen', async (p) => {
+// WCAG 1.4.4: text at 200% without loss. The app zooms the whole UI, so a 360 px phone at 2x
+// has 180 px of layout width. Nothing may run off screen or be cut off by a card; regions that
+// scroll sideways on purpose (data tables, carousels, chip rows) are allowed.
+await test('Text at 200% on a narrow phone: nothing runs off screen or gets clipped', async (p) => {
   await p.setViewportSize({ width: 360, height: 740 });
   await ready(p);
   const off = [];
-  for (const h of ['today', 'cook', 'cook/r/egg_paratha', 'cook/pantry', 'train', 'track', 'me', 'me/settings', 'me/medical']) {
+  for (const h of ['today', 'cook', 'cook/r/egg_paratha', 'cook/pantry', 'cook/plan', 'cook/shop', 'cook/delivery', 'train', 'track',
+    'me', 'me/settings', 'me/medical', 'me/prayer', 'me/reminders', 'me/summary']) {
     await go(p, h);
-    await p.evaluate(() => document.documentElement.style.setProperty('--zoom', '1.6'));
+    await p.evaluate(() => document.documentElement.style.setProperty('--zoom', '2'));
     await p.waitForTimeout(100);
     off.push(...(await p.evaluate((route) => {
       const vw = document.documentElement.clientWidth; const out = [];
       for (const el of document.querySelectorAll('#screen *')) {
         if (el.closest('svg, .carousel, .chips.scroll, .seg, .yheat') || el.children.length || !el.textContent.trim()) continue;
-        const r = el.getBoundingClientRect(); if (r.width && r.right > vw + 1) out.push(`${route}: "${el.textContent.trim().slice(0, 30)}" +${Math.round(r.right - vw)}px`);
+        if (getComputedStyle(el).textOverflow === 'ellipsis') continue;
+        const r = el.getBoundingClientRect(); if (!r.width) continue;
+        let bad = r.right > vw + 1 ? `off screen +${Math.round(r.right - vw)}px` : null;
+        for (let a = el.parentElement; a && a.id !== 'screen'; a = a.parentElement) {
+          const o = getComputedStyle(a).overflowX;
+          if (o === 'auto' || o === 'scroll') { bad = null; break; }
+          if (o !== 'visible') { const ar = a.getBoundingClientRect(); if (r.right > ar.right + 1 || r.left < ar.left - 1) bad = `clipped by .${a.classList[0]}`; break; }
+        }
+        if (bad) out.push(`${route}: "${el.textContent.trim().slice(0, 30)}" ${bad}`);
       }
       return out;
     }, h)));
   }
   assert.deepEqual(off, []);
+});
+
+// The desktop app in a narrow window uses the phone tab bar; the sidebar's keyboard hints and
+// footer must not squeeze into it.
+await test('Desktop app in a narrow window: tab bar fits, no sidebar extras', async () => {
+  const ctx = await browser.newContext({ viewport: { width: 560, height: 800 } }); const p = await ctx.newPage();
+  try {
+    await ready(p);
+    const r = await p.evaluate(() => {
+      const vw = document.documentElement.clientWidth; const shown = (sel) => [...document.querySelectorAll(sel)].filter((e) => e.getClientRects().length).length;
+      const over = [...document.querySelectorAll('nav.tabbar *')].filter((e) => e.getBoundingClientRect().right > vw + 1).length;
+      return { kbd: shown('.tab kbd'), foot: shown('.side-foot'), over };
+    });
+    assert.deepEqual(r, { kbd: 0, foot: 0, over: 0 });
+  } finally { await ctx.close(); }
 });
 
 await test('Random taps across the app cause no errors', async (p) => {

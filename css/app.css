@@ -458,6 +458,9 @@ a:hover { text-decoration-color: currentColor; }
   color: var(--muted);
 }
 kbd { font-family: inherit; background: var(--surface3); padding: 1px 6px; border-radius: var(--r-sm); font-size: var(--fs-xs); }
+/* Keyboard hints and the footer belong to the desktop sidebar; a narrow window shows the phone tab bar without them. */
+.tab kbd,
+.side-foot { display: none; }
 
 /* ---------- Print (doctor summary) ---------- */
 #print-root { display: none; }
@@ -511,8 +514,8 @@ a.card:hover { transform: translateY(-2px); border-color: rgba(255,181,71,.35); 
   }
   .brand { display: flex; align-items: center; gap: 10px; font-size: var(--fs-xl); font-weight: 800; padding: 4px 12px 22px; letter-spacing: -0.02em; }
   .tab { flex: 0 0 auto; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 12px 14px; border-radius: var(--r-lg); font-size: var(--fs-body); }
-  .tab kbd { margin-left: auto; opacity: .5; }
-  .side-foot { margin-top: auto; padding: 12px; font-size: var(--fs-xs); color: var(--faint); line-height: 1.5; }
+  .tab kbd { display: inline; margin-left: auto; opacity: .5; }
+  .side-foot { display: block; margin-top: auto; padding: 12px; font-size: var(--fs-xs); color: var(--faint); line-height: 1.5; }
   .screen { margin-left: calc(var(--side-w) + max(24px, (100vw - var(--side-w) - 860px) / 2)); margin-right: auto; max-width: min(860px, 100vw - var(--side-w) - 48px); padding: 32px 0 60px; }
   .topbar h1 { font-size: var(--fs-3xl); }
   .recipe-grid { grid-template-columns: repeat(4, 1fr); }
@@ -712,9 +715,9 @@ a.btn.primary { background: var(--text); color: #0b0c0e; box-shadow: none; }
 .rings circle { fill: none; stroke-linecap: round; transition: stroke-dashoffset var(--dur-slow) var(--ease); }
 .rings .track { stroke: var(--surface3); }
 .legend-v { display: flex; flex-direction: column; gap: 12px; }
-.legend-v .lg { display: grid; grid-template-columns: 10px 1fr; column-gap: 10px; align-items: baseline; }
+.legend-v .lg { display: grid; grid-template-columns: 10px minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
 .legend-v .dot { width: 10px; height: 10px; border-radius: 50%; transform: translateY(1px); }
-.legend-v .k { font-size: var(--fs-sm); color: var(--muted); }
+.legend-v .k { font-size: var(--fs-sm); color: var(--muted); overflow-wrap: anywhere; }
 .legend-v .v { grid-column: 2; font-size: var(--fs-lg); font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .legend-v .v small { font-size: var(--fs-sm); color: var(--muted); font-weight: 500; }
 .summary-foot { display: flex; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: var(--fs-sm); color: var(--muted); }
@@ -992,6 +995,9 @@ html[lang="ur"] h3 { line-height: 1.6; letter-spacing: 0; }
 .deliv .dthumb { width: 64px; height: 64px; flex: 0 0 64px; border-radius: var(--r-md); overflow: hidden; }
 .deliv .dthumb img.ph { width: 100%; height: 100%; object-fit: cover; }
 .deliv .dthumb .mono { font-size: var(--fs-lg); }
+.deliv b { overflow-wrap: anywhere; }
+/* Data tables keep their columns and scroll sideways when the text is very large. */
+.table-scroll { overflow-x: auto; }
 
 /* ---- Empty states ---- */
 .empty-state { text-align: center; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -1086,7 +1092,7 @@ button.list-item:last-child { border-bottom: 0; }
    all reflow instead of clipping. */
 .cq { container-type: inline-size; }
 @container (max-width: 300px) {
-  .summary { grid-template-columns: 1fr; justify-items: center; gap: 14px; }
+  .summary { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 14px; }
   .summary .legend-v { width: 100%; }
   .pf-head { flex-direction: column; align-items: center; text-align: center; }
   .prayer-row { grid-template-columns: repeat(3, 1fr); row-gap: 10px; }
@@ -1102,6 +1108,7 @@ button.list-item:last-child { border-bottom: 0; }
   .stats .stat:nth-child(odd) { border-inline-start: 0; padding-inline-start: 0; }
 }
 @container (max-width: 220px) {
+  .deliv > .row { flex-direction: column; }
   .prayer-row { grid-template-columns: repeat(2, 1fr); }
 }
 @container (max-width: 300px) {

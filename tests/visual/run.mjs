@@ -43,6 +43,8 @@ const LOCALES = ['en', 'zh', 'ur'];
 
 const FREEZE_CSS = `
   *, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
+  /* Toasts come and go on timers (milestones, undo), so they are never part of a screenshot. */
+  #toast-root, .toast { display: none !important; }
   html[lang="en"] body { font-family: "Inter", "Noto Sans", sans-serif !important; }
   html[lang="zh"] body { font-family: "Inter", "Noto Sans CJK SC", sans-serif !important; }
   html[lang="ur"] body, html[lang="ur"] button, html[lang="ur"] input { font-family: "Noto Nastaliq Urdu", "Noto Sans Arabic", sans-serif !important; }
