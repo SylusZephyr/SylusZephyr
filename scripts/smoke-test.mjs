@@ -161,6 +161,18 @@ await test('ten years of full daily logging fits browser storage', () => {
   assert.ok(chars < 4_000_000, `${Math.round(chars / 1024)} KB for 10 years`);
 });
 
+await test('every meal-slot heading is translated, at any time of day and in Ramadan', async () => {
+  // These headings depend on the clock, so the e2e crawl only sees one of them per run.
+  const { BASE_LABEL } = await import('../js/plan.js'); const { FAST_LABEL } = await import('../js/prayer.js');
+  for (const code of ['zh', 'ur']) {
+    const cat = (await import(`../js/locales/${code}.js`)).default;
+    for (const label of [...Object.values(BASE_LABEL), ...Object.values(FAST_LABEL)]) {
+      assert.ok(cat[label], `${code}: "${label}"`);
+      assert.ok(cat[`${label} ideas`], `${code}: "${label} ideas"`);
+    }
+  }
+});
+
 await test('pending alerts stay under the iOS limit of 64', async () => {
   const { reminderList } = await import('../js/ics.js');
   S.get().prayer = { enabled: true, notify: true, city: 'beijing', ramadan: 'on' };

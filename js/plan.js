@@ -63,7 +63,7 @@ export function currentSlot(now = new Date()) {
   if (since < 780) return 'dinner';
   return 'snack';
 }
-const BASE_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack / shake' };
+export const BASE_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack / shake' };
 const BASE_EMOJI = { breakfast: '', lunch: '', dinner: '', snack: '' };
 // Labels follow fasting mode (Suhoor / Iftar) without every caller needing to know.
 export const SLOT_LABEL = new Proxy(BASE_LABEL, { get: (o, k) => (Pr.fasting() ? Pr.FAST_LABEL : o)[k] });
