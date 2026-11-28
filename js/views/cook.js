@@ -155,15 +155,15 @@ function detail(r) {
     <span class="have-dot" aria-hidden="true">${have ? UI.ICON.check : ''}</span><div class="grow"><div class="name">${UI.esc(g.name)} ${i.opt ? '<span class="muted small">(optional)</span>' : ''}</div><div class="zh">${UI.esc(g.zh)}</div></div><div class="muted small">${UI.esc(i.q)}</div></button>`; }).join('')}
     <p class="tiny muted mt8">Tap an ingredient to mark it as in/out of your pantry. Chinese names help when shopping on Hema/Taobao.</p></div>
 
-  ${(() => { const n = (st.recipeNotes || {})[r.id] || {}; return `<div class="section-title">Your verdict</div><div class="card tight">
-    <div class="row wrap" role="group" aria-label="Your rating">${[1, 2, 3, 4, 5].map((i) => `<button class="star ${i <= (n.rating || 0) ? 'on' : ''}" data-rate="${i}" aria-label="${i} star${i > 1 ? 's' : ''}" aria-pressed="${i === n.rating}">${UI.ICON.star}</button>`).join('')}<span class="muted small ms-auto">${n.rating ? ['', 'Not for me', 'Meh', 'Good', 'Great', 'Favourite'][n.rating] : 'Rate it after cooking'}</span></div>
-    <textarea id="r-note" rows="2" class="mt8" maxlength="300" placeholder="Your notes — less chili, extra 2 minutes, add cheese…">${UI.esc(n.note || '')}</textarea></div>`; })()}
+  <div class="section-title">Steps</div>
+  <div class="card">${r.steps.map((s, i) => `<div class="step"><div class="n">${i + 1}</div><div class="grow">${UI.esc(s.t)}${s.timer ? ` <span class="timer-pill">${UI.ICON.clock}${fmtT(s.timer)}</span>` : ''}</div></div>`).join('')}</div>
+  <div class="notice">Air fryers vary — check chicken is cooked through (no pink, juices clear). Times are for a 4–6 L basket air fryer, preheated.</div>
 
   ${r.vars ? `<div class="section-title">Switch it up</div><div class="card tight">${r.vars.map((v) => `<div class="small row-line">${UI.esc(v)}</div>`).join('')}<p class="tiny faint mt8">Same easy method, different taste — so you never get bored.</p></div>` : ''}
 
-  <div class="section-title">Steps</div>
-  <div class="card">${r.steps.map((s, i) => `<div class="step"><div class="n">${i + 1}</div><div class="grow">${UI.esc(s.t)}${s.timer ? ` <span class="timer-pill">${UI.ICON.clock}${fmtT(s.timer)}</span>` : ''}</div></div>`).join('')}</div>
-  <div class="notice">Air fryers vary — check chicken is cooked through (no pink, juices clear). Times are for a 4–6 L basket air fryer, preheated.</div>`;
+  ${(() => { const n = (st.recipeNotes || {})[r.id] || {}; return `<div class="section-title">Your verdict</div><div class="card tight">
+    <div class="row wrap" role="group" aria-label="Your rating">${[1, 2, 3, 4, 5].map((i) => `<button class="star ${i <= (n.rating || 0) ? 'on' : ''}" data-rate="${i}" aria-label="${i} star${i > 1 ? 's' : ''}" aria-pressed="${i === n.rating}">${UI.ICON.star}</button>`).join('')}<span class="muted small ms-auto">${n.rating ? ['', 'Not for me', 'Meh', 'Good', 'Great', 'Favourite'][n.rating] : 'Rate it after cooking'}</span></div>
+    <textarea id="r-note" rows="2" class="mt8" maxlength="300" placeholder="Your notes — less chili, extra 2 minutes, add cheese…">${UI.esc(n.note || '')}</textarea></div>`; })()}`;
 }
 const fmtT = (s) => s >= 60 ? `${Math.floor(s / 60)}:${S.pad(s % 60)}` : `${s}s`;
 

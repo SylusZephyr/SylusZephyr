@@ -82,3 +82,4 @@ the best apps in each category. Items are ordered by user impact.
 
 - [x] Bar charts with nothing logged drew bare axes (Track: essentials, calories, protein). They now say how to fill them, like the other charts.
 - [x] Week strips used English day initials (S M T…) in Urdu, because Unicode's narrow day names for Urdu are Latin letters. They now use the native short day name. The zh/ur crawl also flags lone Latin capitals, so this can't return.
+- [x] Recipe page order: rating and variations came before the steps, so you scrolled past "Your verdict" before cooking. The order is now Ingredients → Steps (with the safety note) → Switch it up → Your verdict.
