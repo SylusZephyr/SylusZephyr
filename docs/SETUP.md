@@ -85,6 +85,9 @@ node scripts/bump-version.mjs 7.6.0   # then merge the release PR
 git tag v7.6.0 && git push origin v7.6.0
 ```
 
+Without pushing a tag: **Actions → Build apps → Run workflow**, tick **release**. The workflow
+tags `v<package.json version>` on that commit and uses the version's CHANGELOG entry as the notes.
+
 The Android APK in the release is signed with the upload key from the four `ANDROID_*` secrets.
 Without them, a tag build stops at **Check release signing** and publishes nothing, because an
 unsigned APK cannot be installed.

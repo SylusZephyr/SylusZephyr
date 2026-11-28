@@ -1,11 +1,15 @@
 name: Build apps
 
-# Run manually from the Actions tab, or push a tag like v1.0.0 to publish a release.
+# Run manually from the Actions tab (tick "release" to publish one), or push a tag like v1.0.0.
 on:
   workflow_dispatch:
     inputs:
       ios_upload:
         description: Upload the iOS build to TestFlight
+        type: boolean
+        default: false
+      release:
+        description: Publish a GitHub Release tagged v<package.json version>, with the signed APK
         type: boolean
         default: false
   push:
@@ -100,7 +104,7 @@ jobs:
       # A version tag publishes a release, and an unsigned APK cannot be installed: stop here
       # with instructions instead of publishing one.
       - name: Check release signing
-        if: ${{ github.ref_type == 'tag' }}
+        if: ${{ github.ref_type == 'tag' || inputs.release }}
         run: |
           APK=android/app/build/outputs/apk/release/app-release.apk
           if [ ! -f "$APK" ]; then
@@ -223,15 +227,28 @@ jobs:
 
   release:
     name: GitHub release
-    if: ${{ github.ref_type == 'tag' }}
+    if: ${{ github.ref_type == 'tag' || inputs.release }}
     needs: [android, windows]
     runs-on: ubuntu-latest
     permissions: { contents: write }
     steps:
+      - uses: actions/checkout@v5
+      # Tag v<version> (from package.json, or the pushed tag) and use that version's changelog entry as the notes.
+      - id: meta
+        run: |
+          V="$(node -p "require('./package.json').version")"
+          [ "$GITHUB_REF_TYPE" = tag ] && V="${GITHUB_REF_NAME#v}"
+          echo "tag=v$V" >> "$GITHUB_OUTPUT"
+          awk -v v="## $V" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          [ -s "$RUNNER_TEMP/notes.md" ] || { echo "::error::CHANGELOG.md has no '## $V' entry"; exit 1; }
       - uses: actions/download-artifact@v4
         with: { path: artifacts }
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Revive ${{ steps.meta.outputs.tag }}
+          body_path: ${{ runner.temp }}/notes.md
           files: |
             artifacts/revive-android/**/app-release.apk
             artifacts/revive-android/**/*.aab
