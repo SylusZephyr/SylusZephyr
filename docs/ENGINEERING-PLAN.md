@@ -74,3 +74,11 @@ What people open the app for every day.
 - [ ] Signed release builds published on version tags.
   - Done: a `v*` tag builds all apps and publishes a GitHub Release with the signed APK. The CI step that restores the signing key never ran (its `if` read an env var it could not see); that is fixed. A tag without the key now fails loudly instead of publishing an uninstallable APK.
   - To do: the owner adds the four `ANDROID_*` secrets (docs/SETUP.md, "Signed releases"); then tag v7.6.0 to confirm.
+
+## Phase 6 — Continuous improvement
+
+Each item comes from an audit of the running app: phone and desktop, EN/ZH/UR, compared with
+the best apps in each category. Items are ordered by user impact.
+
+- [x] Bar charts with nothing logged drew bare axes (Track: essentials, calories, protein). They now say how to fill them, like the other charts.
+- [x] Week strips used English day initials (S M T…) in Urdu, because Unicode's narrow day names for Urdu are Latin letters. They now use the native short day name. The zh/ur crawl also flags lone Latin capitals, so this can't return.

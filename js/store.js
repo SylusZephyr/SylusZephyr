@@ -41,6 +41,14 @@ export function prettyDate(k, opts = { weekday: 'short', month: 'short', day: 'n
   return f.format(keyToDate(k));
 }
 
+/** One-letter day label for week strips. Urdu's narrow names in the Unicode locale data are
+ * Latin letters (S, M, T…), so where the narrow form comes out in Latin outside English, the
+ * short native name is used instead. @param {string} k */
+export function dayInitial(k) {
+  const n = prettyDate(k, { weekday: 'narrow' });
+  return /^[A-Za-z]+$/.test(n) && !uiLocale().startsWith('en') ? prettyDate(k, { weekday: 'short' }) : n;
+}
+
 export const SCHEMA_VERSION = 3;
 export const loadIssues = [];   // surfaced to the UI after boot (e.g. recovered from corrupt data)
 
