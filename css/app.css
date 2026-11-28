@@ -899,6 +899,8 @@ a.btn.primary { background: var(--text); color: #0b0c0e; box-shadow: none; }
 .wd i.full { background: var(--green); }
 .wd i.full::after { inset: 9px; background: var(--surface); }
 .wd.today span { color: var(--text); font-weight: 600; }
+.wd.future,
+.ww.future { opacity: .45; }
 
 .pos-row { display: flex; justify-content: center; }
 .pos-fig { margin: 0; text-align: center; max-width: 100%; }
