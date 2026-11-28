@@ -419,6 +419,24 @@ await test('Desktop app in a narrow window: tab bar fits, no sidebar extras', as
   } finally { await ctx.close(); }
 });
 
+// The app promises to work without a connection once it has been opened. After the first
+// visit the service worker serves every screen, and the photos in view, with the network off.
+await test('Works offline after the first visit', async (p) => {
+  await ready(p);
+  await p.waitForFunction(() => navigator.serviceWorker?.ready.then(() => true), null, { timeout: 15000 });
+  await p.reload(); await p.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15000 });
+  await p.context().setOffline(true);
+  const failed = [];
+  p.on('requestfailed', (r) => { if (r.url().startsWith(BASE)) failed.push(r.url().slice(BASE.length)); });
+  for (const h of ['today', 'cook', 'cook/r/egg_paratha', 'train', 'track', 'me', 'me/settings']) {
+    await p.goto(BASE + '#' + h); await p.waitForSelector('#screen h1', { timeout: 5000 });
+    const broken = await p.evaluate(() => [...document.images].filter((i) => i.getBoundingClientRect().top < innerHeight && i.complete && i.naturalWidth === 0).map((i) => i.src));
+    assert.deepEqual(broken, [], `${h}: images`);
+  }
+  await p.context().setOffline(false);
+  assert.deepEqual(failed, [], 'requests that failed offline');
+});
+
 await test('Random taps across the app cause no errors', async (p) => {
   await ready(p);
   for (const h of ['today', 'cook', 'train', 'track', 'me', 'me/settings']) {
