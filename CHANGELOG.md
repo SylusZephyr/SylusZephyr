@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.6.1
+- Charts with nothing logged yet (essentials, calories, protein) say how to fill them instead of showing empty axes.
+- Urdu: the week strips in Track and Train show Urdu day names instead of English letters.
+- The web app is live at https://syluszephyr.github.io/SylusZephyr/ (Safari: Share, then Add to Home Screen).
+
 ## 7.6.0
 - Text at 200%: no screen runs off the side or clips its text, even on a small phone. Today's summary stacks, delivery cards put the photo above the dish name, and the doctor summary's tables scroll sideways.
 - Windows: in a narrow window, the bottom tab bar no longer squeezes in the sidebar's keyboard hints and note, which pushed it off screen.
