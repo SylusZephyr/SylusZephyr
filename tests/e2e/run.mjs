@@ -189,7 +189,8 @@ const untranslated = (p) => p.evaluate((allowed) => {
       const t = w.currentNode.nodeValue.replace(/\s+/g, ' ').trim(); const el = w.currentNode.parentElement;
       if (!el || el.closest('script,style,svg,textarea,[data-no-tr],.chart')) continue;
       if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') continue;
-      if (/[A-Za-z]{3}/.test(t) && !/[㐀-鿿؀-ۿ]/.test(t) && !ok.test(t) && !/^https?:/.test(t)) out.push(t);
+      // Lone capitals too: day initials (S M T…) are English letters if the locale data falls back.
+      if ((/[A-Za-z]{3}/.test(t) || /^[A-Z]$/.test(t)) && !/[㐀-鿿؀-ۿ]/.test(t) && !ok.test(t) && !/^https?:/.test(t)) out.push(t);
     }
   }
   return out;

@@ -69,7 +69,7 @@ export function render() {
         <p class="muted small mt8">Then ${ph.flicks} quick flicks and ${ph.reverse} reverse Kegels. About ${mins} min.</p></div>
     </div>
     <button class="btn primary block mt16" data-pf>${UI.ICON.play}<span>Start session</span></button>
-    <div class="week-dots mt16">${counts.map((c) => `<div class="wd ${c.k === S.dayKey() ? 'today' : ''}"><i class="${c.n >= 3 ? 'full' : c.n ? 'part' : ''}" style="--n:${Math.min(3, c.n)}"></i><span>${S.prettyDate(c.k, { weekday: 'narrow' })}</span></div>`).join('')}</div>
+    <div class="week-dots mt16">${counts.map((c) => `<div class="wd ${c.k === S.dayKey() ? 'today' : ''}"><i class="${c.n >= 3 ? 'full' : c.n ? 'part' : ''}" style="--n:${Math.min(3, c.n)}"></i><span>${S.dayInitial(c.k)}</span></div>`).join('')}</div>
   </section>
 
   <div class="section-title">How to do it</div>
@@ -95,7 +95,7 @@ export function render() {
   <section class="card ${w.cleared ? '' : 'danger'}">
     <div class="row between"><div class="kicker m0">${w.cleared ? `Level ${w.level} of ${CARDIO.length}` : 'Gentle walks only until a doctor clears you'}</div><span class="small muted nowrap">${w.hit} of 5 days</span></div>
     <h3 class="mt8">${w.c.min} minutes a day</h3><p class="small muted">${UI.esc(w.c.t)}.${w.cleared && w.level < CARDIO.length ? ` Five days on target this week moves you to ${CARDIO[w.level].min} minutes.` : ''}</p>
-    <div class="walk-week mt12">${w.days.map((k, i) => `<div class="ww ${k === S.dayKey() ? 'today' : ''}"><div class="col-bar"><i style="height:${Math.min(100, Math.round(w.mins[i] / w.c.min * 100))}%" class="${w.mins[i] >= w.c.min ? 'hit' : ''}"></i></div><span>${S.prettyDate(k, { weekday: 'narrow' })}</span></div>`).join('')}</div>
+    <div class="walk-week mt12">${w.days.map((k, i) => `<div class="ww ${k === S.dayKey() ? 'today' : ''}"><div class="col-bar"><i style="height:${Math.min(100, Math.round(w.mins[i] / w.c.min * 100))}%" class="${w.mins[i] >= w.c.min ? 'hit' : ''}"></i></div><span>${S.dayInitial(k)}</span></div>`).join('')}</div>
     <div class="grid3 mt12">${[5, 10, 15].map((m) => `<button class="btn sm" data-walk="${m}">+${m} min</button>`).join('')}</div>
     ${w.cleared ? '' : `<p class="small muted mt12">You reported chest pain, breathlessness or dizziness on exertion. Walk at a pace where you can talk. Mark yourself cleared in <a href="#me/medical">Medical</a> once a doctor has checked you.</p>`}
     <p class="tiny muted mt8">Stop and call ${Region.region().ambulance} for chest pain or pressure, fainting, or severe breathlessness.</p>

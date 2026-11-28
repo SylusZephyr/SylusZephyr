@@ -32,7 +32,7 @@ function overview() {
   ${yearCard()}
   ${insightsCard()}
   ${journalCard()}
-  <div class="card"><div class="kicker">Essentials per day · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: G.essentialsDone(k), label: S.prettyDate(k, { day: 'numeric' }), color: G.essentialsDone(k) >= G.STREAK_THRESHOLD ? '#4ade80' : '#3a3d45' })), { h: 120, max: 7, goal: G.STREAK_THRESHOLD })}</div>`;
+  <div class="card"><div class="kicker">Essentials per day · 14 days</div>${C.barChart(lastNDays(14).map((k) => ({ y: G.essentialsDone(k), label: S.prettyDate(k, { day: 'numeric' }), color: G.essentialsDone(k) >= G.STREAK_THRESHOLD ? '#4ade80' : '#3a3d45' })), { h: 120, max: 7, goal: G.STREAK_THRESHOLD, empty: 'Tick an essential on Today and your days fill in here.' })}</div>`;
 }
 
 // Half a year of consistency, one square per day (columns are weeks).
@@ -123,15 +123,15 @@ function insightsCard() {
 
 function food() {
   const st = S.get(); const tg = P.nutritionTargets(); const days = lastNDays(7);
-  const kc = days.map((k) => ({ y: P.dayTotals(k).kcal, label: S.prettyDate(k, { weekday: 'narrow' }) }));
-  const pr = days.map((k) => ({ y: P.dayTotals(k).protein, label: S.prettyDate(k, { weekday: 'narrow' }), color: '#34d399' }));
+  const kc = days.map((k) => ({ y: P.dayTotals(k).kcal, label: S.dayInitial(k) }));
+  const pr = days.map((k) => ({ y: P.dayTotals(k).protein, label: S.dayInitial(k), color: '#34d399' }));
   const mealsPerDay = days.map((k) => new Set((st.days[k]?.meals || []).filter((m) => m.slot !== 'snack').map((m) => m.slot)).size);
   const today = S.day();
   return `
-  <div class="card"><div class="row between"><div class="kicker">Calories · 7 days</div><span class="small muted">target ${tg.kcal}</span></div>${C.barChart(kc, { goal: tg.kcal, color: '#60a5fa' })}
+  <div class="card"><div class="row between"><div class="kicker">Calories · 7 days</div><span class="small muted">target ${tg.kcal}</span></div>${C.barChart(kc, { goal: tg.kcal, color: '#60a5fa', empty: 'Log a meal and this week’s calories show here.' })}
     <p class="tiny muted">Target = estimated needs (${tg.tdee}) + ~300 kcal for slow gain. Build up gradually — no need to force it.</p></div>
-  <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein, color: '#4ade80' })}</div>
-  <div class="card"><div class="kicker">Main meals per day</div><div class="row jc-around">${days.map((k, i) => `<div class="tc"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.prettyDate(k, { weekday: 'narrow' })}</div></div>`).join('')}</div></div>
+  <div class="card"><div class="row between"><div class="kicker">Protein · 7 days</div><span class="small muted">target ${tg.protein} g</span></div>${C.barChart(pr, { goal: tg.protein, color: '#4ade80', empty: 'Log a meal and this week’s protein shows here.' })}</div>
+  <div class="card"><div class="kicker">Main meals per day</div><div class="row jc-around">${days.map((k, i) => `<div class="tc"><div class="meal-dots" role="img" aria-label="${mealsPerDay[i]} of 3 main meals">${[0, 1, 2].map((j) => `<i class="${j < mealsPerDay[i] ? 'on' : ''}"></i>`).join('')}</div><div class="tiny muted">${S.dayInitial(k)}</div></div>`).join('')}</div></div>
   <div class="section-title">Today’s meals <button class="link" data-logmeal>+ Log</button></div>
   <div class="card">${today.meals.length ? today.meals.map((m) => `<div class="list-item"><div class="li-ico">${UI.ICON.meal}</div><div class="grow"><b>${UI.esc(m.name)}</b><div class="muted small">${S.prettyTime(m.time)} · ${m.kcal} kcal · ${m.protein} g</div></div><button class="icon-btn" data-delmeal="${m.id}" aria-label="Delete">${UI.ICON.trash}</button></div>`).join('') : UI.emptyState({ icon: 'meal', title: 'No meals logged today', body: 'Log what you eat and calories and protein add up here.', action: 'Log a meal', attr: 'data-logmeal' })}</div>`;
 }

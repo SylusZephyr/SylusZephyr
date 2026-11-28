@@ -27,10 +27,12 @@ export function lineChart(points, { h = 140, color = '#ffb547', min, max, band, 
 }
 const fmt = (v) => (Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 10) / 10);
 
-/** @param {{ y: number, label?: string, color?: string, dim?: boolean }[]} bars @param {{ h?: number, color?: string, max?: number, goal?: number }} [opts] */
-export function barChart(bars, { h = 120, color = '#5aa9ff', max, goal } = {}) {
+/** @param {{ y: number, label?: string, color?: string, dim?: boolean }[]} bars @param {{ h?: number, color?: string, max?: number, goal?: number, empty?: string }} [opts] */
+export function barChart(bars, { h = 120, color = '#5aa9ff', max, goal, empty } = {}) {
   const W = 340; const H = h; const pb = 20, pt = 8;
   if (!bars.length) return '';
+  // Nothing logged yet: say how to fill the chart instead of drawing empty axes.
+  if (empty && bars.every((b) => !b.y)) return `<p class="small muted chart-empty">${empty}</p>`;
   const hi = max ?? Math.max(...bars.map((b) => b.y), goal ?? 0, 1);
   const bw = (W - 10) / bars.length;
   const Y = (v) => pt + (1 - v / hi) * (H - pt - pb);
